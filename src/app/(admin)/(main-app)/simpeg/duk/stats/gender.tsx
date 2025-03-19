@@ -45,7 +45,7 @@ export default function GenderStats() {
             } catch (error) {
                 console.error('Error fetching gender stats:', error);
             } finally {
-                // setLoading(false);
+                setTimeout(function(){setLoading(false);}, 1000)
             }
         };
         
