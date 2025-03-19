@@ -1,0 +1,25 @@
+import { Column } from '@/app/(admin)/(main-app)/simpeg/duk/data/employee';
+
+export const DUKTableColumns: Column[] = [
+  { id: 'no', label: 'No', width: 'w-[60px]', sticky: 'left' },
+  { id: 'nama', label: 'Nama', width: 'w-[200px]' },
+  { id: 'nip', label: 'NIP', width: 'w-[150px]' },
+  { id: 'pangkat', label: 'Pangkat', width: 'w-[100px]' },
+  { id: 'gol', label: 'Gol', width: 'w-[80px]' },
+  { id: 'tmt', label: 'TMT', width: 'w-[100px]' },
+  { id: 'jabatan', label: 'Jabatan', width: 'w-[200px]' },
+  { id: 'no_sk', label: 'No SK Pangkat', width: 'w-[150px]' },
+  { id: 'tmt_jabatan', label: 'TMT Jabatan', width: 'w-[120px]' },
+  { id: 'eselon', label: 'Eselon', width: 'w-[100px]' },
+  { id: 'masa_kerja', label: 'Masa Kerja', width: 'w-[120px]' },
+  { id: 'pendidikan', label: 'Pendidikan', width: 'w-[150px]' },
+  { id: 'tahun_lulus', label: 'Tahun Lulus', width: 'w-[120px]' },
+  { id: 'gelar', label: 'Gelar', width: 'w-[100px]' },
+  { id: 'tingkat', label: 'Tingkat', width: 'w-[100px]' },
+  { id: 'tempat_lahir', label: 'Tempat Lahir', width: 'w-[120px]' },
+  { id: 'tanggal_lahir', label: 'Tanggal Lahir', width: 'w-[120px]' },
+  { id: 'umur', label: 'Umur', width: 'w-[100px]' },
+  { id: 'jenis_kelamin', label: 'Jenis Kelamin', width: 'w-[120px]' },
+  { id: 'agama', label: 'Agama', width: 'w-[100px]' },
+  { id: 'actions', label: '', width: 'w-[30px]', sticky: 'right' },
+]; 
