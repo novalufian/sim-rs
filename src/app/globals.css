@@ -597,3 +597,56 @@ layer(base);
   opacity: 0.8;
   cursor: grabbing; /* Changes the cursor to indicate dragging */
 }
+
+/* CUSTOM N PROGRESS BAR */
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: linear-gradient(to right, #1B56FD, #0118D8);
+  height: 5px !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999999 !important;
+  box-shadow : -6px -4px 20px 10px #1B56FD80;
+  
+}
+
+#nprogress .bar .peg{
+  display : none;
+}
+
+
+/* CUSTOM SCROLL */
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Scrollbar Track */
+::-webkit-scrollbar-track {
+  background: #1e1e2e; /* Dark background */
+  border-radius: 10px;
+}
+
+/* Scrollbar Handle */
+::-webkit-scrollbar-thumb {
+  background: #4f46e5; /* Soft purple/blue */
+  border-radius: 10px;
+  transition: background 0.3s ease-in-out;
+}
+
+/* Scrollbar Handle on Hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #6366f1; /* Lighter blue */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4e4e63 #1e1e2e;
+}

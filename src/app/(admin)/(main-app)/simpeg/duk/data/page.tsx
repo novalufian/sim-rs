@@ -5,7 +5,7 @@ import ColumnFilter from "@/components/tables/ColumnFilter";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { DUKTableColumns } from "@/app/(admin)/(main-app)/simpeg/duk/data/tableColumns";
 import { Employee, DropdownState } from "@/app/(admin)/(main-app)/simpeg/duk/data/employee";
-import { getColumnValue } from "@/utils/tableHelpers";
+import { getColumnValue } from "@/app/(admin)/(main-app)/simpeg/duk/data/tableHelpers";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 
 function Page() {

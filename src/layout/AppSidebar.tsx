@@ -62,7 +62,7 @@ const navItems: NavItem[] = [
   {
     icon: <LuNotebookText className="h-6 w-6" />,
     name: "Service Desk",
-    path: "/si-keu",
+    path: "/service-desk",
   },
 
   {
@@ -79,6 +79,7 @@ const othersItems:NavItem[] = [];
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered } = useSidebar();
   const pathname = usePathname();
+  const splitedPath = pathname.split("/");  
 
   const renderMenuItems = (
     navItems: NavItem[],
@@ -216,7 +217,7 @@ const AppSidebar: React.FC = () => {
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // const isActive = (path: string) => path === pathname;
-  const isActive = useCallback((path: string) => path === pathname, [pathname]);
+  const isActive = useCallback((path: string) => path.split("/")[1] === splitedPath[1], [pathname]);
 
   useEffect(() => {
     // Check if the current path matches any submenu item

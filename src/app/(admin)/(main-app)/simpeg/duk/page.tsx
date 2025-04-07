@@ -1,20 +1,15 @@
 import React from 'react'
-import GenderStats from './stats/gender';
-import GelarStats from './stats/gelar';
+import GenderStats from './(stats)/gender';
+import GelarStats from './(stats)/gelar';
 import { BsArrowUpRightCircle } from "react-icons/bs";
 import Link from 'next/link';
-import JabatanChart from './stats/jabatan';
+import JabatanChart from './(stats)/jabatan';
 import HighlightTable from '@/app/(admin)/(others-pages)/(tables)/highlight-table/page';
-import UmurStats from './stats/umur';
+import UmurStats from './(stats)/umur';
+import getGreeting from '@/utils/greatingMsg';
 
 // Function to generate greeting based on time
-const getGreeting = () => {
-    const currentHour = new Date().getHours();
-    if (currentHour < 12) return 'Selemat Pagi';
-    if (currentHour < 15) return 'Selamat Siang';
-    if (currentHour < 17) return 'Selamat Sore';
-    return 'Selamat Malang';
-};
+
 
 export default function page() {
   return (

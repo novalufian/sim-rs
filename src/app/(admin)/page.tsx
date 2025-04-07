@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 export const metadata: Metadata = {
   title:
-    "Next.js E-commerce Dashboard | TailAdmin - Next.js Dashboard Template",
-  description: "This is Next.js Home for TailAdmin Dashboard Template",
+    "SSO RSUD dr. Abdul Rivai",
+  description: "sistem satu login untuk semua aplikasi RSUD",
 };
 
 const classCard = "w-60 h-70 bg-white border border-gray-100 rounded-xl cursor-pointer transition-all hover:drop-shadow-xl hover:-translate-y-4 flex items-center flex-col justify-end overflow-hidden box-border p-3 dark:bg-white/[0.03] dark:border-gray-700";
