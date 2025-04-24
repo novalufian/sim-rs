@@ -74,7 +74,6 @@ export default function GelarStats() {
             stack: "stack", // Stack all datasets together
         };
     });
-    console.log(uniqueCounts)
 
     const chartData = {
         labels: ['Jabatan'], // X-axis: single label for all stacks
@@ -92,7 +91,6 @@ export default function GelarStats() {
                 callbacks: {
                     label: function (context: any) {
                         const datasetIndex = context.datasetIndex; // Index of the dataset
-                        console.log(datasetIndex)
                         const group = stats.find((g) => g.count === uniqueCounts.reverse()[datasetIndex]); // Find the group for this dataset
                         const jabatanList = group?.jabatanList.join(", "); // Join jabatan list into a string
 

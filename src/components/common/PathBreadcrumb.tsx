@@ -73,32 +73,15 @@ const PathBreadcrumb: React.FC<PathBreadcrumbProps> = ({
         <ol className="flex items-center gap-1.5">
         <li>
         <Link
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-        href="/"
-        >
-        Home
-        <svg
-        className="stroke-current"
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        >
-        <path
-        d="M6 12L10 8L6 4"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        />
-        </svg>
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" href="/">Home
+            <svg className="stroke-current" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" > <path d="M6 12L10 8L6 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>
         </Link>
         </li>
         {breadcrumbItems.map((item, index) => (
             <li key={item.path}>
             {index === breadcrumbItems.length - 1 ? (
                 <span className="text-sm text-gray-800 dark:text-white/90">
-                {item.name}
+                {(title) ? title : item.name}
                 </span>
             ) : (
                 <Link
@@ -106,21 +89,7 @@ const PathBreadcrumb: React.FC<PathBreadcrumbProps> = ({
                 href={item.path}
                 >
                 {item.name}
-                <svg
-                className="stroke-current"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                >
-                <path
-                d="M6 12L10 8L6 4"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                />
-                </svg>
+                <svg className="stroke-current" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" > <path d="M6 12L10 8L6 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>
                 </Link>
             )}
             </li>

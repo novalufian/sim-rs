@@ -18,19 +18,21 @@ const DropzoneComponent: React.FC = () => {
       "image/svg+xml": [],
     },
   });
+
   return (
     <ComponentCard title="Dropzone">
       <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
-        <form
+        <div
           {...getRootProps()}
-          className={`dropzone rounded-xl   border-dashed border-gray-300 p-7 lg:p-10
-        ${
-          isDragActive
-            ? "border-brand-500 bg-gray-100 dark:bg-gray-800"
-            : "border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
-        }
-      `}
+          className={`dropzone rounded-xl border-dashed border-gray-300 p-7 lg:p-10
+            ${
+              isDragActive
+                ? "border-brand-500 bg-gray-100 dark:bg-gray-800"
+                : "border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
+            }
+          `}
           id="demo-upload"
+          role="presentation"
         >
           {/* Hidden Input */}
           <input {...getInputProps()} />
@@ -38,7 +40,7 @@ const DropzoneComponent: React.FC = () => {
           <div className="dz-message flex flex-col items-center m-0!">
             {/* Icon Container */}
             <div className="mb-[22px] flex justify-center">
-              <div className="flex h-[68px] w-[68px]  items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400">
+              <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400">
                 <svg
                   className="fill-current"
                   width="29"
@@ -68,7 +70,7 @@ const DropzoneComponent: React.FC = () => {
               Browse File
             </span>
           </div>
-        </form>
+        </div>
       </div>
     </ComponentCard>
   );

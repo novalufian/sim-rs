@@ -1,33 +1,67 @@
-import { Lapor } from "@/app/(admin)/(main-app)/sim-aduan/data/laporInterface";
+"use client";
+import { Lapor,  statusConfig, klasifikasiConfig, priorityConfig} from "@/app/(admin)/(main-app)/sim-aduan/data/laporInterface";
+import Link from "next/link";
 
-export const getColumnValue = (lapor: Lapor, columnId: string): string => {
+export const getColumnValue = (lapor: Lapor, columnId: string): string | React.ReactNode => {
   const columnMapping: { [key: string]: keyof Lapor } = {
+    id: "id",
     judul: "judul",
-    bidang: "bidang",
-    tanggalKejadian: "tanggal",
-    isiLaporan: "isi",
+    klasifikasi: "klasifikasi",
+    priority: "priority",
+    status: "status",
+    uraian: "uraian",
+    media: "media",
+    tanggal_pelaporan: "tanggal_pelaporan",
     email: "email",
-    noHp: "noHp",
-    createdAt: "createdAt",
-    updatedAt: "updatedAt",
-    id: "id"
+    tindak_lanjut: "tindak_lanjut",
+    created_at: "created_at",
   };
 
   const key = columnMapping[columnId];
   const value = key ? lapor[key] : "";
 
-  return typeof value === "string" || typeof value === "number" ? String(value) : "";
-};
+  if (columnId === "status" && typeof value === "string") {
+    const status = statusConfig[value as keyof typeof statusConfig]
+    return <span className={`px-3 py-1 rounded-full inline-flex flex-row items-center  ${status.bgColor +" "+status.color }`}>
+      {status.icon}  <p className="ml-1">{status.label}</p>
+    </span>;
+  }
 
-// Add a display name mapping if needed
-export const columnDisplayNames: { [key: string]: string } = {
-  judul: "JUDUL LAPORAN",
-  bidang: "BIDANG YANG DITUJU",
-  tanggalKejadian: "TANGGAL KEJADIAN",
-  isiLaporan: "ISI LAPORAN",
-  email: "EMAIL",
-  noHp: "NO. HP",
-  createdAt: "CREATED AT",
-  updatedAt: "UPDATED AT",
-  id: "ID"
+  if(columnId ==="judul" && typeof value === "string"){
+    return <Link href={`/sim-aduan/data/${lapor.id}`} className="flex flex-col hover:decoration-1">
+      {value}
+    </Link>
+  }
+
+
+  if (columnId === "klasifikasi" && typeof value === "string") {
+    const status = klasifikasiConfig[value as keyof typeof klasifikasiConfig]
+    return <span className={`px-3 py-1 rounded-full inline-flex flex-row items-center font-light  ${status.bgColor +" "+status.color }`}>
+      {status.icon}  <p className="ml-1">{status.label}</p>
+    </span>;
+  }
+
+  if (columnId === "priority" && typeof value === "string") {
+    const status = priorityConfig[value as keyof typeof priorityConfig]
+    return <span className={`px-3 py-1 rounded-full inline-flex flex-row items-center font-light  ${status.bgColor +" "+status.color }`}>
+      {status.icon}  <p className="ml-1">{status.label}</p>
+    </span>;
+  }
+
+  if (typeof value === "string") {
+    // Format tanggal jika kolom tanggal
+    if (["tanggal_pelaporan", "created_at"].includes(columnId)) {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return new Intl.DateTimeFormat("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }).format(date);
+      }
+    }
+    return value;
+  }
+
+  return typeof value === "number" ? String(value) : "";
 };

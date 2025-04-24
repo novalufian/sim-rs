@@ -7,48 +7,87 @@ import { LaporTableColumns } from "@/app/(admin)/(main-app)/sim-aduan/data/table
 import { Lapor, DropdownState } from "@/app/(admin)/(main-app)/sim-aduan/data/laporInterface";
 import { getColumnValue } from "@/app/(admin)/(main-app)/sim-aduan/data/tableHelpers";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
-import { redirect } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
+
+import { UseAduanSearch } from '@/hooks/fetch/useAduanSearch';
+import { useAduan } from "@/hooks/fetch/useAduan";
+import AduanQueryFilter from "./aduanQueryFilter";
+
+import {TableEmptyState, TableLoading} from "./tableEmptyState";
+import { useAppSelector } from '@/hooks/useAppDispatch';
+import nProgress from "nprogress";
+interface FilterState {
+    status?: string;
+    klasifikasi?: string;
+    priority?: string;
+    page?: number;
+}
 
 function Page() {
+    //trigger for search from redux
+    const {keyword, trigger} = useAppSelector(state => state.search)
+    
+    //state for table
     const [lapor, setLapor] = useState<Lapor[]>([]);
-    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-        new Set(["no", "judul", "bidang", "noHp", "email", "actions"])
+        new Set(["no", "judul", "klasifikasi","priority","status", "actions"])
     );
     const [showColumnFilter, setShowColumnFilter] = useState(false);
     const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
     const [openDropdownIndex, setOpenDropdownIndex] = useState<number| string | null>(null);
+    const [filters, setFilters] = useState({})
 
     const itemsPerPage = 10;
 
+    // search and default fetch hooks
+    const aduanQuery = useAduan({ ...filters, page: currentPage, limit: itemsPerPage });
+    const aduanSearchQuery = UseAduanSearch({ q: keyword, page: currentPage, limit: itemsPerPage, ...filters });
+
+    // use search data only if trigger is true
+    const isUsingSearch = trigger && keyword !== "";
+    const data = isUsingSearch ? aduanSearchQuery.data : aduanQuery.data;
+    const isLoading = isUsingSearch ? aduanSearchQuery.isLoading : aduanQuery.isLoading;
+    const isError = isUsingSearch ? aduanSearchQuery.isError : aduanQuery.isError;
+
+    const router = useRouter();
+    const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
+
     useEffect(() => {
-        const fetchData = async () => {
-        try {
-            const response = await fetch("/api/aduan");
-            const result = await response.json();
-            setLapor(result.data);
-
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        } finally {
-            setLoading(false);
+        const params = new URLSearchParams(window.location.search);
+        if(data) {
+            setLapor(data.data.aduan);
         }
-        };
+        setSearchParams(params);
+        
 
-        fetchData();
-
-        const handleClickOutside = () => {
-        setDropdownStates({});
-        };
-
-        document.addEventListener("click", handleClickOutside);
-        return () => {
-        document.removeEventListener("click", handleClickOutside);
-        };
-    }, []);
+    }, [data, keyword, trigger]);
 
 
+    const handleFilterChange = (newFilters: {
+        status?: string;
+        klasifikasi?: string;
+        priority?: string;
+    }) => {
+        setFilters(newFilters);
+
+        const params = new URLSearchParams(window.location.search)
+        params.delete('status')
+        params.delete('klasifikasi')
+        params.delete('priority')
+
+        // Add only non-empty filters
+        if (newFilters.status) params.set('status', newFilters.status.toLowerCase())
+        if (newFilters.klasifikasi) params.set('klasifikasi', newFilters.klasifikasi.toLowerCase())
+        if (newFilters.priority) params.set('priority', newFilters.priority.toLowerCase())
+    
+        router.replace(`?${params.toString()}`);
+        nProgress.start();
+        setTimeout(() => {
+            nProgress.done();
+        }, 300);
+    };
+    
     const toggleColumn = (columnId: string) => {
         const newVisibleColumns = new Set(visibleColumns);
         if (newVisibleColumns.has(columnId)) {
@@ -59,8 +98,7 @@ function Page() {
         setVisibleColumns(newVisibleColumns);
     };
 
-    const toggleDropdown = (index: number, event: React.MouseEvent) => {
-        console.log(index)
+    const toggleDropdown = (index: string, event: React.MouseEvent) => {
         event.stopPropagation();
 
         setOpenDropdownIndex((prev) => (prev === index ? null : index));
@@ -79,16 +117,10 @@ function Page() {
         console.log("Delete:", lapor);
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
     // Calculate pagination
-    const totalPages = Math.ceil(lapor.length / itemsPerPage);
+    const totalPages =(isLoading) ? 0 : Math.ceil(data.data.count / itemsPerPage);
 
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentlapor = lapor.slice(startIndex, endIndex);
 
     return (
         <div className="container mx-auto px-4">
@@ -193,8 +225,10 @@ function Page() {
             toggleColumn={toggleColumn}
             showColumnFilter={showColumnFilter}
             setShowColumnFilter={setShowColumnFilter}
-        />
-
+        >
+            <AduanQueryFilter onFilterChange={handleFilterChange}/>
+            
+        </ColumnFilter>
         <div className="relative sm:rounded-lg bg-transparent">
             <div className="table-wrapper hide-scrollbar rounded-2xl">
             <div className="min-table-width">
@@ -224,7 +258,14 @@ function Page() {
                     </tr>
                 </thead>
                 <tbody className="bg-white text-gray-700 dark:bg-gray-900 dark:text-gray-200 divide-y divide-gray-200 dark:divide-gray-700">
-                    {currentlapor.map((lapor, index) => (
+                {
+                isError ? (<>error</>) :
+                isLoading ? (
+                    <TableLoading colomLenght={6}/>
+                ) : lapor.length === 0 ? (
+                    <TableEmptyState colomLenght={6} />
+                ) : (
+                    lapor.map((lapor, index) => (
                     <tr key={index} className={`group group-hover:bg-gray-50 hover:cursor-pointer ${openDropdownIndex === lapor.id ? "bg-gray-100 dark:bg-gray-800" : ""}`}>
                         {LaporTableColumns.map(
                         (column) =>
@@ -259,22 +300,26 @@ function Page() {
                             )
                         )}
                     </tr>
-                    ))}
+                    ))
+                )}
                 </tbody>
                 </table>
             </div>
             </div>
         </div>
-
         <div className="mt-10">
             <Pagination
             totalPages={totalPages}
             currentPage={currentPage}
-            onPageChange={(page) => setCurrentPage(page)}
+            onPageChange={(page) =>{ 
+                setCurrentPage(page) 
+                setFilters({ ...filters, page })
+            }}
             />
         </div>
         </div>
     );
 }
+
 
 export default Page;

@@ -11,6 +11,7 @@ interface ColumnFilterProps {
   toggleColumn: (columnId: string) => void;
   showColumnFilter: boolean;
   setShowColumnFilter: (show: boolean) => void;
+  children?: React.ReactNode;
 }
 
 export default function ColumnFilter({
@@ -19,23 +20,28 @@ export default function ColumnFilter({
   toggleColumn,
   showColumnFilter,
   setShowColumnFilter,
+  children
 }: ColumnFilterProps) {
   return (
     <div className="mb-8">
       <div className="flex items-center mb-2 justify-between">
-        <button
-          onClick={() => setShowColumnFilter(!showColumnFilter)}
-          className=" flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white mr-5 px-4">
-          <LuSettings2 className='h-6 w-6 mr-4'/>{showColumnFilter ? 'Hide Column Filter' : 'Show Column Filter'}
-        </button>
+        <div className="flex flex-row gap-1">
+          <button
+            onClick={() => setShowColumnFilter(!showColumnFilter)}
+            className=" flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white mr-5 px-4">
+            <LuSettings2 className='h-6 w-6 mr-4'/>{showColumnFilter ? 'Hide Column Filter' : 'Show Column Filter'}
+          </button>
+
+          {children}
+        </div>
 
         <div className="button-wrapper flex flex-row">
           <button className='flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white mr-1 px-4'>
             <CiExport className='h-6 w-6 mr-2'/> export
           </button>
 
-          <Link href="/add-new" className='flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4'>
-            <AiOutlinePlus className='h-4 w-4 mr-2'/> Add new
+          <Link href="/add-new" className='flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-yellow-300 dark:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white px-4'>
+            <AiOutlinePlus className='h-4 w-4 mr-2 rounded-full'/> Add new
           </Link>
         </div>
         
