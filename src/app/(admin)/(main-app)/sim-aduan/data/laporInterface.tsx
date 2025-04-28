@@ -12,8 +12,8 @@ export interface Lapor {
     tanggal_pelaporan: string;
     priority: string;
     status: string;
-    email: string;
-    tindak_lanjut : string;
+    masked_email: string;
+    tindak_lanjut_nama : string;
     created_at: string;
 }
 

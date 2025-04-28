@@ -1,20 +1,28 @@
+"use client"
 import getGreeting from '@/utils/greatingMsg'
 import Link from 'next/link'
 import React from 'react'
 import { BsArrowUpRightCircle } from 'react-icons/bs'
 import { IoIosAddCircleOutline } from 'react-icons/io'
-import ResponseTimeChart from './(stats)/responseTimeChart'
-import TotalAduanChart from './(stats)/totalAduan'
+import {TotalAduanChart, TotalAduanStat} from './(stats)/totalAduan'
 import LaporanBidangChart from './(stats)/laporanBIdangChart'
-import DistribusiLaporanChart from './(stats)/distribusiLaporanChart'
-import DailyLaporanChart from './(stats)/dailyLaporanMasukChart'
+import TrendAduanChart from './(stats)/trandAduan'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/libs/store'
+import WordCloudChart from './(stats)/skiriningMasalah'
+import DateRangePicker from '@/components/datePicker/dateRangePicker'
 
 function page() {
+    const user = useSelector((state: RootState) => state.auth.user);
+
     return (
         <div className="grid grid-cols-12 gap-2 md:gap-3">
-            <div className="col-span-6 min-h-40 flex justify-center flex-col">
+            <div className="col-span-12">
+            </div>
+            <div className="col-span-6 min-h-40 flex justify-center flex-col mb-10">
                 <h2 className='text-4xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2'> 👋 Hi, {getGreeting()}</h2>
-                <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>Dedi Arpandi</h2>
+                <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>{user?.name.toLocaleLowerCase()}</h2>
+                <DateRangePicker/>
             </div>
 
             <div className="col-span-3">
@@ -34,24 +42,36 @@ function page() {
                 </div>
                 </Link>
             </div>
+            
 
-            <div className="col-span-5 min-h-100">
-                <ResponseTimeChart />
+            <div className="col-span-3 min-h-100">
+                <TotalAduanChart group='status' title='Status Aduan' colors={['#7AE2CF', '#077A7D',  '#06202B',]}/>
+            </div>
+
+            <div className="col-span-3 min-h-100">
+                <TotalAduanChart group='klasifikasi' title='Kasifikasi Aduan' colors={['#A0C878', '#143D60',  '#EB5B00',]}/>
+            </div>
+
+            <div className="col-span-3 min-h-100">
+                <TotalAduanChart group='priority' title='Priority Aduna' colors={['#f59e0b', '#ef4444', '#3b82f6']}/>
             </div>
             <div className="col-span-3 min-h-100">
-                <TotalAduanChart />
-            </div>
-            <div className="col-span-4 min-h-100">
-                <DistribusiLaporanChart />
+                <TotalAduanStat title='Bulan April 2025'/>
             </div>
 
-            <div className="col-span-6 min-h-100">
+            {/* <div className="col-span-12 max-h-70">
+                <TrendAduanChart/>
+            </div> */}
+
+            <div className="col-span-7 min-h-100">
                 <LaporanBidangChart />
             </div>
 
-            <div className="col-span-6">
-                <DailyLaporanChart />
+            <div className="col-span-5 min-h-100">
+                <WordCloudChart/>
             </div>
+
+            
         </div>
 
         

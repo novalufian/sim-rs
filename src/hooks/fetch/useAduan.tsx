@@ -40,7 +40,9 @@ export const useAduan = (filters: AduanFilters = {}) => {
             const res = await api.get(`/aduan?${params.toString()}`)
             return res.data
         },
-        staleTime: 1000 * 60 * 5, // cache for 5 mins
+        // staleTime: 1000 * 60 * 5, // cache for 5 mins
+        refetchOnWindowFocus: false,
+        refetchInterval: false,
     })
 }
 
@@ -52,8 +54,11 @@ export const useAduanId = (id: string) => {
             return res.data
         },
         staleTime: 1000 * 60 * 20, // cache for 20 mins
+        refetchOnWindowFocus: false,
+        refetchInterval: false,
     })
 }
+
 export const useAduanDelete = () => {
     return useMutation({
         mutationFn: async (id: string) => {
@@ -112,15 +117,21 @@ export const usePostAduan = () => {
 
 
 export const updateAduanStatus =()=>{
+    const queryClient = useQueryClient()
     return useMutation({
         mutationFn: async (data: { id: string; formData: any }) => {
-            const res = await api.put(`/aduan/status/${data.id}`, FormData)
+            const res = await api.put(`/aduan/status/${data.id}`, data.formData)
             return res.data
         },
         onSuccess: (data) => {
             console.log('✅ Aduan berhasil diupdate!', data)
             toast.success('Aduan berhasil diupdate!')
+
+            queryClient.invalidateQueries({
+                queryKey: ['aduan'],
+            })
         },
+        
         onError: (error: any) => {
             console.error("❌ Error updating:", error)
             toast.error('Gagal mengupdate aduan!')

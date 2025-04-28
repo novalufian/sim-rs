@@ -83,7 +83,7 @@ export default function SignInForm() {
           Back to dashboard
         </Link>
       </div>
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto relative">
+      <div className="flex flex-col justify-center flex-1 w-full max-w-sm mx-auto relative">
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">

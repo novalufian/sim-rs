@@ -648,3 +648,28 @@ layer(base);
   scrollbar-width: thin;
   scrollbar-color: #4e4e63 #1e1e2e;
 }
+
+
+.flatpickr-calendar {
+  border-radius: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 340px;
+  top: 320px !important;
+  background: #ffffff90;
+  backdrop-filter: blur(25px);
+}
+
+span.flatpickr-day.selected.startRange {
+  background: orangered;
+  border: none;
+}
+
+span.flatpickr-day.selected.endRange {
+  background: orangered;
+  border: none;
+}
+
+.flatpickr-months .flatpickr-prev-month,.flatpickr-months .flatpickr-next-month {
+  top: 15px;
+}

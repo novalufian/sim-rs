@@ -9,10 +9,21 @@ const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
 }) => {
-  const pagesAroundCurrent = Array.from(
-    { length: Math.min(3, totalPages) },
-    (_, i) => i + Math.max(currentPage - 1, 1)
-  );
+ 
+  const getVisiblePages = (current: number, total: number) => {
+    const delta = 1; // how many pages to show before and after
+    const start = Math.max(1, current - delta);
+    const end = Math.min(total, current + delta);
+  
+    const pages = [];
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+  
+    return pages;
+  };
+
+  const pagesAroundCurrent = getVisiblePages(currentPage, totalPages);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);

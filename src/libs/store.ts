@@ -1,12 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import authReducer from '@/features/auth/authSlice';
 import searchReducer from '@/features/search/searchSlice';
-
+import dateRangeReducer from '@/features/dateFilter/dateRangeSlice';
 export const globalStore = () => {
     return configureStore({
         reducer: {
             auth : authReducer,
-            search : searchReducer
+            search : searchReducer,
+            dateRange : dateRangeReducer,
         }
     })
 }

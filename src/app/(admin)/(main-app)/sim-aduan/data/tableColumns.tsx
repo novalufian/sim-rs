@@ -8,8 +8,8 @@ export const LaporTableColumns: Column[] = [
     { id: "priority", label: "Priority", width: "w-[100px]" },
     { id: "tanggal_pelaporan", label: "Tanggal Pelaporan", width: "w-[100px]" },
     { id: "uraian", label: "Isi Laporan", width: "w-[300px]" },
-    { id: "email", label: "Email", width: "w-[200px]" },
-    { id: "tindak_lanjut", label: "Tindak Lanjut", width: "w-[200px]" },
+    { id: "masked_email", label: "Email", width: "w-[200px]" },
+    { id: "tindak_lanjut_nama", label: "Tindak Lanjut", width: "w-[200px]" },
     { id: "created_at", label: "Dibuat Pada", width: "w-[180px]" },
     { id: "actions", label: "", width: "w-[30px]", sticky: "right" },
 ];  

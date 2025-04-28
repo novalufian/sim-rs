@@ -31,22 +31,26 @@
 
     export default function AduanDetail({ data }: { data: AduanDetailProps }) {
     return (
-        <div className="w-full mx-auto bg-white rounded-xl p-6 space-y-6">
+        <div className="w-full mx-auto bg-white dark:bg-white/[0.03] rounded-xl p-6 space-y-6 dark:text-white">
         {/* Header */}
         <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold text-gray-800">Detail Aduan</h1>
+            <h1 className="text-xl font-semibold text-gray-800  dark:text-white">Detail Aduan</h1>
             <span className="text-base text-gray-400">ID #{data?.id.slice(0, 8)}</span>
         </div>
 
         {/* Personal Detail */}
         <section className="space-y-2">
-            <h2 className="text-base font-medium text-gray-500 flex items-center gap-1">
+            <h2 className="text-base font-medium text-gray-600 dark:text-white flex items-center gap-1">
             <AiOutlineUser /> Pelapor
             </h2>
-            <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-            <div>
-                <p className="text-base font-semibold">{data?.email}</p>
+            <div className="flex items-center justify-between bg-gray-50 dark:bg-white/[0.03] rounded-lg p-4 ">
+            <div className='space-y-2'>
+                <p className="text-base font-semibold">Nama :{data?.email}</p>
                 <p className="text-base text-gray-500">NIK: {data?.nik}</p>
+                <p className="text-base font-semibold">No Hp :{data?.email}</p>
+                <p className="text-base font-semibold">Email :{data?.email}</p>
+
+
             </div>
             <div className="flex space-x-3 text-gray-400">
                 <FaEnvelope size={16} />
@@ -60,7 +64,7 @@
             <h2 className="text-base font-medium text-gray-500 flex items-center gap-1">
             <FaTag /> Informasi Aduan
             </h2>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+            <div className="bg-gray-50 dark:bg-white/[0.03] rounded-lg p-4 space-y-2">
             <p className="text-lg font-semibold">{data?.judul}</p>
             <p className="text-base text-gray-600">{data?.uraian}</p>
 

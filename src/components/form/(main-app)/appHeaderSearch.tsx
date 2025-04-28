@@ -56,6 +56,23 @@ function AppHeaderSearch() {
                 params?.delete('q');
                 return;
             }
+
+            event.preventDefault();
+            dispatch(setKeyword(searchInput));
+            params?.set('q', searchInput);
+            if (searchInput != "") {
+                params?.delete('q');
+                dispatch(setKeyword(""));
+                setSearchInput("");
+                dispatch(resetTrigger());
+                router.replace(currentPath);
+                nProgress.start();
+                setTimeout(() => {
+                    nProgress.done();
+                }, 300);
+                return;
+            }
+            dispatch(triggerSearch());
         }
     }
     function handleClick(event: React.MouseEvent) {

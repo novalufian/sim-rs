@@ -12,8 +12,8 @@ export const getColumnValue = (lapor: Lapor, columnId: string): string | React.R
     uraian: "uraian",
     media: "media",
     tanggal_pelaporan: "tanggal_pelaporan",
-    email: "email",
-    tindak_lanjut: "tindak_lanjut",
+    masked_email: "masked_email",
+    tindak_lanjut_nama: "tindak_lanjut_nama",
     created_at: "created_at",
   };
 

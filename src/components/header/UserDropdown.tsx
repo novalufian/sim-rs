@@ -1,13 +1,18 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, {useState } from "react";
+import React, {useEffect, useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useWhoami } from "@/hooks/fetch/useWhoami";
+
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState, AppDispatch } from '@/libs/store'
+import { updateUser, logout } from '@/features/auth/authSlice'
+
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  
+  const dispatch = useDispatch<AppDispatch>();
 
   function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
@@ -20,15 +25,26 @@ export default function UserDropdown() {
     setIsOpen(false);
   }
 
-  if(isLoading) return <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
-  
-  if(error) return <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+  const user = useSelector((state: RootState) => state.auth.user);
 
-  if(!data) return <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+  useEffect(() => {
+    if (data && !user) {
+      dispatch(
+        updateUser({
+          id: data.data.pegawai.id,
+          name: data.data.pegawai.nama,
+          email: data.data.username,
+          role: data.data.role,
+        })
+      );
+    }
+  }, [data, user, dispatch]);
 
-  const userName = data.data.pegawai.nama;
-  const email = data.data.username;
-
+  if (isLoading || error || !data || !user) {
+    return (
+      <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+    );
+  }
   return (
     <div className="relative">
       <button
@@ -44,7 +60,7 @@ export default function UserDropdown() {
           />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">{userName}</span>
+        <span className="block mr-1 font-medium text-theme-sm">{user?.name}</span>
 
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
@@ -73,10 +89,10 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {userName}
+            {user?.name}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {email}
+            {user?.email}
           </span>
         </div>
 

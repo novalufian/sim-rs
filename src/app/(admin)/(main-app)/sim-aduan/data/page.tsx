@@ -49,6 +49,7 @@ function Page() {
     const data = isUsingSearch ? aduanSearchQuery.data : aduanQuery.data;
     const isLoading = isUsingSearch ? aduanSearchQuery.isLoading : aduanQuery.isLoading;
     const isError = isUsingSearch ? aduanSearchQuery.isError : aduanQuery.isError;
+    const [totalPages, setTotalPages] = useState(0);
 
     const router = useRouter();
     const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
@@ -57,11 +58,13 @@ function Page() {
         const params = new URLSearchParams(window.location.search);
         if(data) {
             setLapor(data.data.aduan);
+            console.log(data.data.aduan);
+            setTotalPages(Math.ceil(data.data.count / itemsPerPage))
         }
         setSearchParams(params);
         
 
-    }, [data, keyword, trigger]);
+    }, [data, keyword, trigger, isUsingSearch, totalPages]);
 
 
     const handleFilterChange = (newFilters: {
@@ -70,6 +73,7 @@ function Page() {
         priority?: string;
     }) => {
         setFilters(newFilters);
+        setCurrentPage(1);
 
         const params = new URLSearchParams(window.location.search)
         params.delete('status')
@@ -118,8 +122,6 @@ function Page() {
     };
 
     // Calculate pagination
-    const totalPages =(isLoading) ? 0 : Math.ceil(data.data.count / itemsPerPage);
-
     const startIndex = (currentPage - 1) * itemsPerPage;
 
     return (
