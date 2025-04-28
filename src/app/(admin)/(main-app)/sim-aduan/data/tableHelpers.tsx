@@ -10,12 +10,18 @@ export const getColumnValue = (lapor: Lapor, columnId: string): string | React.R
     priority: "priority",
     status: "status",
     uraian: "uraian",
-    media: "media",
+    media: "media", // optional, boleh tetap ada
     tanggal_pelaporan: "tanggal_pelaporan",
     masked_email: "masked_email",
+    masked_nik: "masked_nik",        // ➔ NEW
+    masked_no_hp: "masked_no_hp",    // ➔ NEW
+    alamat: "alamat",                // ➔ NEW
+    nama: "nama",                    // ➔ NEW
+    skrining_masalah_nama: "skrining_masalah_nama", // ➔ NEW
     tindak_lanjut_nama: "tindak_lanjut_nama",
     created_at: "created_at",
-  };
+};
+
 
   const key = columnMapping[columnId];
   const value = key ? lapor[key] : "";

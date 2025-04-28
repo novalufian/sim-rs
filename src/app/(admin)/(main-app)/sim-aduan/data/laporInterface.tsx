@@ -7,13 +7,18 @@ export interface Lapor {
     id: string;
     judul: string;
     uraian: string;
-    media: string;
+    media?: string; // optional, karena di result tidak ada field media
     klasifikasi: string;
-    tanggal_pelaporan: string;
+    tanggal_pelaporan: string; // ➔ dari created_at
     priority: string;
     status: string;
     masked_email: string;
-    tindak_lanjut_nama : string;
+    masked_nik: string;
+    masked_no_hp: string;
+    alamat: string;
+    nama: string;
+    skrining_masalah_nama: string;
+    tindak_lanjut_nama: string;
     created_at: string;
 }
 

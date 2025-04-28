@@ -31,7 +31,7 @@ function Page() {
     const [lapor, setLapor] = useState<Lapor[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-        new Set(["no", "judul", "klasifikasi","priority","status", "actions"])
+        new Set(["no", "judul", "klasifikasi","priority","status","tindak_lanjut_nama","skrining_masalah_nama", "actions"])
     );
     const [showColumnFilter, setShowColumnFilter] = useState(false);
     const [dropdownStates, setDropdownStates] = useState<DropdownState>({});

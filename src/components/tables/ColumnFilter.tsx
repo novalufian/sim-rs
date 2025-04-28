@@ -51,6 +51,7 @@ export default function ColumnFilter({
         <div className="bg-white dark:bg-gray-900 dark:text-gray-300 p-6 rounded-2xl">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
             {columns.map((column) => (
+              column.id !== 'actions' && (  
               <label key={column.id} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -59,7 +60,7 @@ export default function ColumnFilter({
                   className="form-checkbox h-4 w-4 text-blue-600"
                 />
                 <span className="text-sm">{column.label}</span>
-              </label>
+              </label>)
             ))}
           </div>
         </div>
