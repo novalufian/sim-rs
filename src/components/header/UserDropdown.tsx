@@ -5,18 +5,29 @@ import React, {useEffect, useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useWhoami } from "@/hooks/fetch/useWhoami";
+import Cookies from 'js-cookie';  // Import js-cookie
 
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '@/libs/store'
 import { updateUser, logout } from '@/features/auth/authSlice'
+import { useRouter } from 'next/navigation';
 
 export default function UserDropdown() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
   function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
     setIsOpen((prev) => !prev);
+  }
+
+  function dologout() {
+    dispatch(logout());
+    Cookies.remove('userInfo');
+    Cookies.remove('token');
+    router.push("/");
+    closeDropdown();
   }
 
   const {data,isLoading, error} = useWhoami();
@@ -29,14 +40,17 @@ export default function UserDropdown() {
 
   useEffect(() => {
     if (data && !user) {
+      const userData = {
+        id: data.data.pegawai.id,
+        name: data.data.pegawai.nama,
+        email: data.data.username,
+        role: data.data.role,
+      }
       dispatch(
-        updateUser({
-          id: data.data.pegawai.id,
-          name: data.data.pegawai.nama,
-          email: data.data.username,
-          role: data.data.role,
-        })
+        updateUser(userData)
       );
+      Cookies.set('userInfo', JSON.stringify(userData), { expires: 7 });
+
     }
   }, [data, user, dispatch]);
 
@@ -173,8 +187,8 @@ export default function UserDropdown() {
             </DropdownItem>
           </li>
         </ul>
-        <Link
-          href="/signin"
+        <button onClick={dologout}
+          
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg
@@ -193,7 +207,7 @@ export default function UserDropdown() {
             />
           </svg>
           Sign out
-        </Link>
+        </button>
       </Dropdown>
     </div>
   );

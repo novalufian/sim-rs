@@ -32,7 +32,6 @@ export default function ColumnFilter({
             <LuSettings2 className='h-6 w-6 mr-4'/>{showColumnFilter ? 'Hide Column Filter' : 'Show Column Filter'}
           </button>
 
-          {children}
         </div>
 
         <div className="button-wrapper flex flex-row">
@@ -44,7 +43,10 @@ export default function ColumnFilter({
             <AiOutlinePlus className='h-4 w-4 mr-2 rounded-full'/> Add new
           </Link>
         </div>
-        
+      
+      </div>
+      <div className="flex flex-row gap-1">
+        {children}
       </div>
       
       {showColumnFilter && (

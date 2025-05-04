@@ -11,3 +11,15 @@ export const useBidang = () => {
         staleTime: 1000 * 60 * 60 * 24, // cache for 1 day
     })
 }
+
+export const useSkriningMasalah = () => {
+//         .attr('preserveAspectRatio', 'xMinYMin meet')
+    return useQuery({
+        queryKey: ['skrinmas'],
+        queryFn: async () => {
+            const res = await api.get('/public/skrining_masalah')
+            return res.data
+        },
+        staleTime: 1000 * 60 * 60 * 24, // cache for 1 day
+    })
+}

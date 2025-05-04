@@ -1,19 +1,23 @@
 "use client"
 import getGreeting from '@/utils/greatingMsg'
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { BsArrowUpRightCircle } from 'react-icons/bs'
 import { IoIosAddCircleOutline } from 'react-icons/io'
 import {TotalAduanChart, TotalAduanStat} from './(stats)/totalAduan'
 import LaporanBidangChart from './(stats)/laporanBIdangChart'
-import TrendAduanChart from './(stats)/trandAduan'
-import { useSelector } from 'react-redux'
 import { RootState } from '@/libs/store'
 import WordCloudChart from './(stats)/skiriningMasalah'
 import DateRangePicker from '@/components/datePicker/dateRangePicker'
+import { useAppSelector } from "@/hooks/useAppDispatch";
 
 function page() {
-    const user = useSelector((state: RootState) => state.auth.user);
+    const [userRole, setUserRole] = useState<string | undefined>(undefined)
+    const user = useAppSelector((state: RootState) => state.auth.user);
+
+    useEffect(()=>{
+        setUserRole(user?.role)
+    },[user])
 
     return (
         <div className="grid grid-cols-12 gap-2 md:gap-3">
@@ -26,12 +30,14 @@ function page() {
             </div>
 
             <div className="col-span-3">
+                {!userRole ||userRole != "user" &&
                 <Link href="sim-aduan/lapor" className='group'>
                 <div className="group-hover:dark:bg-amber-300 text-red-600 rounded-2xl border border-gray-200 bg-red-100/50 hover:bg-red-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03]  sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center ">
                     <h1 className='text-2xl leading-tight font-semibold   tracking-tight '>Lapor <br /> Aduan Baru</h1>
                     <IoIosAddCircleOutline className='w-18 h-18 group-hover:scale-140 transition-all group-hover:rotate-90 '/>
                 </div>
                 </Link>
+                }
             </div>
 
             <div className="col-span-3">

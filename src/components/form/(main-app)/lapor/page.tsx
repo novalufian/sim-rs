@@ -18,7 +18,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { usePostAduan } from '@/hooks/fetch/useAduan';
-import { useBidang } from '@/hooks/fetch/openapi/useBidang';
+import { useBidang , useSkriningMasalah} from '@/hooks/fetch/openapi/useApi';
 import DefaultModal from '@/components/modals/defaultModal';
 
 export const aduanSchema = z.object({
@@ -31,11 +31,12 @@ export const aduanSchema = z.object({
     nama: z.string().min(1, "nama wajib diisi"),
     alamat: z.string().min(10, "alamat wajib diisi"),
     email: z.string().email("Format email tidak valid"),
-    hp: z.string().min(1, "Jaminan wajib diisi"),
+    no_hp: z.string().min(1, "Jaminan wajib diisi"),
     priority: z.enum(["LOW", "MEDIUM", "HIGHT"], {
         required_error: "Prioritas wajib diisi",
     }),
     tindak_lanjut_id: z.string().min(1, "Tindak lanjut wajib diisi"),
+    skirining_masalah_id: z.string().min(1, "jenis masalah wajib diisi"),
     status: z.enum(["OPEN", "IN_PROGRESS", "CLOSED"], {
         required_error: "Status wajib diisi",
     }),
@@ -77,7 +78,10 @@ const optionsMedia = [
 export default function LaporForm() {
     const { mutate: postAduan, status, isPending, isSuccess, isError  } = usePostAduan()
     const { data: bidang , isLoading : useBidangLoading} = useBidang();
+    const { data: skriningMasalah , isLoading : useSkriningMasalahLoading} = useSkriningMasalah();
     const bidangList = bidang?.data?.bidangTindakLanjut ?? [];
+    const skriningMasalahList = skriningMasalah?.data?.skriningMasalah ?? [];
+
     const {
         register,
         control,
@@ -150,7 +154,7 @@ export default function LaporForm() {
             </div>
 
             <div className="w-full space-y-6 grid grid-cols-12 gap-4 mt-4">
-            <div className='col-span-8'>
+            <div className='col-span-12'>
                 <Label required>Judul Laporan</Label>
                 <Input {...register("judul")} placeholder='Laporan...' className={`${errors.judul ? 'border-red-500': ""}`}/>
                 {errors.judul && <p className='text-red-500 mt-1'>{errors.judul.message}</p>}
@@ -165,7 +169,7 @@ export default function LaporForm() {
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
                 </select>
-                {errors.tindak_lanjut_id && <p className='text-red-500'>{errors.tindak_lanjut_id.message}</p>}
+                {errors.priority && <p className='text-red-500'>{errors.priority.message}</p>}
             </div>
 
             <div className='col-span-4'>
@@ -178,6 +182,18 @@ export default function LaporForm() {
                 ))}
                 </select>
                 {errors.tindak_lanjut_id && <p className='text-red-500'>{errors.tindak_lanjut_id.message}</p>}
+            </div>
+
+            <div className='col-span-4'>
+                <Label required>Jenis Permasalahan</Label>
+                <select {...register("skirining_masalah_id")}
+                className="w-full h-11 border rounded px-3 text-sm" disabled={useSkriningMasalahLoading}>
+                <option value="">- masalah - </option>
+                {skriningMasalahList.map((opt : any) => (
+                    <option key={opt.id} value={opt.id}>{opt.nama}</option>
+                ))}
+                </select>
+                {errors.skirining_masalah_id && <p className='text-red-500'>{errors.skirining_masalah_id.message}</p>}
             </div>
 
             <div className='col-span-4'>
@@ -197,7 +213,7 @@ export default function LaporForm() {
                 <Controller
                     control={control}
                     name="tanggal_pelaporan"
-                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                    render={({ field: { onChange, value, name, ref } }) => (
                         <DatePicker
                         value={value && typeof value === "string" ? [new Date(value)] : []} 
                         onChange={(selectedDates) => {
@@ -205,7 +221,6 @@ export default function LaporForm() {
                             console.log(date, date.toISOString())
                             if (date) onChange(date.toISOString()); // convert back to string
                         }}
-                        onBlur={onBlur}
                         options={{ dateFormat: "Y-m-d" }}
                         className={`w-full h-11 border rounded px-3 text-sm ${errors.tanggal_pelaporan ? 'border-red-500' : ''}`}
                         name={name}
@@ -216,7 +231,6 @@ export default function LaporForm() {
                     {errors.tanggal_pelaporan && (
                         <p className="text-red-500 text-sm mt-1">{errors.tanggal_pelaporan.message}</p>
                     )}
-
             </div>
 
             <div className='col-span-12'>
@@ -251,8 +265,8 @@ export default function LaporForm() {
 
             <div className='col-span-6'>
                 <Label required>No. HP</Label>
-                <Input type="tel" {...register("hp")} placeholder='08xxxxxxxxxx' />
-                {errors.hp && <p className='text-red-500'>{errors.hp.message}</p>}
+                <Input type="tel" {...register("no_hp")} placeholder='08xxxxxxxxxx' />
+                {errors.no_hp && <p className='text-red-500'>{errors.no_hp.message}</p>}
             </div>
 
             <div className='col-span-12'>

@@ -673,3 +673,40 @@ span.flatpickr-day.selected.endRange {
 .flatpickr-months .flatpickr-prev-month,.flatpickr-months .flatpickr-next-month {
   top: 15px;
 }
+
+.DateInput div {
+  font-size: 16px !important;
+}
+
+.DateInput_input {
+  font-size: 16px;
+  font-weight: 400;
+  color: inherit;
+  padding: 9px;
+  border: none;
+  text-align: center;
+  background: transparent !important;
+}
+
+.DateRangePickerInput {
+  border: none;
+  color: inherit;
+  background: transparent;
+}
+
+.DateRangePicker {
+  color: inherit;
+}
+
+.DateRangePicker_picker {
+  border-radius: 20px;
+  overflow: hidden;
+  border: solid 1px lightgray;
+  backdrop-filter: blur(10px);
+  background: #ffffff80;
+}
+
+
+.DateInput {
+  background: transparent;
+}

@@ -26,62 +26,28 @@ const verifiedInput = {
 function page() {
 
     return (
-        <div className='w-full grid grid-cols-12 gap-6 items-start'>
+        <div className='w-full grid grid-cols-12 gap-2 items-start'>
             <div className="col-span-12">
             <PathBreadcrumb />
             </div>
 
             <LaporForm />
-            
             <ComponentCard title='Check list inputan :'  className="col-span-4 bg-white sticky top-20 h-fit">
                 <ul className='list-decimal w-9/12 m-auto gap-1 text-gray-700'>
-                    <li className={verifiedInput["success"].text}> 
-                        <p className='flex items-center'>
-                        Klasifikasi pelaporan {verifiedInput["success"].label} {verifiedInput["success"].icon}</p>
-                    </li>
-                    <li className={verifiedInput["error"].text}>
-                        <p className=''>Judul : gunakan tata bahasa yang singkat sesuai pokok masalah 
-                        {verifiedInput["error"].label}
-                        {verifiedInput["error"].icon}
-                        </p>
-                    </li>
-                    <li className={verifiedInput["default"].text}>
-                        <p className=''>Bidang yang dituju {verifiedInput["default"].label}  {verifiedInput["default"].icon}</p>
-                    </li>
-                    <li className={verifiedInput["default"].text}>
-                        <p className=''>Pilih sumber media 
-                        {verifiedInput["default"].label} {verifiedInput["default"].icon}</p>
-                    </li>
-                    <li className={verifiedInput["default"].text}>
-                        <p className=''>Tanggal pelaporan {verifiedInput["default"].label}  {verifiedInput["default"].icon}</p>
-                    </li>
-                    <li className={verifiedInput["error"].text}>
-                        <p className=''>Isi laporan , jelaskan secara detail kejadian dan keluhan {verifiedInput["error"].label}  {verifiedInput["error"].icon}</p>
-                    </li>
-
-                    <li className={verifiedInput["success"].text}>
-                        <p className=''>Nik , isi sesuai dengan KTP {verifiedInput["success"].label}  {verifiedInput["success"].icon}</p>
-                    </li>
-
-                    <li className={verifiedInput["default"].text}>
-                        <p className=''>Nama lengkap , isi sesuai dengan KTP {verifiedInput["default"].label}  {verifiedInput["default"].icon}</p>
-                    </li>
-
-                    <li className={verifiedInput["default"].text}>
-                        <p className=''>Alamat lengkap , isi sesuai dengan KTP {verifiedInput["default"].label}  {verifiedInput["default"].icon}</p>
-                    </li>
-
-                    <li className={verifiedInput["default"].text}>
-                        <p className=''>Email , isi jika mempunyai email  {verifiedInput["default"].label}  {verifiedInput["default"].icon}</p>
-                    </li>
-
-                    <li className={verifiedInput["default"].text}>
-                        <p className=''>No. telp / WA , mohon diisi untuk menerima progress aduan  {verifiedInput["default"].label}  {verifiedInput["default"].icon}</p>
-                    </li>
-
-                    <li className={verifiedInput["default"].text}>
-                        <p className=''>File aduan, boleh dikosongkan  {verifiedInput["default"].label}  {verifiedInput["default"].icon}</p>
-                    </li>
+                <li><strong>Klasifikasi Laporan:</strong> Pilih salah satu: <em>Aduan</em>, <em>Aspirasi</em>, atau <em>Permintaan Informasi</em>.</li>
+                <li><strong>Judul:</strong> Gunakan tata bahasa <em>singkat dan jelas</em> sesuai pokok masalah. Contoh: "Jalan Berlubang di RT 03".</li>
+                <li><strong>Prioritas:</strong> Tentukan tingkat urgensi: <em>Low</em>, <em>Medium</em>, atau <em>High</em>.</li>
+                <li><strong>Bidang yang Dituju:</strong> Pilih instansi atau OPD terkait. <strong>Wajib diisi.</strong></li>
+                <li><strong>Jenis Permasalahan:</strong> Pilih jenis masalah dari daftar skrining yang tersedia.</li>
+                <li><strong>Sumber Media:</strong> Pilih dari: <em>Aplikasi</em>, <em>Media Sosial</em>, <em>Humas</em>, <em>WhatsApp</em>, <em>SP4N LAPOR</em>, atau <em>Tatap Muka</em>.</li>
+                <li><strong>Tanggal Pelaporan:</strong> Isi tanggal kejadian atau pelaporan. Format: <code>YYYY-MM-DD</code>.</li>
+                <li><strong>Isi Laporan / Uraian:</strong> Jelaskan secara <em>detail</em> kronologi dan keluhan. Hindari penjelasan yang terlalu umum.</li>
+                <li><strong>NIK:</strong> Masukkan 16 digit nomor sesuai dengan KTP.</li>
+                <li><strong>Nama Lengkap:</strong> Isi nama sesuai KTP.</li>
+                <li><strong>Alamat:</strong> Masukkan alamat lengkap minimal 10 karakter.</li>
+                <li><strong>Email:</strong> Masukkan alamat email aktif dan valid (contoh: email@example.com).</li>
+                <li><strong>No. HP:</strong> Masukkan nomor HP yang dapat dihubungi, contoh: 08xxxxxxxxxx.</li>
+                <li><strong>File Pendukung:</strong> Unggah dokumen, foto, atau bukti lainnya (opsional).</li>
 
                 </ul>
             </ComponentCard>

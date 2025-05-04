@@ -9,7 +9,7 @@ const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
 }) => {
- 
+
   const getVisiblePages = (current: number, total: number) => {
     const delta = 1; // how many pages to show before and after
     const start = Math.max(1, current - delta);

@@ -1,43 +1,18 @@
 import api from '@/libs/api'
 import { useQuery , useMutation, useQueryClient} from '@tanstack/react-query'
-import toast, { ToastBar } from 'react-hot-toast'
-interface AduanFilters {
+import toast from 'react-hot-toast'
+
+interface KlasifikasiFilters {
     status?: string
-    klasifikasi?: string
-    priority?: string
-    startDate?: string
-    endDate?: string
     page?: number
     limit?: number
 }
 
-export const useAduan = (filters: AduanFilters = {}) => {
-    const {
-        status,
-        klasifikasi,
-        priority,
-        startDate,
-        endDate,
-        page = 1,
-        limit = 10,
-    } = filters
-
-
+export const useKlasifikasi = () => {
     return useQuery({
-        queryKey: ['aduan', filters], // caching per filter
+        queryKey: ['klasifikasi'], // caching per filter
         queryFn: async () => {
-            const params = new URLSearchParams()
-
-            if (status) params.append('status', status)
-            if (klasifikasi) params.append('klasifikasi', klasifikasi)
-            if (priority) params.append('priority', priority)
-            if (startDate) params.append('startDate', startDate)
-            if (endDate) params.append('endDate', endDate)
-
-            params.append('page', page.toString())
-            params.append('limit', limit.toString())
-
-            const res = await api.get(`/aduan?${params.toString()}`)
+            const res = await api.get(`/public/klasifikasi_jabatan`)
             return res.data
         },
         // staleTime: 1000 * 60 * 5, // cache for 5 mins
@@ -46,11 +21,11 @@ export const useAduan = (filters: AduanFilters = {}) => {
     })
 }
 
-export const useAduanId = (id: string) => {
+export const useKlasifikasiId = (id: string) => {
     return useQuery({
-        queryKey: ['aduan', id],
+        queryKey: ['klasifikasi', id],
         queryFn: async () => {
-            const res = await api.get(`/aduan/id/${id}`)
+            const res = await api.get(`/master/klasifikasi_jabatan/id/${id}`)
             return res.data
         },
         staleTime: 1000 * 60 * 20, // cache for 20 mins
@@ -59,39 +34,37 @@ export const useAduanId = (id: string) => {
     })
 }
 
-export const useAduanDelete = () => {
+export const useKlasifikasiDelete = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async (id: string) => {
-            const res = await api.delete(`/aduan/${id}`)
+            const res = await api.delete(`/master/klasifikasi_jabatan/${id}`)
             return res.data
         },
         onSuccess: (data) => {
-            console.log('✅ Laporan berhasil dihapus!', data)
-            toast.success('Laporan berhasil dihapus!')
-            queryClient.invalidateQueries({ queryKey: ['aduan'] })
+            console.log('✅ Klasifikasi berhasil dihapus!', data)
+            queryClient.invalidateQueries({ queryKey: ['klasifikasi'] })
         },
         onError: (error: any) => {
-            console.error("❌ Error deleting:", error)
-            toast.error('Gagal menghapus laporan!')
+            // console.error("❌ Error deleting:", error)
+            return error;
         },
     })
 }
 
 
-export const usePostAduan = () => {
+export const usePostKlasifikasi = () => {
     const queryClient = useQueryClient()
-
     return useMutation({
         mutationFn: async (formData: any) => {
-            const res = await api.post('/aduan', formData)
+            const res = await api.post('/master/klasifikasi_jabatan', formData)
             return res.data
         },
         onSuccess: (data) => {
-            console.log('✅ Laporan berhasil dikirim!', data)
+            console.log('✅ Klasifikasi berhasil dikirim!', data)
             // You can trigger toast here or redirect
-            queryClient.invalidateQueries({ queryKey: ['aduan'] })
+            queryClient.invalidateQueries({ queryKey: ['klasifikasi'] })
         },
         onError: (error: any) => {
             if (error.response) {
@@ -121,26 +94,23 @@ export const usePostAduan = () => {
     })
 }
 
-
-export const updateAduanStatus =()=>{
+export const useUpdateKlasifikasi =()=>{    
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: async (data: { id: string; formData: any }) => {
-            const res = await api.put(`/aduan/status/${data.id}`, data.formData)
+            const res = await api.put(`/master/klasifikasi_jabatan/${data.id}`, data.formData)
             return res.data
         },
         onSuccess: (data) => {
-            console.log('✅ Aduan berhasil diupdate!', data)
-            toast.success('Aduan berhasil diupdate!')
+            console.log('✅ Klasifikasi berhasil diupdate!', data)
+            toast.success('Klasifikasi berhasil diupdate!')
 
-            queryClient.invalidateQueries({
-                queryKey: ['aduan'],
-            })
+            queryClient.invalidateQueries({ queryKey: ['klasifikasi'] })
         },
         
         onError: (error: any) => {
             console.error("❌ Error updating:", error)
-            toast.error('Gagal mengupdate aduan!')
+            toast.error('Gagal mengupdate klasifikasi!')
         },
     })
 }

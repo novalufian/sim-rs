@@ -51,7 +51,7 @@ export default function SignInForm() {
       const { token } = data;
 
       console.log(data)
-      document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 3}; SameSite=Lax`;
+      document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       setTimeout(() => {
         // setIsLoading(false);
         router.push("/");

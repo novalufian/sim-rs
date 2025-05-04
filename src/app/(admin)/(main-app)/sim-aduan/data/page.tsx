@@ -16,10 +16,13 @@ import AduanQueryFilter from "./aduanQueryFilter";
 import {TableEmptyState, TableLoading} from "./tableEmptyState";
 import { useAppSelector } from '@/hooks/useAppDispatch';
 import nProgress from "nprogress";
+import DeleteModal from "@/components/modals/deleteModal";
 interface FilterState {
     status?: string;
     klasifikasi?: string;
     priority?: string;
+    startDate?: string;
+    endDate?: string;
     page?: number;
 }
 
@@ -28,10 +31,11 @@ function Page() {
     const {keyword, trigger} = useAppSelector(state => state.search)
     
     //state for table
+    const columnInit = ["no", "judul", "klasifikasi","priority","status","tindak_lanjut_nama","skrining_masalah_nama", "actions"]
     const [lapor, setLapor] = useState<Lapor[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-        new Set(["no", "judul", "klasifikasi","priority","status","tindak_lanjut_nama","skrining_masalah_nama", "actions"])
+        new Set(columnInit)
     );
     const [showColumnFilter, setShowColumnFilter] = useState(false);
     const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
@@ -44,6 +48,8 @@ function Page() {
     const aduanQuery = useAduan({ ...filters, page: currentPage, limit: itemsPerPage });
     const aduanSearchQuery = UseAduanSearch({ q: keyword, page: currentPage, limit: itemsPerPage, ...filters });
 
+    const [openModal, setOpenModal] = useState(false);
+    const [laporDeleteId, setLaporDeleteId] = useState<string | null>(null);
     // use search data only if trigger is true
     const isUsingSearch = trigger && keyword !== "";
     const data = isUsingSearch ? aduanSearchQuery.data : aduanQuery.data;
@@ -52,25 +58,23 @@ function Page() {
     const [totalPages, setTotalPages] = useState(0);
 
     const router = useRouter();
-    const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
         if(data) {
             setLapor(data.data.aduan);
-            console.log(data.data.aduan);
+            console.log(data, isUsingSearch)
             setTotalPages(Math.ceil(data.data.count / itemsPerPage))
         }
-        setSearchParams(params);
-        
 
-    }, [data, keyword, trigger, isUsingSearch, totalPages]);
+    }, [data]);
 
 
     const handleFilterChange = (newFilters: {
         status?: string;
         klasifikasi?: string;
         priority?: string;
+        startDate?: string;
+        endDate?: string;
     }) => {
         setFilters(newFilters);
         setCurrentPage(1);
@@ -119,6 +123,13 @@ function Page() {
 
     const handleDelete = (lapor: Lapor) => {
         console.log("Delete:", lapor);
+        setLaporDeleteId(lapor.id);
+        setOpenModal(true);
+    };
+
+    const handleFirmDelete = (lapor: Lapor) => {
+        console.log("Delete:", lapor);
+        setOpenModal(false);
     };
 
     // Calculate pagination
@@ -263,9 +274,9 @@ function Page() {
                 {
                 isError ? (<>error</>) :
                 isLoading ? (
-                    <TableLoading colomLenght={6}/>
+                    <TableLoading colomLenght={columnInit.length}/>
                 ) : lapor.length === 0 ? (
-                    <TableEmptyState colomLenght={6} />
+                    <TableEmptyState colomLenght={columnInit.length} />
                 ) : (
                     lapor.map((lapor, index) => (
                     <tr key={index} className={`group group-hover:bg-gray-50 hover:cursor-pointer ${openDropdownIndex === lapor.id ? "bg-gray-100 dark:bg-gray-800" : ""}`}>
@@ -319,6 +330,7 @@ function Page() {
             }}
             />
         </div>
+        <DeleteModal laporanId={laporDeleteId}  isOpen={openModal} onClose={()=>{setOpenModal(false)}} onConfirm={()=>{handleFirmDelete}} />
         </div>
     );
 }

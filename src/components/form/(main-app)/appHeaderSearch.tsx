@@ -57,9 +57,9 @@ function AppHeaderSearch() {
                 return;
             }
 
-            event.preventDefault();
-            dispatch(setKeyword(searchInput));
-            params?.set('q', searchInput);
+            // event.preventDefault();
+            // dispatch(setKeyword(searchInput));
+            // params?.set('q', searchInput);
             if (searchInput != "") {
                 params?.delete('q');
                 dispatch(setKeyword(""));
