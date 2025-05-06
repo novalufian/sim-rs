@@ -11,6 +11,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { VscReport } from "react-icons/vsc";
 import { TbPigMoney } from "react-icons/tb";
 import { HorizontaLDots } from "@/icons";
+import { MdOutlineMoreHoriz } from "react-icons/md";
 
 type NavItem = {
   name: string;
@@ -333,7 +334,7 @@ const AppSidebar: React.FC = () => {
                 {isExpanded || isHovered || isMobileOpen ? (
                   "Menu"
                 ) : (
-                  <HorizontaLDots />
+                  <MdOutlineMoreHoriz />
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}

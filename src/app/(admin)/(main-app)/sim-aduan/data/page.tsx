@@ -51,14 +51,14 @@ function Page() {
     const [openModal, setOpenModal] = useState(false);
     const [laporDeleteId, setLaporDeleteId] = useState<string | null>(null);
     // use search data only if trigger is true
-    const isUsingSearch = trigger && keyword !== "";
+    const isUsingSearch = trigger ;
     const data = isUsingSearch ? aduanSearchQuery.data : aduanQuery.data;
-    const isLoading = isUsingSearch ? aduanSearchQuery.isLoading : aduanQuery.isLoading;
+    const isLoading = isUsingSearch ? aduanSearchQuery.isPending : aduanQuery.isPending;
     const isError = isUsingSearch ? aduanSearchQuery.isError : aduanQuery.isError;
     const [totalPages, setTotalPages] = useState(0);
 
     const router = useRouter();
-
+    console.log(data);
     useEffect(() => {
         if(data) {
             setLapor(data.data.aduan);

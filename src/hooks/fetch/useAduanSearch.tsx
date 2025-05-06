@@ -27,7 +27,7 @@ export const UseAduanSearch = (filters: AduanSearchFilters) => {
     if (endDate) params.append('endDate', endDate)
     
     return useQuery({
-        queryKey: ['aduan', filters],
+        queryKey: ['aduanSearch', filters],
         queryFn: async () => {
         const res = await api.get(`/aduan/search?${params.toString()}`)
         return res.data

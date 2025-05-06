@@ -60,7 +60,7 @@ export default function Ecommerce() {
       <div className="grid grid-cols-4 gap-4">
 
         {mainMenu.map((item, index)=>(
-            <Link href={item.url} className={classCard}>
+            <Link href={item.url} className={classCard} key={index}>
             <div className="h-full w-full flex justify-center items-center bg-gray-100 rounded-2xl p-2 dark:bg-gray-900">
               <Image src={item.icon} alt="simpeg" width={80} height={80}></Image>
             </div>

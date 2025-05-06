@@ -1,14 +1,12 @@
 "use client";
 import React, { useEffect, useState } from 'react'
 import { FiSearch } from "react-icons/fi";
-import { VscSend } from "react-icons/vsc";
 import { RiCloseLargeLine } from "react-icons/ri";
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
-import { useAppDispatch , useAppSelector} from '@/hooks/useAppDispatch';
+import { useAppDispatch, useAppSelector } from '@/hooks/useAppDispatch';
 import { setKeyword, triggerSearch, resetTrigger } from '@/features/search/searchSlice';
 import nProgress from 'nprogress';
-import path from 'path';
 
 const style = {
     container: "hidden lg:block",
@@ -18,26 +16,21 @@ const style = {
 
 function AppHeaderSearch() {
     const [searchInput, setSearchInput] = useState<string>("");
-    const [params, setParams] = useState<URLSearchParams | null>(null);
     const router = useRouter();
-    const [currentPath, setCurrentPath] = useState<string>("");
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        
-        const query = searchParams.get('q');
-        if (query) {
-            setSearchInput(query);
-            dispatch(setKeyword(query));
-            dispatch(triggerSearch());
-        }
-
-        setParams(searchParams);
-        setCurrentPath(window.location.pathname);
-    },[])
-
     const dispatch = useAppDispatch();
     const keyword = useAppSelector((state) => state.search.keyword);
+
+    useEffect(() => {
+        if (searchInput !== keyword) {
+            dispatch(setKeyword(searchInput));
+        }
+    }, [searchInput, dispatch, keyword]);
+
+    useEffect(() => {
+        if (keyword !== "") {
+            dispatch(triggerSearch());
+        }
+    }, [keyword, dispatch]);
 
     function handleKeyDown(event: React.KeyboardEvent) {
         if (event.key === 'Enter') {
@@ -45,82 +38,61 @@ function AppHeaderSearch() {
             dispatch(setKeyword(searchInput));
             dispatch(triggerSearch());
 
-            params?.set('q', searchInput);
-            router.replace(`?${params?.toString()}`);
+            const params = new URLSearchParams(window.location.search);
+            params.set('q', searchInput);
+            router.replace(`?${params.toString()}`);
             nProgress.start();
-
             setTimeout(() => {
                 nProgress.done();
             }, 300);
-            if (keyword == "") {
-                params?.delete('q');
-                return;
-            }
-
-            // event.preventDefault();
-            // dispatch(setKeyword(searchInput));
-            // params?.set('q', searchInput);
-            if (searchInput != "") {
-                params?.delete('q');
-                dispatch(setKeyword(""));
-                setSearchInput("");
-                dispatch(resetTrigger());
-                router.replace(currentPath);
-                nProgress.start();
-                setTimeout(() => {
-                    nProgress.done();
-                }, 300);
-                return;
-            }
-            dispatch(triggerSearch());
         }
     }
+
     function handleClick(event: React.MouseEvent) {
         event.preventDefault();
-        dispatch(setKeyword(searchInput));
-        params?.set('q', keyword);
-        if (keyword != "") {
-            params?.delete('q');
+        const params = new URLSearchParams(window.location.search);
+        params.set('q', keyword);
+        router.replace(`?${params.toString()}`);
+
+        if (keyword !== "") {
             dispatch(setKeyword(""));
             setSearchInput("");
             dispatch(resetTrigger());
-            router.replace(currentPath);
-            nProgress.start();
-            setTimeout(() => {
-                nProgress.done();
-            }, 300);
-            return;
+            // Clear the URL query parameters
+            const params = new URLSearchParams();
+            router.replace(`?${params.toString()}`);
         }
-        dispatch(triggerSearch());
+        nProgress.start();
+        setTimeout(() => {
+            nProgress.done();
+        }, 300);
     }
 
     function handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
-        const value = event.target.value;
-        setSearchInput(value);
+        setSearchInput(event.target.value);
     }
 
     return (
         <div className={style.container}>
             <form>
-            <div className="relative">
-                <span className="absolute -translate-y-1/2 left-4 top-1/2 pointer-events-none"><FiSearch/></span>
-                <input
-                type="text"
-                value={searchInput}
-                onChange={handleOnChange}
-                placeholder="Search..."
-                className={style.input}
-                onKeyDown={handleKeyDown}
-                />
+                <div className="relative">
+                    <span className="absolute -translate-y-1/2 left-4 top-1/2 pointer-events-none"><FiSearch /></span>
+                    <input
+                        type="text"
+                        value={searchInput}
+                        onChange={handleOnChange}
+                        placeholder="Search..."
+                        className={style.input}
+                        onKeyDown={handleKeyDown}
+                    />
 
-                <button className={style.button} 
-                onClick={handleClick}>
-                {keyword == "" ?  <span>⌘ K</span> :<RiCloseLargeLine/> }
-                </button>
-            </div>
+                    <button className={style.button} onClick={handleClick}>
+                        {keyword === "" ? <span>⌘ K</span> : <RiCloseLargeLine />}
+                    </button>
+                </div>
             </form>
         </div>
     )
 }
 
-export default AppHeaderSearch
+export default AppHeaderSearch;
