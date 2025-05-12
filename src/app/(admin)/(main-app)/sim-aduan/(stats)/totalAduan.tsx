@@ -1,9 +1,8 @@
 "use client"
 
-import React from 'react'
-import { useAduanStatGroup , useAduanTotal} from '@/hooks/fetch/useAduanStat'
+import React, { useEffect } from 'react'
+import { useAduanStatGroup, useAduanTotal } from '@/hooks/fetch/useAduanStat'
 import { MdKeyboardDoubleArrowUp } from "react-icons/md";
-
 import SpinerLoading from '@/components/loading/spiner'
 import { Doughnut } from 'react-chartjs-2'
 import CountUp from 'react-countup';
@@ -23,15 +22,25 @@ type AduanStatItem = {
     priority?: string
     count: number | bigint
 }
+interface FilterState {
+    startDate?: string
+    endDate?: string
+}
 
-export function TotalAduanChart(prop : {group : string, title :  string, colors? : string[]}) {
-    const { data, isLoading } = useAduanStatGroup(prop.group) // <-- adjust group here
+export function TotalAduanChart({group, title, colors, filters}: {group: string, title: string, colors?: string[], filters: FilterState}) {
+    // Add filters as dependency to trigger refetch when filters change
+    const { data, isLoading, refetch } = useAduanStatGroup(group, filters)
     
+    // Refetch data when filters change
+    useEffect(() => {
+        refetch()
+    }, [filters, refetch])
+
     if (isLoading) {
         return (
-        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
-            <SpinerLoading title={prop.title} />
-        </div>
+            <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
+                <SpinerLoading title={title} />
+            </div>
         )
     }
 
@@ -53,7 +62,6 @@ export function TotalAduanChart(prop : {group : string, title :  string, colors?
             '#10b981',
             '#8b5cf6',
             '#6366f1',
-
         ]
         const colors: string[] = []
         for (let i = 0; i < length; i++) {
@@ -70,48 +78,53 @@ export function TotalAduanChart(prop : {group : string, title :  string, colors?
             {
                 label: 'Jumlah Aduan',
                 data: counts,
-                backgroundColor: prop.colors,
+                backgroundColor: colors || backgroundColors,
                 borderWidth: 1,
-                borderRadius : 10,
-                spacing : 5,
-                
+                borderRadius: 10,
+                spacing: 5,
             },
         ],
     }
 
     const options = {
-        cutout : '70%',
+        cutout: '70%',
         padding: 20,
         margin: 20,
         plugins: {
-        legend: {
-            display: true, // <- Hides the legend
-            position: 'bottom',
-            labels: {
-                boxWidth: 20,
-                padding: 10,
-                font: {
-                    size: 12,
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                    boxWidth: 20,
+                    padding: 10,
+                    font: {
+                        size: 12,
+                    },
+                    color: '#374151',
+                    usePointStyle: true,
+                    pointStyle: 'circle',
                 },
-                color: '#374151',
-                usePointStyle: true,
-                pointStyle: 'circle',
             },
         },
-    },
     } as const;
 
     return (
         <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-100">
-        <h2 className="text-lg font-semibold text-center text-gray-500">Grafik</h2>
-        <h2 className="text-2xl font-semibold mb-10 text-center">{prop.title}</h2>
-        <Doughnut data={chartData} options={options}/>
+            <h2 className="text-lg font-semibold text-center text-gray-500">Grafik</h2>
+            <h2 className="text-2xl font-semibold mb-10 text-center">{title}</h2>
+            <Doughnut data={chartData} options={options}/>
         </div>
     )
 }
 
-export function TotalAduanStat(prop : { title :  string}) {
-    const { data, isLoading } = useAduanTotal() // <-- adjust group here
+export function TotalAduanStat({title, filters}: {title: string, filters: FilterState}) {
+    // Add filters as dependency to trigger refetch when filters change
+    const { data, isLoading, refetch } = useAduanTotal(filters)
+    
+    // Refetch data when filters change
+    useEffect(() => {
+        refetch()
+    }, [filters, refetch])
 
     if (isLoading) {
         return (
@@ -122,9 +135,9 @@ export function TotalAduanStat(prop : { title :  string}) {
     }
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-100">
-            <h2 className="text-lg font-semibold text-center text-gray-500">Total Data Aduan</h2>
-            <h2 className="text-2xl font-semibold mb-10 text-center">{prop.title}</h2>
+        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-100 h-full">
+            <h2 className="text-lg font-semibold text-center text-gray-500">Total</h2>
+            <h2 className="text-2xl font-semibold mb-10 text-center">{title}</h2>
 
             <div className="flex flex-col h-[200px] justify-center items-center">
                 <p className='text-7xl font-semibold tracking-tight flex items-center text-green-600'>
@@ -136,5 +149,4 @@ export function TotalAduanStat(prop : { title :  string}) {
             <p className='w-9/12 text-center m-auto text-gray-500'>informasi data real time dan akurat</p>
         </div>
     )
-
 }

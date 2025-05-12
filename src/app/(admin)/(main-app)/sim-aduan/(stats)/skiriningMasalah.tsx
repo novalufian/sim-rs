@@ -1,85 +1,72 @@
-"use client";
+    "use client";
 
-import SpinerLoading from '@/components/loading/spiner';
-import { useSkriningMasalah } from '@/hooks/fetch/useAduanStat';
-import React, { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+    import SpinerLoading from '@/components/loading/spiner';
+    import { useSkriningMasalah } from '@/hooks/fetch/useAduanStat';
+    import React, { useEffect, useRef } from 'react';
+    import * as d3 from 'd3';
+    import d3Cloud from 'd3-cloud';
 
-// Enhanced type declarations for d3-cloud
-declare module 'd3-cloud' {
-    export interface Word {
+    interface CloudWord {
         text: string;
         size: number;
-        x?: number;
-        y?: number;
-        rotate?: number;
-        font?: string;
-        style?: string;
-        padding?: number;
+        x: number;
+        y: number;
+        rotate: number;
     }
-    
-    export interface CloudLayout<T extends Word = Word> {
-        start(): CloudLayout<T>;
-        stop(): CloudLayout<T>;
-        words(words: T[]): CloudLayout<T>;
-        size(size: [number, number]): CloudLayout<T>;
-        font(font: string | ((d: T) => string)): CloudLayout<T>;
-        fontSize(size: (d: T) => number): CloudLayout<T>;
-        rotate(rotate: (d: T) => number): CloudLayout<T>;
-        padding(padding: number | ((d: T) => number)): CloudLayout<T>;
-        on(type: 'end', listener: (words: T[]) => void): CloudLayout<T>;
-        on(type: 'word', listener: (word: T) => void): CloudLayout<T>;
+
+    interface FilterState {
+        startDate?: string;
+        endDate?: string;
     }
-    function cloud<T extends Word = Word>(): CloudLayout<T>;
-}
 
-import d3Cloud from 'd3-cloud';
+    interface WordData {
+        text: string;
+        count: number;
+    }
 
-interface CloudWord {
-    text: string;
-    size: number;
-    x: number;
-    y: number;
-    rotate: number;
-}
-
-function WordCloudChart() {
-    const { data, isLoading } = useSkriningMasalah();
+    function WordCloudChart({ filters }: { filters: FilterState }) {
+    const { data, isLoading, refetch } = useSkriningMasalah(filters);
     const svgRef = useRef<SVGSVGElement>(null);
-    
+    const layoutRef = useRef<ReturnType<typeof d3Cloud> | null>(null);
+
     useEffect(() => {
         if (!data || isLoading || !svgRef.current) return;
-        
+
         // Clear previous SVG
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove();
-        
+
+        // Stop previous layout if exists
+        if (layoutRef.current) {
+        layoutRef.current.stop();
+        }
+
         const width = 800;
         const height = 500;
         const margin = { top: 20, right: 20, bottom: 30, left: 40 };
-        
+
         svg
         .attr('width', width)
         .attr('height', height)
         .attr('viewBox', `0 0 ${width} ${height}`)
-        .attr('style', 'max-width: 100%; height: auto; background: #f8f9fa;'); // Added background for visibility
+        .attr('style', 'max-width: 100%; height: auto; background: #f8f9fa;');
+
+        // Process data
+        const labels = data.data?.skriningMasalah?.labels || [];
+        const counts = data.data?.skriningMasalah?.counts || [];
         
-        // Process data according to your API response structure
-        const labels = data.data.skriningMasalah.labels || [];
-        const counts = data.data.skriningMasalah.counts || [];
-        // Combine labels and counts into word objects
         const wordData = labels.map((label: string, index: number) => ({
-            text: label,
-            count: counts[index] || 0
+        text: label,
+        count: counts[index] || 0
         }));
-        
-        const values = wordData.map((d: { count: number }) => Number(d.count));
-        const maxValue = d3.max(values) ?? 1;
-        const fontSize = d3.scaleLinear<number>()
-        .domain([0, maxValue as number])
+
+        const values = wordData.map((d: WordData) => Number(d.count));
+        const maxValue = d3.max(values as number[]) ?? 1; 
+        const fontSize = d3.scaleLinear()
+        .domain([0, maxValue])
         .range([15, 60])
         .clamp(true);
-        
+
         // Create word cloud layout
         const layout = d3Cloud<CloudWord>()
         .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
@@ -91,14 +78,14 @@ function WordCloudChart() {
             rotate: 0
         })))
         .padding(5)
-        .rotate(() => Math.random() * 60 - 30) // Random rotation between -30 and 30 degrees
+        .rotate(() => Math.random() * 60 - 30)
         .font('sans-serif')
         .fontSize(d => d.size)
-        .on('end', (words: CloudWord[]) => {
+        .on('end', (words) => {
             const g = svg.append('g')
             .attr('transform', `translate(${width/2},${height/2})`);
-            
-            g.selectAll<SVGTextElement, CloudWord>('text')
+
+            g.selectAll('text')
             .data(words)
             .enter()
             .append('text')
@@ -111,40 +98,52 @@ function WordCloudChart() {
             .append('title')
             .text(d => `${d.text}: ${d.size.toFixed(0)} occurrences`);
         });
-        
+
+        layoutRef.current = layout;
         layout.start();
-        
+
         return () => {
-            layout.stop();
+        if (layoutRef.current) {
+            layoutRef.current.stop();
+        }
         };
     }, [data, isLoading]);
-    
-    if (isLoading) return <SpinerLoading title="Loading Word Cloud..." />;
-    
-    // Check if data exists but is empty
-    if (data && (!data.data.skriningMasalah.labels || data.data.skriningMasalah.labels.length === 0)) {
+
+    useEffect(() => {
+        refetch();
+    }, [filters, refetch]);
+
+    if (isLoading) {
         return (
-            <div className="rounded-lg border bg-card p-4 shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Common Complaint Topics</h2>
-            <div className="text-center py-8">No complaint data available</div>
-            </div>
+        <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <SpinerLoading title="Loading Word Cloud..." />
+        </div>
         );
     }
-    
-    return (
+
+    if (!data?.data?.skriningMasalah?.labels || data.data.skriningMasalah.labels.length === 0) {
+        return (
         <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <h2 className="text-lg font-semibold mb-4">Common Complaint Topics</h2>
+            <div className="text-center py-8">No complaint data available</div>
+        </div>
+        );
+    }
+
+    return (
+        <div className="rounded-2xl border bg-card p-4 h-full">
         <h2 className="text-lg font-semibold mb-4">Topik aduan yang sering muncul</h2>
         <div className="overflow-auto">
-        <svg 
-        ref={svgRef} 
-        className="mx-auto"
-        width="100%"
-        height="500"
-        preserveAspectRatio="xMidYMid meet"
-        />
+            <svg 
+            ref={svgRef} 
+            className="mx-auto"
+            width="100%"
+            height="500"
+            preserveAspectRatio="xMidYMid meet"
+            />
         </div>
         </div>
     );
-}
+    }
 
-export default WordCloudChart;
+    export default WordCloudChart;

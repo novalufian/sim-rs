@@ -1,4 +1,7 @@
-declare module 'd3-cloud' {
+    // types/d3-cloud.d.ts
+    import * as d3 from 'd3';
+
+    declare module 'd3-cloud' {
     export interface Word {
         text: string;
         size: number;
@@ -9,7 +12,7 @@ declare module 'd3-cloud' {
         style?: string;
         padding?: number;
     }
-    
+
     export interface CloudLayout<T extends Word = Word> {
         start(): CloudLayout<T>;
         stop(): CloudLayout<T>;
@@ -22,7 +25,7 @@ declare module 'd3-cloud' {
         on(type: 'end', listener: (words: T[]) => void): CloudLayout<T>;
         on(type: 'word', listener: (word: T) => void): CloudLayout<T>;
     }
-    
+
     function cloud<T extends Word = Word>(): CloudLayout<T>;
     export default cloud;
-}
+    }

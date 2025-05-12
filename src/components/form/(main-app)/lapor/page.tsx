@@ -1,25 +1,27 @@
 // LaporForm.tsx"use client";
 "use client"
+import React, { useEffect, useState, InputHTMLAttributes } from 'react';
+import { useParams } from 'next/navigation';
+interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {}
+
 import ComponentCard from '@/components/common/ComponentCard';
 import Button from '@/components/ui/button/Button';
-import { ChevronDownIcon, PaperPlaneIcon } from '@/icons';
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
-
-import React, { useEffect, useState } from 'react';
 import DropzoneComponent from '@/components/form/form-elements/DropZone';
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import TextArea from '@/components/form/input/TextArea';
 import DatePicker from 'react-flatpickr';
 
-
+import { HiMiniPaperAirplane } from "react-icons/hi2";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { usePostAduan } from '@/hooks/fetch/useAduan';
+import { usePostAduan , useUpdateAduan, useAduanId} from '@/hooks/fetch/useAduan';
 import { useBidang , useSkriningMasalah} from '@/hooks/fetch/openapi/useApi';
 import DefaultModal from '@/components/modals/defaultModal';
+
 
 export const aduanSchema = z.object({
     klasifikasi: z.string().min(1, "Klasifikasi wajib diisi"),
@@ -41,10 +43,6 @@ export const aduanSchema = z.object({
         required_error: "Status wajib diisi",
     }),
     created_by: z.string().min(1, "Pembuat wajib diisi"),
-    // updated_by: z.string().min(1, "Pengubah wajib diisi"),
-    // file_aduan: z.string().url("Link file aduan tidak valid"),
-    // tanggal_tindak_lanjut: z.string().date("Format tanggal tindak lanjut tidak valid"),
-    // skrining_masalah: z.string().min(1, "Skrining masalah wajib diisi"),
 })
 
 
@@ -76,11 +74,20 @@ const optionsMedia = [
 ];
 
 export default function LaporForm() {
-    const { mutate: postAduan, status, isPending, isSuccess, isError  } = usePostAduan()
+    const params = useParams();
+    const id = params?.id as string;
+
+    // hook
+    const { mutate: postAduan, status, isPending, isSuccess, isError  } = usePostAduan();
+    const {mutate : updateAduan, isPending : updatePending, isError : updateError, isSuccess : updateSuccess} = useUpdateAduan();   
     const { data: bidang , isLoading : useBidangLoading} = useBidang();
+    const { data: laporData, isLoading : useLaporLoading} = useAduanId(id ?? "");
     const { data: skriningMasalah , isLoading : useSkriningMasalahLoading} = useSkriningMasalah();
+
     const bidangList = bidang?.data?.bidangTindakLanjut ?? [];
     const skriningMasalahList = skriningMasalah?.data?.skriningMasalah ?? [];
+
+    const [lapor, setLapor] = useState<any>(null);
 
     const {
         register,
@@ -109,8 +116,16 @@ export default function LaporForm() {
     };
 
     const onSubmit = (data: any) => {
-        console.log("Data kiriman:", data);
-        postAduan(data);
+        if(params.id){
+            const updateDate ={
+                id : id.toString(),
+                formData : data
+            }
+            updateAduan(updateDate);
+        }else{
+            postAduan(data);
+        }
+        // postAduan(data);
     };
 
     // Handle success or error
@@ -118,8 +133,9 @@ export default function LaporForm() {
         console.log(err)
     }
 
+
     useEffect(() => {
-        if (isSuccess) {
+        if (isSuccess || updateSuccess) {
             setOpenModal(true);
             reset({
                 klasifikasi: "PENGADUAN",
@@ -129,7 +145,28 @@ export default function LaporForm() {
             setSelectedKlasifikasi("PENGADUAN");
         }
     }
-    , [isSuccess]);
+    , [isSuccess, updateSuccess]);
+
+    useEffect(() => {
+        if(laporData){
+            // setValue("id", id);
+            setLapor(laporData.data);
+            setSelectedKlasifikasi(laporData.data.klasifikasi);
+            setValue("judul", laporData.data.judul);
+            setValue("uraian", laporData.data.uraian);
+            setValue("tanggal_pelaporan",new Date(laporData.data.tanggal_pelaporan.split("T")[0]).toISOString().slice(0, 10));
+            setValue("nik", laporData.data.nik);
+            setValue("nama", laporData.data.nama);
+            setValue("alamat", laporData.data.alamat);
+            setValue("email", laporData.data.email || ""); // Handle null email
+            setValue("no_hp", laporData.data.no_hp);
+            setValue("priority", laporData.data.priority);
+            setValue("tindak_lanjut_id", laporData.data.tindak_lanjut_id);
+            setValue("skirining_masalah_id", laporData.data.skirining_masalah_id);
+            setValue("media", laporData.data.media);
+            setSelectedKlasifikasi(laporData.data.klasifikasi);
+        }
+    }, [laporData]);
 
     return (
         <ComponentCard title='Form aduan' className='col-span-8 text-base'>
@@ -156,7 +193,7 @@ export default function LaporForm() {
             <div className="w-full space-y-6 grid grid-cols-12 gap-4 mt-4">
             <div className='col-span-12'>
                 <Label required>Judul Laporan</Label>
-                <Input {...register("judul")} placeholder='Laporan...' className={`${errors.judul ? 'border-red-500': ""}`}/>
+                <Input {...register("judul")} placeholder='Laporan...' className={`${errors.judul ? 'border-red-500': ""}`} />
                 {errors.judul && <p className='text-red-500 mt-1'>{errors.judul.message}</p>}
             </div>
 
@@ -166,7 +203,7 @@ export default function LaporForm() {
                 className="w-full h-11 border rounded px-3 text-sm">
                 <option value="">Pilih Priority</option>
                 {optionPriority.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value} >{opt.label}</option>
                 ))}
                 </select>
                 {errors.priority && <p className='text-red-500'>{errors.priority.message}</p>}
@@ -178,7 +215,7 @@ export default function LaporForm() {
                 className="w-full h-11 border rounded px-3 text-sm" disabled={useBidangLoading}>
                 <option value="">Pilih bidang</option>
                 {bidangList.map((opt : any) => (
-                    <option key={opt.id} value={opt.id}>{opt.nama}</option>
+                    <option key={opt.id} value={opt.id} >{opt.nama}</option>
                 ))}
                 </select>
                 {errors.tindak_lanjut_id && <p className='text-red-500'>{errors.tindak_lanjut_id.message}</p>}
@@ -215,16 +252,16 @@ export default function LaporForm() {
                     name="tanggal_pelaporan"
                     render={({ field: { onChange, value, name, ref } }) => (
                         <DatePicker
-                        value={value && typeof value === "string" ? [new Date(value)] : []} 
+                        value={ value && typeof value === "string" ? [new Date(value)] : []}
                         onChange={(selectedDates) => {
+                            console.log(selectedDates)
                             const date = selectedDates?.[0];
-                            console.log(date, date.toISOString())
                             if (date) onChange(date.toISOString()); // convert back to string
                         }}
                         options={{ dateFormat: "Y-m-d" }}
                         className={`w-full h-11 border rounded px-3 text-sm ${errors.tanggal_pelaporan ? 'border-red-500' : ''}`}
                         name={name}
-                        ref={ref} // ✅ correct ref usage
+                        ref={ref}
                         />
                     )}
                     />
@@ -235,7 +272,7 @@ export default function LaporForm() {
 
             <div className='col-span-12'>
                 <Label required>Isi Laporan</Label>
-                <TextArea rows={6} {...register("uraian")} />
+                <TextArea rows={6} {...register("uraian")}/>
                 {errors.uraian && <p className='text-red-500'>{errors.uraian.message}</p>}
             </div>
 
@@ -279,7 +316,7 @@ export default function LaporForm() {
                 </Button>
                 <Button btntype="submit" size="sm" className={`w-auto ${isPending ? "bg-gray-300" : "bg-blue-600 hover:bg-blue-700"} text-white`} >
                 {isPending ? "Mengirim..." : "Kirim Laporan"}
-                <PaperPlaneIcon className={`${!isPending ? "inline-block": "hidden"}`}/>
+                <HiMiniPaperAirplane className={`${!isPending ? "inline-block": "hidden"}`}/>
                 <AiOutlineLoading3Quarters className={`animate-spin ${isPending ? "inline-block" : "hidden"}`} />
                 </Button>
             </div>

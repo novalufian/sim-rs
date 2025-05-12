@@ -5,9 +5,9 @@ import Cookies from 'js-cookie';
 
 export const useWhoami = () => {
 
-    const token = Cookies.get('jwt'); 
+    const token = Cookies.get('userInfo'); 
 
-    if (token) {
+    if (!token && token === undefined) {
         const userInfo = Cookies.get('userInfo');
         if (userInfo) {
             return {

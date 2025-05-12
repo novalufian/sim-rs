@@ -25,4 +25,5 @@
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/middleware.ts"],
   "exclude": ["node_modules"],
   "pageExtensions": ["ts", "tsx", "js", "jsx", "mdx"],
+  "typeRoots": ["./types", "./node_modules/@types"]
 }

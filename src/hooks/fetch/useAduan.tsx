@@ -121,6 +121,27 @@ export const usePostAduan = () => {
     })
 }
 
+export const useUpdateAduan = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async (data: any) => {
+            console.log(data)
+            const res = await api.put('/aduan/' + data.id, data.formData)
+            return res.data
+        },
+        onSuccess: (data) => {
+            console.log('✅ Laporan berhasil diupdate!', data)
+            toast.success('Laporan berhasil diupdate!')
+            queryClient.invalidateQueries({ queryKey: ['aduan'] })
+        },
+        
+        onError: (error: any) => {
+            console.error("❌ Error updating:", error)
+            toast.error('Gagal mengupdate laporan!')
+        },
+    })
+}
+
 
 export const updateAduanStatus =()=>{
     const queryClient = useQueryClient()

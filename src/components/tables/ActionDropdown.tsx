@@ -1,6 +1,8 @@
 import React from 'react';
 import { FiMoreVertical, FiEdit } from 'react-icons/fi';
 import { AiOutlineDelete } from 'react-icons/ai';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/libs/store';
 
 interface ActionDropdownProps {
   index: number;
@@ -18,6 +20,8 @@ export default function ActionDropdown({
   onEdit,
   onDelete,
 }: ActionDropdownProps) {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const role = user?.role;
   return (
     <div className="relative">
       <button
@@ -40,26 +44,31 @@ export default function ActionDropdown({
               <FiEdit className="mr-2" />
               View
             </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-              className="w-full text-left px-4 py-2 text-sm hover:text-gray-700 hover:bg-gray-100 flex items-center rounded-md "
-            >
-              <FiEdit className="mr-2" />
-              Edit
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center rounded-md "
-            >
-              <AiOutlineDelete className="mr-2" />
-              Delete
-            </button>
+            {role != "user" && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="w-full text-left px-4 py-2 text-sm hover:text-gray-700 hover:bg-gray-100 flex items-center rounded-md "
+              >
+                <FiEdit className="mr-2" />
+                Edit
+              </button>
+            )}  
+
+            {role != "user" && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center rounded-md "
+              >
+                <AiOutlineDelete className="mr-2" />
+                Delete
+              </button>
+            )}
           </div>
         </div>
       )}

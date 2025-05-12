@@ -175,7 +175,7 @@ export default function AduanQueryFilter({ onFilterChange }: Props) {
 
             {/* Date Range Picker */}
             <div className={"relative "+ _CLASSNAME_}>
-            <DateRangePicker
+                <DateRangePicker
                 startDate={filters.startDate ? moment(filters.startDate) : null}
                 endDate={filters.endDate ? moment(filters.endDate) : null}
                 onDatesChange={handleDateChange}

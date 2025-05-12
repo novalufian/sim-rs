@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,12 +7,14 @@ import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
+import { BsArrowLeft } from "react-icons/bs";
+import { LuEyeClosed, LuEye } from "react-icons/lu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/fetch/useAuth";
 import SpinerLoading from "@/components/loading/spiner";
+import Cookies from 'js-cookie';  // Import js-cookie
 
 // 1. Define Zod schema
 const SignInSchema = z.object({
@@ -24,14 +25,17 @@ const SignInSchema = z.object({
 type SignInFormData = z.infer<typeof SignInSchema>;
 
 export default function SignInForm() {
-  const { mutate : doAuth,data, isPending, isError,error, isSuccess } = useAuth();
+  const { mutate: doAuth, data, isPending, isError, error, isSuccess } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(isPending);
+  
+  // Use isPending for loading state instead of isLoading
+  const isLoading = isPending;
 
   const errorMsg = error?.response?.data?.message || "Unknown error";
-  const paswordError = errorMsg.includes("credential") ;
-  const emailError = errorMsg.includes("username") ;
+  const paswordError = errorMsg.includes("credential");
+  const emailError = errorMsg.includes("username");
+  
   const {
     register,
     handleSubmit,
@@ -41,48 +45,52 @@ export default function SignInForm() {
   });
 
   const onSubmit = async (formData: SignInFormData) => {
-    doAuth(formData);
-    setIsLoading(true);
-
+    doAuth(formData);  // Trigger authentication
   };
 
   useEffect(() => {
     if (isSuccess) {
       const { token } = data;
 
-      console.log(data)
-      document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+      console.log(data);
+      // Store token and user data in cookies
+      Cookies.set('token', token, { expires: 7 });
+      Cookies.set('userInfo', JSON.stringify(data.user), { expires: 7 });
+
+      // Redirect after successful login
       setTimeout(() => {
-        // setIsLoading(false);
         router.push("/");
       }, 1500);
     }
-  }, [isSuccess]);
+  }, [isSuccess, data, router]);
 
   useEffect(() => {
     if (isError) {
-      setIsLoading(false);
+      // Clear cookies if there's an error
+      Cookies.remove('token');
+      Cookies.remove('userInfo');
     }
-  }
-  , [isError]);
+  }, [isError]);
+
 
   return (
     <div className="flex flex-col flex-1 lg:w-2/5 w-full relative">
-        {isLoading && (
-          <div className="absolute top-0 left-0 cursor-not-allowed h-full w-full z-20 bg-white/20 backdrop-blur-sm">
-            <SpinerLoading/>
-          </div>
-        )}
+      {isLoading && (
+        <div className="absolute top-0 left-0 cursor-not-allowed h-full w-full z-20 bg-white/20 backdrop-blur-sm">
+          <SpinerLoading />
+        </div>
+      )}
 
       <div className="w-8/10 max-w-md sm:pt-10 mx-auto mb-5">
         <Link
           href="/"
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
-          <ChevronLeftIcon />
+          <BsArrowLeft className="w-5 h-5 mr-10" />
           Back to dashboard
         </Link>
       </div>
+
       <div className="flex flex-col justify-center flex-1 w-full max-w-sm mx-auto relative">
         <div>
           <div className="mb-5 sm:mb-8">
@@ -126,9 +134,9 @@ export default function SignInForm() {
                     className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
                   >
                     {showPassword ? (
-                      <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
+                      <LuEye className="fill-white dark:fill-gray-400" />
                     ) : (
-                      <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
+                      <LuEyeClosed className="fill-gray-500 dark:fill-gray-400" />
                     )}
                   </span>
                 </div>
@@ -140,7 +148,6 @@ export default function SignInForm() {
                   <p className="text-sm text-error-500 mt-1">{errorMsg}</p>
                 )}
               </div>
-
 
               <div>
                 <Button className="w-full" size="sm" btntype="submit">

@@ -108,7 +108,6 @@ function Page() {
 
     const toggleDropdown = (index: string, event: React.MouseEvent) => {
         event.stopPropagation();
-
         setOpenDropdownIndex((prev) => (prev === index ? null : index));
     };
 
@@ -118,7 +117,7 @@ function Page() {
     };
 
     const handleEdit = (lapor: Lapor) => {
-        console.log("Edit:", lapor);
+        redirect(`/sim-aduan/lapor/${lapor.id}/edit`);
     };
 
     const handleDelete = (lapor: Lapor) => {
@@ -136,7 +135,7 @@ function Page() {
     const startIndex = (currentPage - 1) * itemsPerPage;
 
     return (
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4" onClick={()=>{setOpenDropdownIndex(null)}}>
         <style jsx global>{`
                 /* Hide scrollbar for Chrome, Safari and Opera */
                 .hide-scrollbar::-webkit-scrollbar {

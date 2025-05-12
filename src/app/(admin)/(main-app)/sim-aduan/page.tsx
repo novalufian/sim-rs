@@ -8,12 +8,58 @@ import {TotalAduanChart, TotalAduanStat} from './(stats)/totalAduan'
 import LaporanBidangChart from './(stats)/laporanBIdangChart'
 import { RootState } from '@/libs/store'
 import WordCloudChart from './(stats)/skiriningMasalah'
-import DateRangePicker from '@/components/datePicker/dateRangePicker'
+import { FaRegCalendarCheck } from "react-icons/fa";
+import { GrPowerReset } from "react-icons/gr";
+
+
+// import DateRangePicker from '@/components/datePicker/dateRangePicker'
+import { DateRangePicker } from "react-dates";
+import moment from 'moment';
+import 'react-dates/initialize';
+import "react-dates/lib/css/_datepicker.css";  // Import the CSS for react-dates
+
+
 import { useAppSelector } from "@/hooks/useAppDispatch";
+import { filter } from 'd3'
+interface FilterState {
+    startDate?: string
+    endDate?: string
+}
+
+const _CLASSNAME_ = "appearance-none flex flex-row text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4 cursor-pointer  items-center";
+
 
 function page() {
     const [userRole, setUserRole] = useState<string | undefined>(undefined)
     const user = useAppSelector((state: RootState) => state.auth.user);
+    const [filters, setFilters] = useState<FilterState>({})
+    const [focusedInput, setFocusedInput] = useState<any>(null)
+    const onFilterChange = (newFilters: {
+        startDate?: string;
+        endDate?: string;
+    }) => {
+        setFilters(newFilters);
+    };
+
+    const handleDateChange = ({ startDate, endDate }: any) => {
+        const updatedFilters = {
+            ...filters,
+            startDate: startDate ? startDate.format('YYYY-MM-DD') : '',
+            endDate: endDate ? endDate.format('YYYY-MM-DD') : '',
+        }
+        setFilters(updatedFilters);
+        onFilterChange(updatedFilters)
+    };
+
+    const handleResetFilterDate = () => {
+        setFilters({
+            startDate: '',
+            endDate: '',
+        })
+        setFocusedInput(null)
+        // onFilterChange(filters)
+    }
+
 
     useEffect(()=>{
         setUserRole(user?.role)
@@ -21,12 +67,71 @@ function page() {
 
     return (
         <div className="grid grid-cols-12 gap-2 md:gap-3">
+            <style jsx global>{`
+            .DateInput div {
+                font-size: 16px !important;
+            }
+
+            .DateInput_input {
+                font-size: 16px;
+                font-weight: 400;
+                color: inherit;
+                padding: 9px;
+                border: none;
+                text-align: center;
+                background: transparent !important;
+            }
+
+            .DateRangePickerInput {
+                border: none;
+                color: inherit;
+                background: transparent;
+            }
+
+            .DateRangePicker {
+                color: inherit;
+            }
+
+            .DateRangePicker_picker {
+                border-radius: 20px;
+                overflow: hidden;
+                border: solid 1px lightgray;
+                backdrop-filter: blur(10px);
+                background: #ffffff80;
+            }
+
+
+            .DateInput {
+                background: transparent;
+            }
+                `}
+            </style>
             <div className="col-span-12">
             </div>
-            <div className="col-span-6 min-h-40 flex justify-center flex-col mb-10">
+            <div className="col-span-6 min-h-40 flex justify-center flex-col mb-10 items-start">
                 <h2 className='text-4xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2'> 👋 Hi, {getGreeting()}</h2>
                 <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>{user?.name.toLocaleLowerCase()}</h2>
-                <DateRangePicker/>
+                {/* <DateRangePicker/> */}
+                <div className='flex gap-1 mt-10'>
+                    <div className={"relative cursor-pinter "+ _CLASSNAME_}>
+                        <DateRangePicker
+                        startDate={filters.startDate ? moment(filters.startDate) : null}
+                        endDate={filters.endDate ? moment(filters.endDate) : null}
+                        onDatesChange={handleDateChange}
+                        startDateId="start_date"
+                        focusedInput={focusedInput}
+                        onFocusChange={focusedInput => setFocusedInput(focusedInput)}
+                        endDateId="end_date"
+                        displayFormat="YYYY-MM-DD"
+                        isOutsideRange={() => false}
+                        />
+                        <FaRegCalendarCheck className='w-6 h-6 ml-4 text-gray-300'/>
+                    </div>
+
+                    <button className={_CLASSNAME_} onClick={handleResetFilterDate}>
+                        <GrPowerReset className='w-6 h-6'/>
+                    </button>
+                </div>
             </div>
 
             <div className="col-span-3">
@@ -51,18 +156,18 @@ function page() {
             
 
             <div className="col-span-3 min-h-100">
-                <TotalAduanChart group='status' title='Status Aduan' colors={['#7AE2CF', '#077A7D',  '#06202B',]}/>
+                <TotalAduanChart group='status' title='Status Aduan' colors={['#7AE2CF', '#077A7D',  '#06202B',]} filters={filters}/>
             </div>
 
             <div className="col-span-3 min-h-100">
-                <TotalAduanChart group='klasifikasi' title='Kasifikasi Aduan' colors={['#A0C878', '#143D60',  '#EB5B00',]}/>
+                <TotalAduanChart group='klasifikasi' title='Kasifikasi Aduan' colors={['#A0C878', '#143D60',  '#EB5B00',]} filters={filters}/>
             </div>
 
             <div className="col-span-3 min-h-100">
-                <TotalAduanChart group='priority' title='Priority Aduna' colors={['#f59e0b', '#ef4444', '#3b82f6']}/>
+                <TotalAduanChart group='priority' title='Priority Aduna' colors={['#f59e0b', '#ef4444', '#3b82f6']} filters={filters}/>
             </div>
             <div className="col-span-3 min-h-100">
-                <TotalAduanStat title='Bulan April 2025'/>
+                <TotalAduanStat title={`Aduan Masuk`} filters={filters}/>
             </div>
 
             {/* <div className="col-span-12 max-h-70">
@@ -70,11 +175,11 @@ function page() {
             </div> */}
 
             <div className="col-span-7 min-h-100">
-                <LaporanBidangChart />
+                <LaporanBidangChart filters={filters}/>
             </div>
 
             <div className="col-span-5 min-h-100">
-                <WordCloudChart/>
+                <WordCloudChart filters={filters}/>
             </div>
 
             

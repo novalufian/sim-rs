@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
-  reactStrictMode: false, // Consider enabling this in development for better practices
+  reactStrictMode: true, // Consider enabling this in development for better practices
 };
 
 export default nextConfig;
