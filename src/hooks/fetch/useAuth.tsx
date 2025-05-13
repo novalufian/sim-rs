@@ -1,5 +1,5 @@
 import api from '@/libs/api'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
 export const useAuth = () => {
     return useMutation({
@@ -17,7 +17,7 @@ export const useAuth = () => {
                 const message = error.response.data?.message || 'Unknown error'
                 const validationErrors = error.response.data?.data
                 console.log("🛑 Validation error:", message)
-            
+
                 if (Array.isArray(validationErrors)) {
                     validationErrors.forEach((err: any) => {
                     console.error(`🔸 ${err.path.join('.')} - ${err.message}`)

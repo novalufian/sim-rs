@@ -179,8 +179,8 @@ export default function LaporForm() {
                 <button
                     key={option.value}
                     type="button"
-                    className={`col-span-1 px-4 py-4 text-sm font-semibold uppercase transition-all duration-200
-                    ${selectedKlasifikasi === option.value ? 'bg-red-600 text-white' : 'text-red-600 bg-white hover:bg-red-100'}`}
+                    className={`col-span-1 px-4 py-4 text-sm font-semibold uppercase transition-all duration-200 
+                    ${selectedKlasifikasi === option.value ? 'bg-red-600 text-white' : 'text-red-600 bg-white hover:bg-red-100 dark:bg-white/[0.03] dark:hover:bg-red-100'}`}
                     onClick={() => handleKlasifikasiChange(option.value)}
                 >
                     {selectedKlasifikasi === option.value && "✔ "}

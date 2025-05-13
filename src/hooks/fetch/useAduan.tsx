@@ -1,6 +1,6 @@
 import api from '@/libs/api'
 import { useQuery , useMutation, useQueryClient} from '@tanstack/react-query'
-import toast, { ToastBar } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 interface AduanFilters {
     status?: string
     klasifikasi?: string
@@ -97,9 +97,9 @@ export const usePostAduan = () => {
             if (error.response) {
                 const message = error.response.data?.message || 'Unknown error'
                 const validationErrors = error.response.data?.data
-            
+
                 console.error("🛑 Validation error:", message)
-            
+
                 if (Array.isArray(validationErrors)) {
                     validationErrors.forEach((err: any) => {
                     console.error(`🔸 ${err.path.join('.')} - ${err.message}`)
@@ -111,7 +111,7 @@ export const usePostAduan = () => {
                         },
                         duration: 5000
                     })
-                    
+
                     })
                 }
             } else {
@@ -134,7 +134,7 @@ export const useUpdateAduan = () => {
             toast.success('Laporan berhasil diupdate!')
             queryClient.invalidateQueries({ queryKey: ['aduan'] })
         },
-        
+
         onError: (error: any) => {
             console.error("❌ Error updating:", error)
             toast.error('Gagal mengupdate laporan!')
@@ -158,7 +158,7 @@ export const updateAduanStatus =()=>{
                 queryKey: ['aduan'],
             })
         },
-        
+
         onError: (error: any) => {
             console.error("❌ Error updating:", error)
             toast.error('Gagal mengupdate aduan!')

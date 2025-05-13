@@ -26,12 +26,12 @@ export default function UserDropdown() {
     dispatch(logout());
     Cookies.remove('userInfo');
     Cookies.remove('token');
-    router.push("/");
+    router.refresh()
     closeDropdown();
   }
 
   const {data,isLoading, error} = useWhoami();
-  
+
   function closeDropdown() {
     setIsOpen(false);
   }
@@ -53,7 +53,7 @@ export default function UserDropdown() {
       Cookies.set('userInfo', JSON.stringify(data), { expires: 7 });
 
     }
-    
+
   }, [data, user, dispatch]);
 
   if (isLoading || error || !data || !user) {
@@ -64,7 +64,7 @@ export default function UserDropdown() {
   return (
     <div className="relative">
       <button
-        onClick={toggleDropdown} 
+        onClick={toggleDropdown}
         className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
@@ -165,7 +165,7 @@ export default function UserDropdown() {
           </li>
         </ul>
         <button onClick={dologout}
-          
+
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg

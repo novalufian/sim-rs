@@ -131,9 +131,9 @@
     }
 
     return (
-        <div className="rounded-2xl border bg-card p-4 h-full">
+        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
         <h2 className="text-lg font-semibold mb-4">Topik aduan yang sering muncul</h2>
-        <div className="overflow-auto">
+        <div className="overflow-hidden rounded-2xl">
             <svg 
             ref={svgRef} 
             className="mx-auto"

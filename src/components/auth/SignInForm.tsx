@@ -3,14 +3,13 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { BsArrowLeft } from "react-icons/bs";
 import { LuEyeClosed, LuEye } from "react-icons/lu";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/fetch/useAuth";
 import SpinerLoading from "@/components/loading/spiner";
@@ -28,14 +27,14 @@ export default function SignInForm() {
   const { mutate: doAuth, data, isPending, isError, error, isSuccess } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  
+
   // Use isPending for loading state instead of isLoading
   const isLoading = isPending;
 
   const errorMsg = error?.response?.data?.message || "Unknown error";
   const paswordError = errorMsg.includes("credential");
   const emailError = errorMsg.includes("username");
-  
+
   const {
     register,
     handleSubmit,
@@ -52,15 +51,15 @@ export default function SignInForm() {
     if (isSuccess) {
       const { token } = data;
 
-      console.log(data);
+      console.log("sukses ", token);
       // Store token and user data in cookies
       Cookies.set('token', token, { expires: 7 });
       Cookies.set('userInfo', JSON.stringify(data.user), { expires: 7 });
 
       // Redirect after successful login
-      setTimeout(() => {
-        router.push("/");
-      }, 1500);
+      // redirect("/")
+      router.refresh();
+
     }
   }, [isSuccess, data, router]);
 
