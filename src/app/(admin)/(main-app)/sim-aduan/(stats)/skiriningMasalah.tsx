@@ -3,6 +3,8 @@
     import SpinerLoading from '@/components/loading/spiner';
     import { useSkriningMasalah } from '@/hooks/fetch/useAduanStat';
     import React, { useEffect, useRef } from 'react';
+    import { BsCloudSlash } from "react-icons/bs";
+
     import * as d3 from 'd3';
     import d3Cloud from 'd3-cloud';
 
@@ -54,14 +56,14 @@
         // Process data
         const labels = data.data?.skriningMasalah?.labels || [];
         const counts = data.data?.skriningMasalah?.counts || [];
-        
+
         const wordData = labels.map((label: string, index: number) => ({
         text: label,
         count: counts[index] || 0
         }));
 
         const values = wordData.map((d: WordData) => Number(d.count));
-        const maxValue = d3.max(values as number[]) ?? 1; 
+        const maxValue = d3.max(values as number[]) ?? 1;
         const fontSize = d3.scaleLinear()
         .domain([0, maxValue])
         .range([15, 60])
@@ -115,10 +117,19 @@
 
     if (isLoading) {
         return (
-        <div className="rounded-lg border bg-card p-4 shadow-sm">
+        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
             <SpinerLoading title="Loading Word Cloud..." />
         </div>
         );
+    }
+
+    if(!data){
+        return (
+            <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full flex flex-col justify-center items-center text-gray-400">
+                <BsCloudSlash className='w-15 h-15'/>
+                <p>koneksi server bermasalah</p>
+            </div>
+        )
     }
 
     if (!data?.data?.skriningMasalah?.labels || data.data.skriningMasalah.labels.length === 0) {
@@ -134,8 +145,8 @@
         <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
         <h2 className="text-lg font-semibold mb-4">Topik aduan yang sering muncul</h2>
         <div className="overflow-hidden rounded-2xl">
-            <svg 
-            ref={svgRef} 
+            <svg
+            ref={svgRef}
             className="mx-auto"
             width="100%"
             height="500"

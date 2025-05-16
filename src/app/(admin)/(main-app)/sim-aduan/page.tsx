@@ -68,43 +68,43 @@ function page() {
     return (
         <div className="grid grid-cols-12 gap-2 md:gap-3">
             <style jsx global>{`
-            .DateInput div {
-                font-size: 16px !important;
-            }
+                .DateInput div {
+                    font-size: 16px !important;
+                }
 
-            .DateInput_input {
-                font-size: 16px;
-                font-weight: 400;
-                color: inherit;
-                padding: 9px;
-                border: none;
-                text-align: center;
-                background: transparent !important;
-            }
+                .DateInput_input {
+                    font-size: 16px;
+                    font-weight: 400;
+                    color: inherit;
+                    padding: 9px;
+                    border: none;
+                    text-align: center;
+                    background: transparent !important;
+                }
 
-            .DateRangePickerInput {
-                border: none;
-                color: inherit;
-                background: transparent;
-            }
+                .DateRangePickerInput {
+                    border: none;
+                    color: inherit;
+                    background: transparent;
+                }
 
-            .DateRangePicker {
-                color: inherit;
-            }
+                .DateRangePicker {
+                    color: inherit;
+                }
 
-            .DateRangePicker_picker {
-                border-radius: 20px;
-                overflow: hidden;
-                border: solid 1px lightgray;
-                backdrop-filter: blur(10px);
-                background: #ffffff80;
-            }
+                .DateRangePicker_picker {
+                    border-radius: 20px;
+                    overflow: hidden;
+                    border: solid 1px lightgray;
+                    backdrop-filter: blur(10px);
+                    background: #ffffff80;
+                }
 
 
-            .DateInput {
-                background: transparent;
-            }
-                `}
+                .DateInput {
+                    background: transparent;
+                }
+                    `}
             </style>
             <div className="col-span-12">
             </div>
@@ -153,18 +153,18 @@ function page() {
                 </div>
                 </Link>
             </div>
-            
+
 
             <div className="col-span-3 min-h-100">
-                <TotalAduanChart group='status' title='Status Aduan' colors={['#7AE2CF', '#077A7D',  '#06202B',]} filters={filters}/>
+                <TotalAduanChart group='status' title='Status Laporan' colors={['#7AE2CF', '#077A7D',  '#06202B',]} filters={filters}/>
             </div>
 
             <div className="col-span-3 min-h-100">
-                <TotalAduanChart group='klasifikasi' title='Kasifikasi Aduan' colors={['#A0C878', '#143D60',  '#EB5B00',]} filters={filters}/>
+                <TotalAduanChart group='klasifikasi' title='Kasifikasi Laporan' colors={['#A0C878', '#143D60',  '#EB5B00',]} filters={filters}/>
             </div>
 
             <div className="col-span-3 min-h-100">
-                <TotalAduanChart group='priority' title='Priority Aduna' colors={['#f59e0b', '#ef4444', '#3b82f6']} filters={filters}/>
+                <TotalAduanChart group='priority' title='Priority Laporan' colors={['#f59e0b', '#ef4444', '#3b82f6']} filters={filters}/>
             </div>
             <div className="col-span-3 min-h-100">
                 <TotalAduanStat title={`Aduan Masuk`} filters={filters}/>
@@ -182,10 +182,10 @@ function page() {
                 <WordCloudChart filters={filters}/>
             </div>
 
-            
+
         </div>
 
-        
+
     )
 }
 

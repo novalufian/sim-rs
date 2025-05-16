@@ -2,7 +2,6 @@ import ThemeTogglerTwo from "@/components/common/ThemeTogglerTwo";
 
 import { ThemeProvider } from "@/context/ThemeContext";
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 
 export default function AuthLayout({
@@ -21,9 +20,10 @@ export default function AuthLayout({
                   <Image
                     width={231}
                     height={48}
-                    src="/images/logo/rsud-logo.png"
+                    src="./images/logo/logo.svg"
                     alt="Logo"
                   />
+
                 <p className="text-center text-gray-800 dark:text-white/80 text-xl">
                   SSO RSUD dr. ABDUL RIVAI <br />
                   sistem terpadu satu atap untuk pelayanan kesehatan

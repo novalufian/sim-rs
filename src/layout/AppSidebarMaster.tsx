@@ -4,13 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
-import { FiUsers } from "react-icons/fi";
 import { RxDashboard } from "react-icons/rx";
-import { LuBuilding2, LuArchive, LuTicket,LuScale ,LuNotebookText} from "react-icons/lu";
 import { IoIosArrowDown } from "react-icons/io";
-import { VscReport } from "react-icons/vsc";
-import { TbPigMoney } from "react-icons/tb";
 import { MdOutlineMoreHoriz } from "react-icons/md";
+import { GoLog,GoPeople,GoSmiley,GoGlobe ,GoGitPullRequestClosed} from "react-icons/go";
 
 type NavItem = {
   name: string;
@@ -24,76 +21,54 @@ const navItems: NavItem[] = [
   {
     icon: <RxDashboard className="h-6 w-6"/>,
     name: "DASHBOARD",
-    path : "/",
+    path : "/master/",
     disable : false
   },
   {
-    icon: <FiUsers className="h-6 w-6" />,
-    name: "SIMPEG",
-    path: "/simpeg",
-    disable : true
+    icon: <GoPeople className="h-6 w-6" />,
+    name: "USER",
+    path: "/master/user",
+    disable : false
 
   },
   {
-    icon: <LuBuilding2 className="h-6 w-6" />,
-    name: "SIM-ASSET",
-    path: "/sim-asset",
-    disable : true
-
-  },
-
-  {
-    icon: <LuArchive className="h-6 w-6" />,
-    name: "SIM-ARSIP",
-    path: "/sim-arsip",
-    disable : true
-
-  },
-
-  {
-    icon: <VscReport className="h-6 w-6" />,
-    name: "SIM-ADUAN",
-    path: "/sim-aduan",
+    icon: <GoSmiley className="h-6 w-6" />,
+    name: "PEGAWAI", //nanti pndah ke simpeg
+    path: "/master/pegawai",
     disable : false
 
   },
 
   {
-    icon: <LuTicket className="h-6 w-6" />,
-    name: "SI-NOMOR",
-    path: "/si-nomor",
-    disable : true
+    icon: <GoGlobe className="h-6 w-6" />,
+    name: "DEMOGRAFI",
+    path: "/master/demografi",
+    disable : false
 
   },
 
   {
-    icon: <TbPigMoney className="h-6 w-6" />,
-    name: "SI-KEU",
-    path: "/si-keu",
-    disable : true
-
-  },
-  {
-    icon: <LuNotebookText className="h-6 w-6" />,
-    name: "Service Desk",
-    path: "/service-desk",
-    disable : true
+    icon: <GoLog className="h-6 w-6" />,
+    name: "KEPEGAWAIAN",
+    path: "/master/kepegawaian",
+    disable : false
 
   },
 
   {
-    icon: <LuScale className="h-6 w-6" />,
-    name: "J.D.I.H",
-    path: "/jdih",
-    disable : true
+    icon: <GoGitPullRequestClosed className="h-6 w-6" />,
+    name: "PELATIHAN",
+    path: "/master/pelatihan",
+    disable : false
 
-  }
+  },
+
 ];
 
 const othersItems:NavItem[] = [];
 
 
-const AppSidebar: React.FC = () => {
+const AppSidebarMaster: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered } = useSidebar();
   const pathname = usePathname();
   const splitedPath = pathname.split("/");
@@ -234,7 +209,7 @@ const AppSidebar: React.FC = () => {
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // const isActive = (path: string) => path === pathname;
-  const isActive = useCallback((path: string) => path.split("/")[1] === splitedPath[1], [pathname]);
+  const isActive = useCallback((path: string) => path.split("/")[2] === splitedPath[1], [pathname]);
 
   useEffect(() => {
     // Check if the current path matches any submenu item
@@ -364,4 +339,4 @@ const AppSidebar: React.FC = () => {
   );
 };
 
-export default AppSidebar;
+export default AppSidebarMaster;

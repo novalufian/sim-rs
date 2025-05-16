@@ -2,7 +2,9 @@
 
 import SpinerLoading from '@/components/loading/spiner';
 import { useAduanBidang } from '@/hooks/fetch/useAduanStat';
-import ChartDataLabels from "chartjs-plugin-datalabels"; 
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { BsCloudSlash } from "react-icons/bs";
+
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -45,7 +47,7 @@ interface BidangData {
 }
 
 function LaporanBidangChart({ filters }: { filters: FilterState }) {
-    const { data, isLoading, refetch } = useAduanBidang(filters);
+    const { data, isLoading, refetch, isError } = useAduanBidang(filters);
     const [bidang, setBidang] = useState<BidangData[]>([]);
 
     useEffect(() => {
@@ -67,6 +69,15 @@ function LaporanBidangChart({ filters }: { filters: FilterState }) {
                 <SpinerLoading title="Laporan per Bidang" />
             </div>
         );
+    }
+
+    if(isError){
+        return (
+            <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full flex flex-col justify-center items-center text-gray-400">
+                <BsCloudSlash className='w-15 h-15'/>
+                <p>server bermasalah</p>
+            </div>
+        )
     }
 
     const sortedBidang = [...bidang].sort((a: BidangData, b: BidangData) => b.total_aduan - a.total_aduan);
@@ -135,9 +146,9 @@ function LaporanBidangChart({ filters }: { filters: FilterState }) {
         <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[400px] flex flex-col">
             <h1 className="text-lg font-bold mb-4">Bar Chart: Jumlah Laporan per Bidang</h1>
             <div className="flex-1">
-                <Bar 
-                    data={chartData} 
-                    options={options} 
+                <Bar
+                    data={chartData}
+                    options={options}
                     height={400}
                 />
             </div>

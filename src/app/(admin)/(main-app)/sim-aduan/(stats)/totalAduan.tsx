@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react'
 import { useAduanStatGroup, useAduanTotal } from '@/hooks/fetch/useAduanStat'
 import { MdKeyboardDoubleArrowUp } from "react-icons/md";
+import { BsCloudSlash } from "react-icons/bs";
 import SpinerLoading from '@/components/loading/spiner'
 import { Doughnut } from 'react-chartjs-2'
 import CountUp from 'react-countup';
@@ -29,8 +30,8 @@ interface FilterState {
 
 export function TotalAduanChart({group, title, colors, filters}: {group: string, title: string, colors?: string[], filters: FilterState}) {
     // Add filters as dependency to trigger refetch when filters change
-    const { data, isLoading, refetch } = useAduanStatGroup(group, filters)
-    
+    const { data, isLoading, refetch, isError } = useAduanStatGroup(group, filters)
+
     // Refetch data when filters change
     useEffect(() => {
         refetch()
@@ -40,6 +41,15 @@ export function TotalAduanChart({group, title, colors, filters}: {group: string,
         return (
             <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
                 <SpinerLoading title={title} />
+            </div>
+        )
+    }
+
+    if(!data){
+        return (
+            <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full flex flex-col justify-center items-center text-gray-400">
+                <BsCloudSlash className='w-15 h-15'/>
+                <p>server bermasalah</p>
             </div>
         )
     }
@@ -119,8 +129,8 @@ export function TotalAduanChart({group, title, colors, filters}: {group: string,
 
 export function TotalAduanStat({title, filters}: {title: string, filters: FilterState}) {
     // Add filters as dependency to trigger refetch when filters change
-    const { data, isLoading, refetch } = useAduanTotal(filters)
-    
+    const { data, isLoading, refetch, isError } = useAduanTotal(filters)
+
     // Refetch data when filters change
     useEffect(() => {
         refetch()
@@ -130,6 +140,15 @@ export function TotalAduanStat({title, filters}: {title: string, filters: Filter
         return (
             <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
                 <SpinerLoading title='Status Aduan' />
+            </div>
+        )
+    }
+
+    if(isError && !data){
+        return (
+            <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full flex flex-col justify-center items-center text-gray-400">
+                <BsCloudSlash className='w-15 h-15'/>
+                <p>server bermasalah</p>
             </div>
         )
     }

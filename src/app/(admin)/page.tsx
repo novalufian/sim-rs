@@ -14,42 +14,54 @@ const mainMenu = [
   {
     "title" : "SIMPEG",
     "icon" : "/images/icons/main-menu/simpeg.png",
-    "url" : "/simpeg"
+    "url" : "/simpeg",
+    "disable" : true
   },
   {
     "title" : "SIM-ASSET",
     "icon" : "/images/icons/main-menu/asset.png",
-    "url" : "/sim-asset"
+    "url" : "/sim-asset",
+    "disable" : true
+
   },
   {
     "title" : "SIM-ARSIP",
     "icon" : "/images/icons/main-menu/arsip.png",
-    "url" : "/sim-arsip"
+    "url" : "/sim-arsip",
+    "disable" : true
+
   },
   {
     "title" : "SIM-ADUAN",
     "icon" : "/images/icons/main-menu/lapor.png",
-    "url" : "/sim-aduan"
+    "url" : "/sim-aduan",
+    "disable" : false
+
   },
   {
     "title" : "SI-NOMOR",
     "icon" : "/images/icons/main-menu/nomor.png",
-    "url" : "/si-nomor"
+    "url" : "/si-nomor",
+    "disable" : true
   },
   {
     "title" : "SIM-KEU",
     "icon" : "/images/icons/main-menu/uang.png",
-    "url" : "/sim-keu"
+    "url" : "/sim-keu",
+    "disable" : true
   },
   {
     "title" : "SERVICE DESK",
     "icon" : "/images/icons/main-menu/service.png",
-    "url" : "/service-desk"
+    "url" : "/service-desk",
+    "disable" : true
   },
   {
     "title" : "J.D.I.H",
     "icon" : "/images/icons/main-menu/jdih.png",
-    "url" : "/jdih"
+    "url" : "/jdih",
+    "disable" : true
+    ,
   }
 ]
 
@@ -60,14 +72,14 @@ export default function Ecommerce() {
       <div className="grid grid-cols-4 gap-4">
 
         {mainMenu.map((item, index)=>(
-            <Link href={item.url} className={classCard} key={index}>
+            <Link href={item.url} className={`${classCard}  ${item.disable ? "pointer-events-none cursor-not-allowed opacity-55" : "" }`} key={index}>
             <div className="h-full w-full flex justify-center items-center bg-gray-100 rounded-2xl p-2 dark:bg-gray-900">
-              <Image src={item.icon} alt="simpeg" width={80} height={80}></Image>
+              <Image src={item.icon} alt="simpeg" className={item.disable ? 'filter grayscale ' : ''} width={80} height={80}></Image>
             </div>
             <h2 className="text-2xl text-gray-700 my-5 tracking-tighter dark:text-white">{item.title}</h2>
             </Link>
         ))}
-        
+
       </div>
     </div>
   );

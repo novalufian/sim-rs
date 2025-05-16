@@ -4,32 +4,25 @@ import Pagination from "@/components/tables/Pagination";
 import ColumnFilter from "@/components/tables/ColumnFilter";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { LaporTableColumns } from "@/app/(admin)/(main-app)/sim-aduan/data/tableColumns";
-import { Lapor, DropdownState } from "@/app/(admin)/(main-app)/sim-aduan/data/laporInterface";
+import { Lapor } from "@/app/(admin)/(main-app)/sim-aduan/data/laporInterface";
 import { getColumnValue } from "@/app/(admin)/(main-app)/sim-aduan/data/tableHelpers";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
-import { redirect, useRouter, useSearchParams } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 import { UseAduanSearch } from '@/hooks/fetch/useAduanSearch';
 import { useAduan } from "@/hooks/fetch/useAduan";
 import AduanQueryFilter from "./aduanQueryFilter";
 
-import {TableEmptyState, TableLoading} from "./tableEmptyState";
+import {TableEmptyState, TableLoading, TableError} from "./tableEmptyState";
 import { useAppSelector } from '@/hooks/useAppDispatch';
 import nProgress from "nprogress";
 import DeleteModal from "@/components/modals/deleteModal";
-interface FilterState {
-    status?: string;
-    klasifikasi?: string;
-    priority?: string;
-    startDate?: string;
-    endDate?: string;
-    page?: number;
-}
+
 
 function Page() {
     //trigger for search from redux
     const {keyword, trigger} = useAppSelector(state => state.search)
-    
+
     //state for table
     const columnInit = ["no", "judul", "klasifikasi","priority","status","tindak_lanjut_nama","skrining_masalah_nama", "actions"]
     const [lapor, setLapor] = useState<Lapor[]>([]);
@@ -38,9 +31,10 @@ function Page() {
         new Set(columnInit)
     );
     const [showColumnFilter, setShowColumnFilter] = useState(false);
-    const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
+    // const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
     const [openDropdownIndex, setOpenDropdownIndex] = useState<number| string | null>(null);
     const [filters, setFilters] = useState({})
+    const [retryError, setRetryError] = useState(0)
 
     const itemsPerPage = 10;
 
@@ -55,6 +49,7 @@ function Page() {
     const data = isUsingSearch ? aduanSearchQuery.data : aduanQuery.data;
     const isLoading = isUsingSearch ? aduanSearchQuery.isPending : aduanQuery.isPending;
     const isError = isUsingSearch ? aduanSearchQuery.isError : aduanQuery.isError;
+    const refetchData = isUsingSearch ? aduanSearchQuery.refetch : aduanQuery.refetch;
     const [totalPages, setTotalPages] = useState(0);
 
     const router = useRouter();
@@ -88,14 +83,14 @@ function Page() {
         if (newFilters.status) params.set('status', newFilters.status.toLowerCase())
         if (newFilters.klasifikasi) params.set('klasifikasi', newFilters.klasifikasi.toLowerCase())
         if (newFilters.priority) params.set('priority', newFilters.priority.toLowerCase())
-    
+
         router.replace(`?${params.toString()}`);
         nProgress.start();
         setTimeout(() => {
             nProgress.done();
         }, 300);
     };
-    
+
     const toggleColumn = (columnId: string) => {
         const newVisibleColumns = new Set(visibleColumns);
         if (newVisibleColumns.has(columnId)) {
@@ -141,13 +136,13 @@ function Page() {
                 .hide-scrollbar::-webkit-scrollbar {
                     display: none;
                 }
-                
+
                 /* Hide scrollbar for IE, Edge and Firefox */
                 .hide-scrollbar {
                     -ms-overflow-style: none;  /* IE and Edge */
                     scrollbar-width: none;  /* Firefox */
                 }
-                
+
                 /* For modern browsers that show scrollbar */
                 ::-webkit-scrollbar {
                     width: 6px;
@@ -239,7 +234,7 @@ function Page() {
             setShowColumnFilter={setShowColumnFilter}
         >
             <AduanQueryFilter onFilterChange={handleFilterChange}/>
-            
+
         </ColumnFilter>
         <div className="relative sm:rounded-lg bg-transparent">
             <div className="table-wrapper hide-scrollbar rounded-2xl">
@@ -271,7 +266,7 @@ function Page() {
                 </thead>
                 <tbody className="bg-white text-gray-700 dark:bg-gray-900 dark:text-gray-200 divide-y divide-gray-200 dark:divide-gray-700">
                 {
-                isError ? (<>error</>) :
+                    isError ? (<TableError colomLenght={columnInit.length} onRetry={refetchData} retryCount={retryError} setRetryCount={setRetryError}/>) :
                 isLoading ? (
                     <TableLoading colomLenght={columnInit.length}/>
                 ) : lapor.length === 0 ? (
@@ -285,7 +280,7 @@ function Page() {
                             <td
                                 key={column.id}
                                 className={`
-                                    
+
                                     p-3 whitespace-nowrap group-hover:bg-gray-100 dark:group-hover:bg-gray-800    ${
                                 column.sticky === "left"
                                     ? "sticky-left bg-white group-hover:bg-gray-200 dark:group-hover:bg-gray-700  dark:bg-gray-900 z-20 text-center "
@@ -323,8 +318,8 @@ function Page() {
             <Pagination
             totalPages={totalPages}
             currentPage={currentPage}
-            onPageChange={(page) =>{ 
-                setCurrentPage(page) 
+            onPageChange={(page) =>{
+                setCurrentPage(page)
                 setFilters({ ...filters, page })
             }}
             />

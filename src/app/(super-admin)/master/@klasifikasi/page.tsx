@@ -18,34 +18,34 @@ function TodoPage() {
     const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
     const { data : klasifikasi , isLoading : useKlasifikasiLoading} = useKlasifikasi();
-    const { 
-        mutateAsync : DeleteKlasifikasi, 
-        isPending : DeleteKlasifikasiPending, 
-        isError : DeleteKlasifikasiError, 
-        isSuccess : DeleteKlasifikasiSuccess 
+    const {
+        mutateAsync : DeleteKlasifikasi,
+        isPending : DeleteKlasifikasiPending,
+        isError : DeleteKlasifikasiError,
+        isSuccess : DeleteKlasifikasiSuccess
     } = useKlasifikasiDelete();
 
-    const { 
-        mutateAsync : CreateKlasifikasi, 
-        isPending : CreateKlasifikasiPending, 
-        isError : CreateKlasifikasiError, 
-        isSuccess : CreateKlasifikasiSuccess 
+    const {
+        mutateAsync : CreateKlasifikasi,
+        isPending : CreateKlasifikasiPending,
+        isError : CreateKlasifikasiError,
+        isSuccess : CreateKlasifikasiSuccess
     } = usePostKlasifikasi();
 
     const {
-        mutateAsync : UpdateKlasifikasi, 
-        isPending : UpdateKlasifikasiPending, 
-        isError : UpdateKlasifikasiError, 
+        mutateAsync : UpdateKlasifikasi,
+        isPending : UpdateKlasifikasiPending,
+        isError : UpdateKlasifikasiError,
         isSuccess : UpdateKlasifikasiSuccess
-    } = useUpdateKlasifikasi(); 
+    } = useUpdateKlasifikasi();
 
     const [deleteMessage, setDeleteMessage] = useState("")
-    
+
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 10
 
     useEffect(() => {
-        setTodos(klasifikasi?.data?.klasifikasiJabatan ?? [])   
+        setTodos(klasifikasi?.data?.klasifikasiJabatan ?? [])
 
         if(DeleteKlasifikasiSuccess){
             setDeleteMessage("Berhasil menghapus data");
@@ -55,7 +55,7 @@ function TodoPage() {
             }, 2000);
         }
     }, [klasifikasi, DeleteKlasifikasiSuccess])
-    
+
     const handleAdd = () => {
         if (input.trim() === "") return
         const newTodo: Todo = {
@@ -72,50 +72,60 @@ function TodoPage() {
             handleAdd();
         }
     };
-    
+
     const handleDelete = async (id: string) => {
         try {
             await DeleteKlasifikasi(id); // Trigger the mutation
-                
+
             // setTodos(todos.filter(todo => todo.id !== id))
         } catch (error : any) {
-            console.log("Delete failed:", error.status);
-            if(error.status === 403){
+            console.log("Delete failed:", error?.status);
+            if(error?.status === 403){
                 setDeleteMessage("Anda tidak memiliki hak akses untuk menghapus, hanya SUPER ADMIN yang memiliki hak akses");
             }
         }
     }
-    
+
     const handleEdit = (data: any) => {
         setTodos(todos.map(todo => todo.id === data.id ? { ...todo, isEditing: true } : todo))
         setSelectedTodo(data)
     }
-    
+
     const handleSave = async(id: string, newText: string) => {
         try {
             console.log(newText)
-            const bidang = await UpdateKlasifikasi({id : id.toString(), formData : {nama : selectedTodo?.nama}});
+            await UpdateKlasifikasi({id : id.toString(), formData : {nama : selectedTodo?.nama}});
             setTodos(todos.map(todo =>
                 todo.id === id ? { ...todo, text: newText, isEditing: false } : todo
             ))
-        } catch (error : any) {
+        } catch (error : unknown) {
             console.log("Update failed:", error);
         }
     }
-    
+
     const handleCancel = (id: string) => {
         setTodos(todos.map(todo => todo.id === id ? { ...todo, isEditing: false } : todo))
     }
-    
+
+    // const filteredTodos = todos.filter(todo =>
+    //     todo.nama.toLowerCase().includes(search.toLowerCase())
+    // )
+
+    function fuzzyMatch(str : string, pattern : string) {
+      pattern = pattern.toLowerCase().split('').join('.*');
+      const regex = new RegExp(`.*${pattern}.*`);
+      return regex.test(str.toLowerCase());
+    }
+
     const filteredTodos = todos.filter(todo =>
-        todo.nama.toLowerCase().includes(search.toLowerCase())
-    )
-    
+      fuzzyMatch(todo.nama, search)
+    );
+
     // Pagination logic
     const indexOfLastTodo = currentPage * itemsPerPage
     const indexOfFirstTodo = indexOfLastTodo - itemsPerPage
     const currentTodos = filteredTodos.slice(indexOfFirstTodo, indexOfLastTodo)
-    
+
     const totalPages = Math.ceil(filteredTodos.length / itemsPerPage)
 
     const handleNextPage = () => {
@@ -135,14 +145,14 @@ function TodoPage() {
         <div className="max-w-xl mx-auto p-4 space-y-1 relative">
             <h1 className="text-2xl font-bold flex justify-between items-center">👑 Master Klasifikasi <span className="text-sm font-light text-gray-500">{todos.length} data</span></h1>
             <p className ="text-gray-500 py-2 mb-5">Jenis klasifikas jabatan untuk pegawai.</p>
-        
+
             <div className="flex gap-2">
                 <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Klasifikasi baru..." className="flex-1 border border-gray-300 px-3 py-2 rounded"/>
                 <button onClick={handleAdd}  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add</button>
             </div>
-        
+
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cari ex:bidang..." className="w-full border border-gray-300 px-3 py-2 rounded "/>
-        
+
             <ul className="space-y-2">
                 {currentTodos.map((todo, index) => (
                     <li key={todo.id} className="flex items-center gap-2 py-2 border-b border-gray-200">
@@ -153,7 +163,7 @@ function TodoPage() {
                                     setSelectedTodo({
                                         id: todo.id,
                                         nama: e.target.value.toString(),
-                                        isEditing: true 
+                                        isEditing: true
                                     })
                                 }} className="flex-1 border border-gray-300 px-2 py-1 rounded"/>
                                 <button onClick={() => {
@@ -175,12 +185,12 @@ function TodoPage() {
                     </li>
                 ))}
             </ul>
-        
+
             {/* Pagination Controls */}
             <div className="flex justify-between items-center">
                 <button onClick={handlePrevPage} disabled={currentPage === 1} className=" text-gray-700 px-4 py-2 rounded disabled:opacity-50">
                     <IoArrowBackCircleOutline className="w-10 h-10"/>
-                </button> 
+                </button>
                 <span>Page {currentPage} of {totalPages}</span>
                 <button onClick={handleNextPage} disabled={currentPage === totalPages} className=" text-gray-700 px-4 py-2 rounded disabled:opacity-50">
                     <IoArrowForwardCircleOutline className="w-10 h-10"/>

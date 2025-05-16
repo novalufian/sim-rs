@@ -1,12 +1,10 @@
 // LaporForm.tsx"use client";
 "use client"
-import React, { useEffect, useState, InputHTMLAttributes } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {}
-
 import ComponentCard from '@/components/common/ComponentCard';
 import Button from '@/components/ui/button/Button';
-import DropzoneComponent from '@/components/form/form-elements/DropZone';
+// import DropzoneComponent from '@/components/form/form-elements/DropZone';
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import TextArea from '@/components/form/input/TextArea';
@@ -52,12 +50,6 @@ const optionsKlasifiaksi = [
     { label: "Permintaan Informasi", value: "PERMINTAAN_INFORMASI" }
 ];
 
-const optionBidang = [
-    { value: "marketing", label: "Marketing" },
-    { value: "template", label: "Template" },
-    { value: "development", label: "Development" },
-];
-
 const optionPriority = [
     { value: "HIGHT", label: "Hight" },
     { value: "MEDIUM", label: "Medium" },
@@ -79,7 +71,7 @@ export default function LaporForm() {
 
     // hook
     const { mutate: postAduan, status, isPending, isSuccess, isError  } = usePostAduan();
-    const {mutate : updateAduan, isPending : updatePending, isError : updateError, isSuccess : updateSuccess} = useUpdateAduan();   
+    const {mutate : updateAduan, isPending : updatePending, isError : updateError, isSuccess : updateSuccess} = useUpdateAduan();
     const { data: bidang , isLoading : useBidangLoading} = useBidang();
     const { data: laporData, isLoading : useLaporLoading} = useAduanId(id ?? "");
     const { data: skriningMasalah , isLoading : useSkriningMasalahLoading} = useSkriningMasalah();
@@ -129,7 +121,7 @@ export default function LaporForm() {
     };
 
     // Handle success or error
-    const onerror = (err : any) => {  
+    const onerror = (err : any) => {
         console.log(err)
     }
 
@@ -179,7 +171,7 @@ export default function LaporForm() {
                 <button
                     key={option.value}
                     type="button"
-                    className={`col-span-1 px-4 py-4 text-sm font-semibold uppercase transition-all duration-200 
+                    className={`col-span-1 px-4 py-4 text-sm font-semibold uppercase transition-all duration-200
                     ${selectedKlasifikasi === option.value ? 'bg-red-600 text-white' : 'text-red-600 bg-white hover:bg-red-100 dark:bg-white/[0.03] dark:hover:bg-red-100'}`}
                     onClick={() => handleKlasifikasiChange(option.value)}
                 >
@@ -306,9 +298,9 @@ export default function LaporForm() {
                 {errors.no_hp && <p className='text-red-500'>{errors.no_hp.message}</p>}
             </div>
 
-            <div className='col-span-12'>
+            {/* <div className='col-span-12'>
                 <DropzoneComponent />
-            </div>
+            </div> */}
             {errors.status && <p className='text-red-500'>{errors.status.message}</p>}
             <div className="col-span-12 flex justify-end">
                 <Button btntype="button" size="sm" className="w-auto bg-gray-300 hover:bg-gray-800 mr-3 text-gray-800 hover:text-white">
@@ -329,4 +321,3 @@ export default function LaporForm() {
         </ComponentCard>
     );
 }
-

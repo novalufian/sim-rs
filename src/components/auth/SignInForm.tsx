@@ -44,7 +44,12 @@ export default function SignInForm() {
   });
 
   const onSubmit = async (formData: SignInFormData) => {
-    doAuth(formData);  // Trigger authentication
+    try {
+        doAuth(formData); // Trigger authentication
+    } catch (error) {
+      console.error("Authentication failed:", error);
+      // setErrorMessage("Failed to sign in. Please try again.");
+    }
   };
 
   useEffect(() => {

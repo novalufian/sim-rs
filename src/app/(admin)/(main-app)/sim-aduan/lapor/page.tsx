@@ -2,26 +2,7 @@
 import ComponentCard from '@/components/common/ComponentCard'
 import PathBreadcrumb from '@/components/common/PathBreadcrumb'
 import LaporForm from '@/components/form/(main-app)/lapor/page'
-import { TbChecks } from "react-icons/tb";
-import { IoCloseCircle } from "react-icons/io5";
 import React from 'react'
-const verifiedInput = {
-    success : {
-        icon : <TbChecks className='text-green-600 ml-2'/>,
-        text : "text-green-600 mb-3",
-        label : "sudah diisi"
-    },
-    error : {
-        icon : <IoCloseCircle className='text-red-600'/>,
-        text : "text-red-600 mb-3",
-        label : ""
-    },
-    default : {
-        icon : "",
-        text : "text-gray-600 mb-3",
-        label : "belum diisi"
-    }
-}
 
 function page() {
 
@@ -35,7 +16,7 @@ function page() {
             <ComponentCard title='Check list inputan :'  className="col-span-4 bg-white sticky top-20 h-fit">
                 <ul className='list-decimal w-9/12 m-auto gap-1 text-gray-700'>
                 <li><strong>Klasifikasi Laporan:</strong> Pilih salah satu: <em>Aduan</em>, <em>Aspirasi</em>, atau <em>Permintaan Informasi</em>.</li>
-                <li><strong>Judul:</strong> Gunakan tata bahasa <em>singkat dan jelas</em> sesuai pokok masalah. Contoh: "Jalan Berlubang di RT 03".</li>
+                <li><strong>Judul:</strong> Gunakan tata bahasa <em>singkat dan jelas</em> sesuai pokok masalah. Contoh: Jalan Berlubang di RT 03.</li>
                 <li><strong>Prioritas:</strong> Tentukan tingkat urgensi: <em>Low</em>, <em>Medium</em>, atau <em>High</em>.</li>
                 <li><strong>Bidang yang Dituju:</strong> Pilih instansi atau OPD terkait. <strong>Wajib diisi.</strong></li>
                 <li><strong>Jenis Permasalahan:</strong> Pilih jenis masalah dari daftar skrining yang tersedia.</li>
