@@ -18,9 +18,11 @@ export default function AuthLayout({
               {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <div className="flex flex-col items-center max-w-xs">
                   <Image
-                    width={231}
-                    height={48}
-                    src="./images/logo/logo.svg"
+                    placeholder="empty"
+                    priority
+                    width="200"
+                    height="200"
+                    src="/images/logo/rsudlogo.png"
                     alt="Logo"
                   />
 

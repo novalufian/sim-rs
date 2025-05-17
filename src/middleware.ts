@@ -5,6 +5,12 @@ export function middleware(request: NextRequest) {
     // Get the pathname of the request (e.g. /, /protected)
     const path = request.nextUrl.pathname
 
+    if (path.startsWith('/_next') ||
+        path.includes('.') ||
+        path.startsWith('/api')) {
+        return NextResponse.next()
+    }
+
     // Get the token from cookies
     const isAuthenticated = request.cookies.has('token')
 
@@ -43,4 +49,4 @@ export const config = {
         '/jdih/:path*',
         '/signin'
     ]
-} 
+}

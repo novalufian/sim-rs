@@ -164,7 +164,7 @@ function page() {
             </div>
 
             <div className="col-span-3 min-h-100">
-                <TotalAduanChart group='priority' title='Priority Laporan' colors={['#f59e0b', '#ef4444', '#3b82f6']} filters={filters}/>
+                <TotalAduanChart group='priority' title='Prioritas Laporan' colors={['#f59e0b', '#ef4444', '#3b82f6']} filters={filters}/>
             </div>
             <div className="col-span-3 min-h-100">
                 <TotalAduanStat title={`Aduan Masuk`} filters={filters}/>

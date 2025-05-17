@@ -29,7 +29,7 @@ export default function SignInForm() {
   const router = useRouter();
 
   // Use isPending for loading state instead of isLoading
-  const isLoading = isPending;
+  const [isLoading, setIsLoading] = useState(false)
 
   const errorMsg = error?.response?.data?.message || "Unknown error";
   const paswordError = errorMsg.includes("credential");
@@ -54,25 +54,28 @@ export default function SignInForm() {
 
   useEffect(() => {
     if (isSuccess) {
-      const { token } = data;
+        setIsLoading(isPending)
+        const { token } = data;
 
-      console.log("sukses ", token);
-      // Store token and user data in cookies
-      Cookies.set('token', token, { expires: 7 });
-      Cookies.set('userInfo', JSON.stringify(data.user), { expires: 7 });
+        console.log("sukses ", token);
+        // Store token and user data in cookies
+        Cookies.set('token', token, { expires: 7 });
+        Cookies.set('userInfo', JSON.stringify(data.user), { expires: 7 });
 
-      // Redirect after successful login
-      // redirect("/")
-      router.refresh();
+        // Redirect after successful login
+        // redirect("/")
+        router.refresh();
 
     }
-  }, [isSuccess, data, router]);
+  }, [isSuccess, data, router, isPending]);
 
   useEffect(() => {
     if (isError) {
       // Clear cookies if there's an error
-      Cookies.remove('token');
-      Cookies.remove('userInfo');
+        Cookies.remove('token');
+        Cookies.remove('userInfo');
+        console.log("errorr masss")
+
     }
   }, [isError]);
 
