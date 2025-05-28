@@ -22,7 +22,7 @@ export default function RootLayout({
         className={` min-h-screen min-w-full`}
       >
         <Provider store={globalStore()}>
-          <div className="fixed inset-0 bg-gradient-to-t from-gray-100 to-gray-50 dark:from-gray-900 dark:to-gray-900 -z-10" />
+          <div className="fixed inset-0 bg-gradient-to-t from-[#EDEFF1] to-gray-50 dark:from-gray-900 dark:to-gray-900 -z-10" />
           <RouteChangeBar />
           <ThemeProvider>
             {/* 

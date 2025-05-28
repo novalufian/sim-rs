@@ -1,15 +1,16 @@
 "use client";
-
-import React from 'react'
-import PegawaiProfile from '@/components/form/(main-app)/profile/pegawaiProfile';
+import AuthForm from '@/components/form/(main-app)/profile/auth'
 import { useAppSelector } from '@/hooks/useAppDispatch';
 import { RootState } from '@/libs/store';
+import React from 'react'
+
 function page() {
     const user = useAppSelector((state: RootState) => state.auth.user);
+    if(!user) return <div>Loading...</div>
 
     return (
-        <>page
-            <PegawaiProfile userId={user?.id || ""}/>
+        <>
+            <AuthForm pegawaiId={user?.id} isProfile={true} />
         </>
     )
 }

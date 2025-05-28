@@ -60,7 +60,7 @@ const PathBreadcrumb: React.FC<PathBreadcrumbProps> = ({
         ) : (
             <h2
             onClick={() => setIsEditing(true)}
-            className="text-xl font-semibold text-gray-800 dark:text-white/90 cursor-pointer group-hover:bg-gray-100/50 dark:group-hover:bg-gray-800/50 px-2 py-1 rounded transition-colors duration-150"
+            className="text-4xl font-semibold tracking-tight text-gray-800 dark:text-white/90 cursor-pointer group-hover:bg-gray-100/50 dark:group-hover:bg-gray-800/50 px-2 py-1 rounded transition-colors duration-150"
             >
             {currentPageTitle}
             <span className="ml-2 opacity-0 group-hover:opacity-100 text-gray-400 text-sm font-normal">

@@ -6,6 +6,7 @@ import { LuSettings2 } from "react-icons/lu";
 import Link from 'next/link';
 
 interface ColumnFilterProps {
+  addLink : string;
   columns: Column[];
   visibleColumns: Set<string>;
   toggleColumn: (columnId: string) => void;
@@ -15,6 +16,7 @@ interface ColumnFilterProps {
 }
 
 export default function ColumnFilter({
+  addLink,
   columns,
   visibleColumns,
   toggleColumn,
@@ -39,7 +41,7 @@ export default function ColumnFilter({
             <CiExport className='h-6 w-6 mr-2'/> export
           </button>
 
-          <Link href="/sim-aduan/lapor" className='flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-yellow-300 dark:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white px-4'>
+          <Link href={addLink} className='flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-yellow-300 dark:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white px-4'>
             <AiOutlinePlus className='h-4 w-4 mr-2 rounded-full'/> Add new
           </Link>
         </div>

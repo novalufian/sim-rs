@@ -108,7 +108,7 @@ const AppSidebar: React.FC = () => {
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`menu-item group  ${
+              className={`menu-item group rounded-full  ${
                 openSubmenu?.type === menuType && openSubmenu?.index === index
                   ? "menu-item-active"
                   : "menu-item-inactive"
@@ -145,7 +145,7 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 href={nav.path}
-                className={`menu-item group ${
+                className={`menu-item group rounded-full  ${
                   isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                 }`}
               >
@@ -234,7 +234,7 @@ const AppSidebar: React.FC = () => {
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // const isActive = (path: string) => path === pathname;
-  const isActive = useCallback((path: string) => path.split("/")[1] === splitedPath[1], [pathname]);
+  const isActive = useCallback((path: string) => path.split("/")[1] === splitedPath[1], [ splitedPath]);
 
   useEffect(() => {
     // Check if the current path matches any submenu item
@@ -313,22 +313,22 @@ const AppSidebar: React.FC = () => {
             <>
               <Image
                 className="dark:hidden"
-                src="/images/logo/logo-icon.svg"
+                src="/images/logo/rsudlogo.png"
                 alt="Logo"
                 width={32}
                 height={32}
               />
               <Image
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src="/images/logo/rsudlogo.png"
                 alt="Logo"
-                width={150}
-                height={40}
+                width={32}
+                height={32}
               />
             </>
           ) : (
             <Image
-              src="/images/logo/logo-icon.svg"
+              src="/images/logo/rsudlogo.png"
               alt="Logo"
               width={32}
               height={32}
@@ -336,27 +336,12 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </div>
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar h-full justify-center">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
-                ) : (
-                  <MdOutlineMoreHoriz />
-                )}
-              </h2>
               {renderMenuItems(navItems, "main")}
             </div>
-
-
           </div>
         </nav>
       </div>

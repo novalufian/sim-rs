@@ -51,7 +51,7 @@
         .attr('width', width)
         .attr('height', height)
         .attr('viewBox', `0 0 ${width} ${height}`)
-        .attr('style', 'max-width: 100%; height: auto; background: #f8f9fa;');
+        .attr('style', 'max-width: 100%; height: auto; background: #ffffff;');
 
         // Process data
         const labels = data.data?.skriningMasalah?.labels || [];
@@ -117,7 +117,7 @@
 
     if (isLoading) {
         return (
-        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
+        <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
             <SpinerLoading title="Loading Word Cloud..." />
         </div>
         );
@@ -125,7 +125,7 @@
 
     if(!data){
         return (
-            <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full flex flex-col justify-center items-center text-gray-400">
+            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full flex flex-col justify-center items-center text-gray-400">
                 <BsCloudSlash className='w-15 h-15'/>
                 <p>koneksi server bermasalah</p>
             </div>
@@ -142,9 +142,9 @@
     }
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
+        <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
         <h2 className="text-lg font-semibold mb-4">Topik aduan yang sering muncul</h2>
-        <div className="overflow-hidden rounded-2xl">
+        <div className="overflow-hidden rounded-4xl">
             <svg
             ref={svgRef}
             className="mx-auto"

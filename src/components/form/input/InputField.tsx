@@ -3,6 +3,7 @@ import React, { forwardRef } from "react";
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   success?: boolean;
   error?: boolean;
+  loading?: boolean;
   hint?: string;
 }
 
@@ -13,6 +14,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       className = "",
       success = false,
       error = false,
+      loading = false,
       hint,
       ...props
     },
@@ -28,6 +30,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       inputClasses += ` text-success-500 border-success-400 focus:ring-success-500/10 focus:border-success-300  dark:text-success-400 dark:border-success-500`;
     } else {
       inputClasses += ` bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800`;
+    }
+
+    if(loading){
+      return (
+        <div className="space-y-2 animate-pulse">
+            <div className="h-11 bg-gray-200 dark:bg-gray-600 rounded-lg w-full"></div>
+        </div>
+      )
     }
 
     return (

@@ -227,6 +227,7 @@ function Page() {
         {/* <PageBreadcrumb pageTitle="Data urut kepegawaian" /> */}
 
         <ColumnFilter
+            addLink="/sim-aduan/lapor"
             columns={LaporTableColumns}
             visibleColumns={visibleColumns}
             toggleColumn={toggleColumn}

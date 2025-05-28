@@ -15,11 +15,16 @@ function getEnvVariable(name: string, defaultValue?: string): string {
 }
 
 // 3.  Get the base URL from the environment
-const baseURL = getEnvVariable(API_URL_ENV_NAME, 'http://localhost:3000');
+// const baseURL = getEnvVariable(API_URL_ENV_NAME, 'http://localhost:3000');
+const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 // 4.  Create the Axios instance
 const api = axios.create({
-  baseURL: baseURL,
+    baseURL: baseURL,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache' // Disable HTTP cache, we'll handle our own
+    }
 });
 
 /*

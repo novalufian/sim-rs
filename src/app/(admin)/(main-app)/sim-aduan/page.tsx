@@ -26,7 +26,7 @@ interface FilterState {
     endDate?: string
 }
 
-const _CLASSNAME_ = "appearance-none flex flex-row text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4 cursor-pointer  items-center";
+const _CLASSNAME_ = "appearance-none flex flex-row text-gray-500 transition-colors bg-white rounded-full hover:text-dark-900 h-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-3 cursor-pointer  items-center";
 
 
 function page() {
@@ -66,7 +66,7 @@ function page() {
     },[user])
 
     return (
-        <div className="grid grid-cols-12 gap-2 md:gap-3">
+        <div className="grid grid-cols-12 gap-[2px] md:gap-2">
             <style jsx global>{`
                 .DateInput div {
                     font-size: 16px !important;
@@ -108,12 +108,14 @@ function page() {
             </style>
             <div className="col-span-12">
             </div>
-            <div className="col-span-6 min-h-40 flex justify-center flex-col mb-10 items-start">
-                <h2 className='text-4xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2'> 👋 Hi, {getGreeting()}</h2>
-                <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>{user?.name.toLocaleLowerCase()}</h2>
+            <div className="col-span-6 min-h-40 flex justify-between flex-col items-start">
+                <div className='flex flex-col'>
+                    <h2 className='text-4xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2'> 👋 Hi, {getGreeting()}</h2>
+                    <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>{user?.name.toLocaleLowerCase()}</h2>
+                </div>
                 {/* <DateRangePicker/> */}
-                <div className='flex gap-1 mt-10'>
-                    <div className={"relative cursor-pinter "+ _CLASSNAME_}>
+                <div className='flex gap-[2px]'>
+                    <div className={"relative cursor-pinter text-gray-500 "+ _CLASSNAME_}>
                         <DateRangePicker
                         startDate={filters.startDate ? moment(filters.startDate) : null}
                         endDate={filters.endDate ? moment(filters.endDate) : null}
@@ -137,7 +139,7 @@ function page() {
             <div className="col-span-3">
                 {!userRole ||userRole != "user" &&
                 <Link href="sim-aduan/lapor" className='group'>
-                <div className="group-hover:dark:bg-amber-300 text-red-600 rounded-2xl border border-gray-200 bg-red-100/50 hover:bg-red-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03]  sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center ">
+                <div className="group-hover:dark:bg-amber-300 text-red-600 rounded-4xl bg-red-100/50 hover:bg-red-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03]  sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center ">
                     <h1 className='text-2xl leading-tight font-semibold   tracking-tight '>Lapor <br /> Aduan Baru</h1>
                     <IoIosAddCircleOutline className='w-18 h-18 group-hover:scale-140 transition-all group-hover:rotate-90 '/>
                 </div>
@@ -147,11 +149,15 @@ function page() {
 
             <div className="col-span-3">
                 <Link href="sim-aduan/data" className='group'>
-                <div className="group-hover:dark:bg-amber-300 text-gray-600 rounded-2xl border border-gray-200 bg-gray-100/50 hover:bg-gray-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03]  sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center ">
+                <div className="group-hover:dark:bg-amber-300 text-gray-600 rounded-4xl bg-white hover:bg-gray-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03]  sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center ">
                     <h1 className='text-2xl leading-tight font-semibold   tracking-tight '>Kelola <br /> Data Aduan</h1>
                     <BsArrowUpRightCircle className='w-15 h-15 group-hover:scale-140 transition-all group-hover:rotate-45 '/>
                 </div>
                 </Link>
+            </div>
+
+            <div className="col-span-12 h-20 flex justify-center items-center">
+                <hr className='w-6/8 border-t border-white/[0.03]'/>
             </div>
 
 

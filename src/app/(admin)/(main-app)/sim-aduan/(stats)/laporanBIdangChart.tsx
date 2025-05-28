@@ -65,7 +65,7 @@ function LaporanBidangChart({ filters }: { filters: FilterState }) {
 
     if (isLoading) {
         return (
-            <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
+            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full">
                 <SpinerLoading title="Laporan per Bidang" />
             </div>
         );
@@ -73,7 +73,7 @@ function LaporanBidangChart({ filters }: { filters: FilterState }) {
 
     if(isError){
         return (
-            <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full flex flex-col justify-center items-center text-gray-400">
+            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 h-full flex flex-col justify-center items-center text-gray-400">
                 <BsCloudSlash className='w-15 h-15'/>
                 <p>server bermasalah</p>
             </div>
@@ -143,7 +143,7 @@ function LaporanBidangChart({ filters }: { filters: FilterState }) {
     };
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[400px] flex flex-col">
+        <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[400px] flex flex-col">
             <h1 className="text-lg font-bold mb-4">Bar Chart: Jumlah Laporan per Bidang</h1>
             <div className="flex-1">
                 <Bar

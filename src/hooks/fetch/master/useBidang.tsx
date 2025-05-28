@@ -2,12 +2,6 @@ import api from '@/libs/api'
 import { useQuery , useMutation, useQueryClient} from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 
-interface BidangFilters {
-    status?: string
-    page?: number
-    limit?: number
-}
-
 export const useBidang = () => {
     return useQuery({
         queryKey: ['bidang'], // caching per filter
@@ -70,9 +64,9 @@ export const usePostBidang = () => {
             if (error.response) {
                 const message = error.response.data?.message || 'Unknown error'
                 const validationErrors = error.response.data?.data
-            
+
                 console.error("🛑 Validation error:", message)
-            
+
                 if (Array.isArray(validationErrors)) {
                     validationErrors.forEach((err: any) => {
                     console.error(`🔸 ${err.path.join('.')} - ${err.message}`)
@@ -84,7 +78,7 @@ export const usePostBidang = () => {
                         },
                         duration: 5000
                     })
-                    
+
                     })
                 }
             } else {
@@ -95,7 +89,7 @@ export const usePostBidang = () => {
 }
 
 
-export const useUpdateBidang =()=>{    
+export const useUpdateBidang =()=>{
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: async (data: { id: string; formData: any }) => {
@@ -108,7 +102,7 @@ export const useUpdateBidang =()=>{
 
             queryClient.invalidateQueries({ queryKey: ['bidang'] })
         },
-        
+
         onError: (error: any) => {
             console.error("❌ Error updating:", error)
             toast.error('Gagal mengupdate bidang!')
@@ -131,4 +125,3 @@ export const useSearchBidang = () => {
         refetchInterval: false,
     })
 }
-
