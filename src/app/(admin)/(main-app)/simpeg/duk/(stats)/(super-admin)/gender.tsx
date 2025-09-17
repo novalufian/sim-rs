@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-
+import {usePegawaiJenisKelamin} from '@/hooks/fetch/pegawai/usePegawaiState'
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -13,6 +13,8 @@ import {
     ArcElement
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { HiExternalLink } from 'react-icons/hi';
+import Link from 'next/link';
 
 ChartJS.register(
     CategoryScale,
@@ -34,25 +36,19 @@ interface GenderStats {
 
 export default function GenderStats() {
     const [stats, setStats] = useState<GenderStats | null>(null);
-    const [loading, setLoading] = useState(true);
+    // const [loading, setLoading] = useState(true);
+    const { data, isLoading, isError } = usePegawaiJenisKelamin();
+
     
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch('/api/duk?gender=true');
-                const result = await response.json();
-                setStats(result.data);
-            } catch (error) {
-                console.error('Error fetching gender stats:', error);
-            } finally {
-                setTimeout(function(){setLoading(false);}, 1000)
-            }
-        };
-        
-        fetchData();
-    }, []);
+        if(data){
+            setStats(data.data.state)
+        }
+    }, [data]);
     
-    if (loading) return <div className='rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[450px] flex justify-center items-center flex-col'>
+    
+    if (isLoading) return <div className='rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[450px] flex justify-center items-center flex-col'>
         <AiOutlineLoading3Quarters className='dark:text-white w-10 h-10 mb-3 animate-spin'/>
         <p className='text-xl dark:text-white'>Loading...</p>
     </div>;
@@ -97,14 +93,17 @@ export default function GenderStats() {
     return (
         
         <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]">
-            <div className=" bg-white shadow-default rounded-2xl pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6">
-                <div className="flex justify-between flex-col">
-                    <h3 className="text-3xl font-semibold text-gray-800 dark:text-white/90">
-                    Gender
-                    </h3>
-                    <p className=" font-normal text-gray-500 text-theme-sm dark:text-gray-400 mb-10">
-                    keseluruhan pegawai
-                    </p>
+            <div className=" bg-white shadow-default rounded-2xl pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6 mb-10">
+                <div className="flex justify-between flex-row">
+                    <div className="flex flex-col sm:items-left sm:justify-between items-left">
+                        <h3 className="text-3xl font-bold dark:text-white">Gender</h3>
+                        <p className=" font-normal text-gray-500 text-theme-sm dark:text-gray-400 ">keseluruhan pegawai</p>
+                    </div>
+
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between items-center">
+                    <Link href="/simpeg/cuti" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">lihat detail <HiExternalLink/></Link>
+                </div>
+                    
                 </div>
                 <div className="relative ">
                     <div className="max-h-[330px]">

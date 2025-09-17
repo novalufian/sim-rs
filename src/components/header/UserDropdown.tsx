@@ -53,10 +53,11 @@ useEffect(() => {
     setIsLoading(whoAmILoading);
     if (whoamiData?.data) {
         const userData = {
-            id: whoamiData.data.id_pegawai,
+            id: whoamiData.data.id,
             name: whoamiData.data.nama,
             email: whoamiData.data.username,
             role: whoamiData.data.role,
+            id_pegawai: whoamiData.data.id_pegawai,
         };
 
         if (!user) {

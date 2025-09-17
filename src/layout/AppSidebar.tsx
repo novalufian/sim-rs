@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
     icon: <FiUsers className="h-6 w-6" />,
     name: "SIMPEG",
     path: "/simpeg",
-    disable : true
+    disable : false
 
   },
   {

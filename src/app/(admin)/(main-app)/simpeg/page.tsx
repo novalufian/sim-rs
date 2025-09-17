@@ -1,86 +1,31 @@
-import { Metadata } from "next";
+"use client";
 import React from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { useAppSelector } from '@/hooks/useAppDispatch';
+import getGreeting from '@/utils/greatingMsg'
+import PageSuperAdmin from "./page-super-admin";
+import PageUser from "./page-user";
+import PageAdmin from "./page-admin";
 
-export const metadata: Metadata = {
-    title: "Simpeg - RS",
-    description: "This is Next.js Blank Page TailAdmin Dashboard Template",
-};
-
-const menu =[
-    {
-        "icon" : "/images/icons/duk.png",
-        "title" : "Daftar Urut Kepangkatan",
-        "url" : "/simpeg/duk"
-    },
-    {
-        "icon" : "/images/icons/cuti.png",
-        "title" : "Cuti Pegawai",
-        "url" : "/simpeg/cuti"
-
-    },
-    {
-        "icon" : "/images/icons/mutasi.png",
-        "title" : "Mutasi Pegawai",
-        "url" : "/simpeg/mutasi"
-
-    },
-    {
-        "icon" : "/images/icons/gaji.png",
-        "title" : "Kenaikan Gaji",
-        "url" : "/simpeg/kenaikan-gaji"
-
-    },
-    {
-        "icon" : "/images/icons/belajar.png",
-        "title" : "Tugas / Ijin Belajar",
-        "url" : "/simpeg/ijin-belajar"
-
-    },
-    {
-        "icon" : "/images/icons/pensiun.png",
-        "title" : "Pensiun Pegawai",
-        "url" : "/simpeg/pensiun"
-
-    },
-    {
-        "icon" : "/images/icons/kawin.png",
-        "title" : "Kawin Cerai",
-        "url" : "/simpeg/kawin-cerai"
-
-    },
-    {
-        "icon" : "/images/icons/surat.png",
-        "title" : "Persuratan",
-        "url" : "/simpeg/persuratan"
-
-    },
-
-]
 
 export default function BlankPage() {
+    const user = useAppSelector((state) => state.auth.user);
+    const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+    const token = useAppSelector((state) => state.auth.token);
+
+    console.log(user?.role, isAuthenticated)
+
     return (
     <>
-
-        <h1 className="w-full box-border px-10 text-3xl font-semibold text-gray-600 mt-10 dark:text-white/70">👋 <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Hi Nova , </span> <br />Selemat datang di Simpeg!</h1>
-
-        <div className="rounded-2xl px-5 py-7 xl:px-10 xl:py-12 flex flex-wrap mb-4 gap-3 dark:text-white">
-            {menu.map((item, index) => (
-                <Link 
-                    href={item.url} 
-                    key={index}
-                    className="w-[calc(25%-12px)] h-[200px] cursor-pointer "
-                >
-                    <div 
-                        className="w-full h-full rounded-2xl border-2 border-white hover:border hover:border-white hover:shadow-slate-900 hover:bg-white/90 dark:hover:bg-gray-800 bg-white/50 p-5 dark:border-gray-800 dark:bg-gray-800/20 md:p-6 flex justify-center flex-col items-center "
-                    >
-                        <Image width={64} height={64} src={item.icon} alt={item.title}/>
-                        <p className="w-7/10 text-center mt-4">{item.title}</p>
-                    </div>
-                </Link>
-            ))}
+        <div className='flex flex-col mb-5'>
+            <h2 className='text-4xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2'> 👋 Hi, {getGreeting()}</h2>
+            <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-400 via-blue-800 to-dark-blue-600 bg-clip-text text-transparent capitalize'>{user?.name.toLocaleLowerCase()}</h2>
         </div>
+
+        {user?.role === "super_admin" && <PageSuperAdmin />}
+        {user?.role === "user" && <PageUser />}
+        {user?.role === "admin" && <PageAdmin />}
+
+        
     </>
     );
 }

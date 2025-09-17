@@ -77,9 +77,10 @@ export const usePegawai = (filters: PegawaiFilters = {}) => {
       params.append('limit', limit.toString())
       
       if (sortBy) params.append('sortBy', sortBy)
-        if (sortOrder) params.append('sortOrder', sortOrder)
+      if (sortOrder) params.append('sortOrder', sortOrder)
           
-      const res = await api.get(`/pegawai`)
+      // const res = await api.get(`/pegawai`)
+      const res = await api.get(`/pegawai?${params.toString()}`);
       return res.data // This should contain { data: [], total: count }
     },
     refetchOnWindowFocus: false,

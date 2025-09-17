@@ -48,7 +48,7 @@ export default function HighlightTable() {
                         {employees.map((employee, index)=>(
                             <tr key={index} className="hover:dark:bg-gray-800">
                                 <td className="p-3">{index+1}</td>
-                                <td className="p-3">{employee['NAMA']}</td>
+                                <td className="p-3">{employee['nama']}</td>
                                 <td className="p-3"></td>
                             </tr>
                         ))}

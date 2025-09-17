@@ -15,7 +15,7 @@ const mainMenu = [
     "title" : "SIMPEG",
     "icon" : "/images/icons/main-menu/simpeg.png",
     "url" : "/simpeg",
-    "disable" : true
+    "disable" : false
   },
   {
     "title" : "SIM-ASSET",

@@ -1,12 +1,12 @@
 import React from 'react'
-import GenderStats from './(stats)/gender';
-import GelarStats from './(stats)/gelar';
+import GenderStats from './(stats)/(super-admin)/gender';
 import { BsArrowUpRightCircle } from "react-icons/bs";
 import Link from 'next/link';
-import JabatanChart from './(stats)/jabatan';
-import HighlightTable from '@/app/(admin)/(others-pages)/(tables)/highlight-table/page';
-import UmurStats from './(stats)/umur';
+import UmurStats from './(stats)/(super-admin)/umur';
 import getGreeting from '@/utils/greatingMsg';
+import AgamaStats from './(stats)/(super-admin)/agama';
+import StatusPerkawinanStats from './(stats)/(super-admin)/statusPerkawinan';
+import StatusPekerjaanStats from './(stats)/(super-admin)/statusPekerjaan';
 
 // Function to generate greeting based on time
 
@@ -26,24 +26,34 @@ export default function page() {
           </div>
         </Link>
       </div>
+      <div className="col-span-12 my-5 text-center">
+        <h1 className='text-4xl leading-tight font-thin tracking-tight  dark:text-gray-400'>Statistik Demografi</h1>
+      </div>
 
       <div className="col-span-4">
           <GenderStats/>
       </div>
+      <div className="col-span-4">
+          <AgamaStats/>
+      </div>
 
-      <div className="col-span-8">
+      <div className="col-span-4">
+          <StatusPerkawinanStats/>
+      </div>
+
+      {/* <div className="col-span-8">
         <GelarStats/>
-      </div>
-
-      <div className="col-span-12">
-        <JabatanChart></JabatanChart>
-      </div>
-
-      <div className="col-span-5">
-        <HighlightTable/>
-      </div>
+      </div> */}
 
       <div className="col-span-7">
+        <StatusPekerjaanStats/>
+      </div>
+
+      {/* <div className="col-span-5">
+        <HighlightTable/>
+      </div> */}
+
+      <div className="col-span-5">
         <UmurStats/>
       </div>
     </div>

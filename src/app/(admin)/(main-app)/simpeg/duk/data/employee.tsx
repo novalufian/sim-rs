@@ -1,24 +1,33 @@
 export interface Employee {
-  NAMA: string;
-  "NIP/NIPPPK": string;
-  PANGKAT: string;
-  GOL: string;
-  TMT: string;
-  JABATAN: string;
-  "NO. SK PANGKAT AKHIR": string;
-  TMTJAB: string;
-  ESELON: string;
-  "TH MSKRJ": string;
-  "BLN MS KRJ": string;
-  PENDIDIKAN: string;
-  "TAHUN LULUS": string;
-  GELAR: string;
-  TINGKAT: string;
-  "TMPT LHR": string;
-  TGLLHR: string;
-  UMUR: string;
-  "JENIS KELAMIN": string;
-  AGAMA: string;
+  id: string;
+  id_pegawai: string;
+  nama: string;
+  nip: string;
+  tempat_lahir?: string | null;
+  tanggal_lahir?: string | null;
+  umur?: number | null;
+  jenis_kelamin?: string | null;
+  agama?: string | null;
+  status_perkawinan?: string | null;
+  status_pekerjaan?: string | null;
+  alamat_ktp?: string | null;
+  alamat_domisili?: string | null;
+  no_kk?: {
+    masked: string;
+    unmasked: string;
+  } | null;
+  no_rekening?: {
+    masked: string;
+    unmasked: string;
+  } | null;
+  no_hp?: {
+    masked: string;
+    unmasked: string;
+  } | null;
+  email?: string | null;
+  tmt_pangkat?: string | null;
+  tmt_jabatan?: string | null;
+  is_deleted: boolean;
 }
 
 export interface Column {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Pagination from "@/components/tables/Pagination";
 import ColumnFilter from "@/components/tables/ColumnFilter";
 import ActionDropdown from "@/components/tables/ActionDropdown";
@@ -7,33 +7,28 @@ import { DUKTableColumns } from "@/app/(admin)/(main-app)/simpeg/duk/data/tableC
 import { Employee, DropdownState } from "@/app/(admin)/(main-app)/simpeg/duk/data/employee";
 import { getColumnValue } from "@/app/(admin)/(main-app)/simpeg/duk/data/tableHelpers";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
+import { usePegawai } from "@/hooks/fetch/pegawai/usePegawai";
 
 function Page() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-    new Set(["no", "nama", "nip", "pangkat", "gol", "jabatan", "actions"])
+    new Set(["no", "nama", "nip", "tempat_lahir", "tanggal_lahir", "umur", "jenis_kelamin", "agama", "status_pekerjaan", "actions"])
   );
   const [showColumnFilter, setShowColumnFilter] = useState(false);
   const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
   const itemsPerPage = 10;
 
+  // Use the usePegawai hook
+  const { data: pegawaiData, isLoading, error } = usePegawai({
+    page: currentPage,
+    limit: itemsPerPage
+  });
+
+  const employees: Employee[] = pegawaiData?.data.pegawai || [];
+  const totalPages = pegawaiData?.data.total ? Math.ceil(pegawaiData.data.total / itemsPerPage) : 0;
+
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/duk");
-        const result = await response.json();
-        setEmployees(result.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-
     const handleClickOutside = () => {
       setDropdownStates({});
     };
@@ -80,17 +75,21 @@ function Page() {
     console.log("Delete:", employee);
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
+  // if (isLoading) {
+  //   return <div>Loading...</div>;
+  // }
+
+  if (error) {
+    return <div>Error loading data: {error.message}</div>;
   }
 
   // Calculate pagination
-  const totalPages = Math.ceil(employees.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentEmployees = employees.slice(startIndex, endIndex);
+  const currentEmployees = employees;
 
   return (
+    <Suspense fallback={<div className="container mx-auto px-4"><div>Loading...</div></div>}>
     <div className="container mx-auto px-4">
       <style jsx global>{`
             /* Hide scrollbar for Chrome, Safari and Opera */
@@ -188,7 +187,7 @@ function Page() {
       {/* <PageBreadcrumb pageTitle="Data urut kepegawaian" /> */}
 
       <ColumnFilter
-        addLink="/sim-aduan/lapor"
+        addLink="/simpeg/duk/pegawai"
         columns={DUKTableColumns}
         visibleColumns={visibleColumns}
         toggleColumn={toggleColumn}
@@ -225,7 +224,22 @@ function Page() {
                 </tr>
               </thead>
               <tbody className="bg-white text-gray-700 dark:bg-gray-900 dark:text-gray-200 divide-y divide-gray-200 dark:divide-gray-700">
-                {currentEmployees.map((employee, index) => (
+                {
+                isLoading ? Array.from({ length: 10 }).map((_, index) => (
+                  <tr key={index} className="animate-pulse">
+                    {DUKTableColumns.map(
+                      (column) =>
+                        visibleColumns.has(column.id) && (
+                          <td
+                            key={column.id}
+                            className={`p-3 whitespace-nowrap`}
+                          >
+                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+                          </td>
+                        )
+                    )}
+                  </tr>
+                )) : ( currentEmployees.map((employee, index) => (
                   <tr key={index} className="group group-hover:bg-gray-50 hover:cursor-pointer">
                     {DUKTableColumns.map(
                       (column) =>
@@ -258,7 +272,7 @@ function Page() {
                         )
                     )}
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>
@@ -273,6 +287,7 @@ function Page() {
         />
       </div>
     </div>
+    </Suspense>
   );
 }
 
