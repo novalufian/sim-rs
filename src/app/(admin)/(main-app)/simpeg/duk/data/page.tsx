@@ -8,12 +8,44 @@ import { Employee, DropdownState } from "@/app/(admin)/(main-app)/simpeg/duk/dat
 import { getColumnValue } from "@/app/(admin)/(main-app)/simpeg/duk/data/tableHelpers";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import { usePegawai } from "@/hooks/fetch/pegawai/usePegawai";
+import { useAppSelector } from '@/hooks/useAppDispatch';
+import router from "next/router";
+import nProgress from "nprogress";
+
 
 function Page() {
   const [currentPage, setCurrentPage] = useState(1);
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-    new Set(["no", "nama", "nip", "tempat_lahir", "tanggal_lahir", "umur", "jenis_kelamin", "agama", "status_pekerjaan", "actions"])
+    new Set([
+      "no",                     // NO
+      "nama",                   // NAMA
+      "nip",                    // NIP/NIPPPK
+      "status_pekerjaan",       // STATUS PEKERJAAN
+      // "pangkat_tmt",            // PANGKAT/GOL (kalau ada golongan pisah, tambahin juga)
+      "pengangkatan_tmt",       // TMT
+      "jabatan",                // JABATAN
+      "pengangkatan_nomor_sk",  // NO. SK PANGKAT AKHIR
+      // "jabatan_tmt",            // TMTJAB
+      // "eselon",               // ESELON (kalau nanti ada)
+      "pengangkatan_masakerja", // THN MSKRJ / BLN MSKRJ
+      "pendidikan_institusi",   // PENDIDIKAN
+      "pendidikan_jenjang",     // Jenjang
+      // "pendidikan_gelar",       // GELAR
+      // "pendidikan_tingkat",   // TINGKAT (kalau ada field)
+      "pendidikan_tahun_selesai", // TAHUN LULUS
+      "tempat_lahir",           // TMPT LHR
+      "tanggal_lahir",          // TGLLHR
+      "umur",                   // UMUR
+      "jenis_kelamin",          // JENIS KELAMIN
+      "agama",                  // AGAMA
+      "actions"
+    ])
   );
+  //search and default fetch hooks
+  const {keyword, trigger} = useAppSelector(state => state.search)
+  // const pegawaiQuery = UsePegawaiSearch({ q: keyword, page: currentPage, limit: itemsPerPage, ...filters });
+
+  const [filters, setFilters] = useState({})
   const [showColumnFilter, setShowColumnFilter] = useState(false);
   const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
   const itemsPerPage = 10;
@@ -21,7 +53,8 @@ function Page() {
   // Use the usePegawai hook
   const { data: pegawaiData, isLoading, error } = usePegawai({
     page: currentPage,
-    limit: itemsPerPage
+    limit: itemsPerPage,
+    ...filters
   });
 
   const employees: Employee[] = pegawaiData?.data.pegawai || [];
@@ -38,6 +71,15 @@ function Page() {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+    
+    nProgress.start();
+    setTimeout(() => {
+      nProgress.done();
+    }, 300);
+  };
 
   const toggleColumn = (columnId: string) => {
     const newVisibleColumns = new Set(visibleColumns);
@@ -74,10 +116,6 @@ function Page() {
   const handleDelete = (employee: Employee) => {
     console.log("Delete:", employee);
   };
-
-  // if (isLoading) {
-  //   return <div>Loading...</div>;
-  // }
 
   if (error) {
     return <div>Error loading data: {error.message}</div>;
@@ -193,6 +231,7 @@ function Page() {
         toggleColumn={toggleColumn}
         showColumnFilter={showColumnFilter}
         setShowColumnFilter={setShowColumnFilter}
+        onFilterChange={handleFilterChange}
       />
 
       <div className="relative sm:rounded-lg bg-transparent">
@@ -292,3 +331,7 @@ function Page() {
 }
 
 export default Page;
+function UsePegawaiSearch(arg0: any) {
+  throw new Error("Function not implemented.");
+}
+
