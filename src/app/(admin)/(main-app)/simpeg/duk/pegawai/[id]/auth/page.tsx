@@ -3,11 +3,12 @@ import React from "react";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useGetPegawaiById, useUpdatePegawai } from '@/hooks/fetch/pegawai/usePegawai';
-
+import { useAppSelector } from '@/hooks/useAppDispatch';
 
 export default function Page() {
+    const user = useAppSelector((state) => state.auth.user);
     const params = useParams();
-    const id = params?.id as string;
+    const id = ( params?.id === "data-saya") ? user?.id_pegawai as string : params?.id as string;
     const idParam = id;
     const {
         register,

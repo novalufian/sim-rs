@@ -74,7 +74,7 @@ export default function PageUser() {
             <h1 className="col-span-12 text-center text-2xl my-5 text-gray-500">Menu Utama</h1>
 
             <div className="col-span-3">
-                <Link href="duk/data" className='group'>
+                <Link href="simpeg/duk/pegawai/data-saya" className='group'>
                 <div className="group-hover:dark:bg-blue-light-300 text-blue-600 rounded-2xl border border-gray-200 bg-blue-100/50 hover:bg-blue-600 hover:text-white p-4 transition-all dark:border-gray-800 dark:bg-white/[0.03]  sm:p-6 min-h-30 dark:text-blue-light-300 group-hover:dark:text-gray-800 flex justify-between items-center ">
                     <h1 className='text-2xl leading-tight font-semibold   tracking-tight '>Kelola <br /> Data Diri</h1>
                     <BsArrowUpRightCircle className='w-15 h-15 group-hover:scale-140 transition-all group-hover:rotate-45 '/>
@@ -101,7 +101,7 @@ export default function PageUser() {
             </div>
 
             <div className="col-span-3">
-                <Link href="duk/data" className='group'>
+                <Link href="duk/pegawai/data-saya" className='group'>
                 <div className="group-hover:dark:bg-blue-light-300 text-blue-600 rounded-2xl border border-gray-200 bg-blue-100/50 hover:bg-blue-600 hover:text-white p-4 transition-all dark:border-gray-800 dark:bg-white/[0.03]  sm:p-6 min-h-30 dark:text-blue-light-300 group-hover:dark:text-gray-800 flex justify-between items-center ">
                     <h1 className='text-2xl leading-tight font-semibold   tracking-tight '>Mutasi</h1>
                     <BsArrowUpRightCircle className='w-15 h-15 group-hover:scale-140 transition-all group-hover:rotate-45 '/>

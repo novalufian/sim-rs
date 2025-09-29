@@ -3,6 +3,8 @@ import PathBreadcrumb from '@/components/common/PathBreadcrumb';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useParams } from 'next/navigation';
+
+
 export default function Layout({
     children,
 }: {
@@ -10,7 +12,8 @@ export default function Layout({
 }) {
     const pathname = usePathname();
     const params = useParams();
-    const id = params?.id as string;    
+    const id = params?.id as string;
+
 
     const activeLinkClass = "text-base font-medium text-white dark:text-gray-300 dark:bg-blue-900 bg-blue-600 w-full p-2 px-4 rounded-md transition-colors duration-300";
     const inactiveLinkClass = "text-base font-medium text-gray-700 dark:text-gray-300 w-full p-2 px-4 rounded-md dark:hover:bg-gray-800 hover:bg-gray-200 transition-colors duration-300";

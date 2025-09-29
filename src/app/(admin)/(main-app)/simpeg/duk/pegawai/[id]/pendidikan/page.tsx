@@ -3,6 +3,7 @@ import React, { useMemo} from 'react';
 import { useParams } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useGetPegawaiById, useUpdatePegawai } from '@/hooks/fetch/pegawai/usePegawai';
+import { useAppSelector } from '@/hooks/useAppDispatch';
 
 type RiwayatPendidikan = {
   status_pendidikan: { nama: string };
@@ -25,9 +26,10 @@ const statusPendidikanOptions = [
 ];
 
 export default function PendidikanPage() {
+  const user = useAppSelector((state) => state.auth.user);
   const params = useParams();
-  const id = params?.id as string;
-  const idParam = id;
+  const id = (params?.id === "data-saya") ? user?.id_pegawai : params?.id;
+  const idParam = id as string;
   
 
   const { data, isLoading } = useGetPegawaiById(idParam);

@@ -3,6 +3,8 @@ import React, { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'next/navigation';
 import { useGetPegawaiById, useUpdatePegawai } from '@/hooks/fetch/pegawai/usePegawai';
+import { useAppSelector } from '@/hooks/useAppDispatch';
+
 
 type FormValues = {
   no_hp?: string | null;
@@ -15,9 +17,10 @@ type FormValues = {
 };
 
 export default function KontakDokumenPage() {
+  const user = useAppSelector((state) => state.auth.user);
   const params = useParams();
-  const id = params?.id as string;
-  const idParam = id;
+  const id = (params?.id === "data-saya") ? user?.id_pegawai : params?.id ;  
+  const idParam = id as string;
 
 
   const { data, isLoading } = useGetPegawaiById(idParam);

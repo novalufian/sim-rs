@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react'
 import PegawaiForm from '@/components/form/PegawaiForm';
 import { useGetPegawaiById } from '@/hooks/fetch/pegawai/usePegawai';
 import { useParams } from 'next/navigation';
+import { useAppSelector } from '@/hooks/useAppDispatch';
+
 
 const defaultPegawaiData = {
     id: '1',
@@ -25,8 +27,11 @@ const defaultPegawaiData = {
 };
 
 function PegawaiPage() {
+    const user = useAppSelector((state) => state.auth.user);
+
+
     const params = useParams();
-    const id = params?.id as string;
+    const id = (params?.id === "data-saya") ? user?.id_pegawai as string : params?.id as string;
     const idParam = id;
     const [editing, setEditing] = useState(false);
     const [pegawaiData, setPegawaiData] = useState(defaultPegawaiData);
