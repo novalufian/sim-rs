@@ -55,6 +55,11 @@ export default function PegawaiQueryFilter({ onFilterChange }: PegawaiQueryFilte
                 jenjang_pendidikan: params.get("jenjang_pendidikan") || "",
             };
 
+            const allEmpty = Object.values(initialFilters).every(value => value === "");
+            if (allEmpty) {
+                updateURLParams(initialFilters); // set URL dengan default kosong
+            }
+
             setFilters(initialFilters);
             onFilterChange(initialFilters);
             setIsInitialized(true);

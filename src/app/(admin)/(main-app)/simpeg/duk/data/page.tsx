@@ -11,6 +11,9 @@ import { usePegawai } from "@/hooks/fetch/pegawai/usePegawai";
 import { useAppSelector } from '@/hooks/useAppDispatch';
 import router from "next/router";
 import nProgress from "nprogress";
+import { usePegawaiSearch } from "@/hooks/fetch/pegawai/usePegawaiSearch";
+import LeftDrawer from "@/components/drawer/leftDrawer";
+import SelectedPegawai from "./selectedPegawai";
 
 
 function Page() {
@@ -41,25 +44,57 @@ function Page() {
       "actions"
     ])
   );
-  //search and default fetch hooks
-  const {keyword, trigger} = useAppSelector(state => state.search)
-  // const pegawaiQuery = UsePegawaiSearch({ q: keyword, page: currentPage, limit: itemsPerPage, ...filters });
 
-  const [filters, setFilters] = useState({})
+  //drawer pegawai
+  const [pegawaiDrawer, setPegawaiDrawer] = useState(false);
+  const [selectedPegawai, setSelectedPegawai] = useState<Employee | null>(null); 
+
+  // Search state from Redux
+  const { keyword, trigger } = useAppSelector(state => state.search);
+  const [ employees, setEmployees ] = useState<Employee[]>([]);
+  // Filter and UI states
+  
+  const [filters, setFilters] = useState({});
   const [showColumnFilter, setShowColumnFilter] = useState(false);
   const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
   const itemsPerPage = 10;
 
-  // Use the usePegawai hook
-  const { data: pegawaiData, isLoading, error } = usePegawai({
+  // Default fetch hook
+  const { data: pegawaiData, isLoading: isLoadingDefault, error: errorDefault } = usePegawai({
     page: currentPage,
     limit: itemsPerPage,
     ...filters
   });
 
-  const employees: Employee[] = pegawaiData?.data.pegawai || [];
-  const totalPages = pegawaiData?.data.total ? Math.ceil(pegawaiData.data.total / itemsPerPage) : 0;
+  // Search fetch hook
+  const { data: pegawaiSearchData, isLoading: isLoadingSearch, error: errorSearch } = usePegawaiSearch({
+    q: keyword,
+    page: currentPage,
+    limit: itemsPerPage,
+    ...filters
+  });
 
+  // Determine which data to use based on keyword presence
+  const isSearchMode = trigger || keyword.trim() !== '';
+  // const isSearchMode = keyword && keyword.trim() !== '';
+  // const isUsingSearch = trigger ;
+
+  const activeData = isSearchMode ? pegawaiSearchData : pegawaiData;
+  const isLoading = isSearchMode ? isLoadingSearch : isLoadingDefault;
+  const error = isSearchMode ? errorSearch : errorDefault;
+  // Extract employees and pagination info
+  // const employees: Employee[] = activeData?.data.pegawai || [];
+  const totalPages = activeData?.data.total ? Math.ceil(activeData.data.total / itemsPerPage) : 0;
+
+
+  console.log(isSearchMode)
+  // Reset to page 1 when switching between search and default mode
+  useEffect(() => {
+    if(activeData) {
+      setEmployees(activeData.data.pegawai);
+      setCurrentPage(1);
+    }
+  }, [activeData]);
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -74,6 +109,7 @@ function Page() {
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
     
     nProgress.start();
     setTimeout(() => {
@@ -123,7 +159,6 @@ function Page() {
 
   // Calculate pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
   const currentEmployees = employees;
 
   return (
@@ -221,8 +256,8 @@ function Page() {
             }
         `}</style>
 
-      <PathBreadcrumb defaultTitle="Daftar data"/>
-      {/* <PageBreadcrumb pageTitle="Data urut kepegawaian" /> */}
+      <PathBreadcrumb defaultTitle="Data Pegawai"/>
+      
 
       <ColumnFilter
         addLink="/simpeg/duk/pegawai"
@@ -263,55 +298,76 @@ function Page() {
                 </tr>
               </thead>
               <tbody className="bg-white text-gray-700 dark:bg-gray-900 dark:text-gray-200 divide-y divide-gray-200 dark:divide-gray-700">
-                {
-                isLoading ? Array.from({ length: 10 }).map((_, index) => (
-                  <tr key={index} className="animate-pulse">
-                    {DUKTableColumns.map(
-                      (column) =>
-                        visibleColumns.has(column.id) && (
-                          <td
-                            key={column.id}
-                            className={`p-3 whitespace-nowrap`}
-                          >
-                            <div className="h-4 bg-gray-200 rounded w-full"></div>
-                          </td>
-                        )
-                    )}
+                {isLoading ? (
+                  // Loading skeleton
+                  Array.from({ length: 10 }).map((_, index) => (
+                    <tr key={index} className="animate-pulse">
+                      {DUKTableColumns.map(
+                        (column) =>
+                          visibleColumns.has(column.id) && (
+                            <td
+                              key={column.id}
+                              className={`p-3 whitespace-nowrap`}
+                            >
+                              <div className="h-4 bg-gray-200 rounded w-full"></div>
+                            </td>
+                          )
+                      )}
+                    </tr>
+                  ))
+                ) : currentEmployees.length === 0 ? (
+                  // No data message
+                  <tr >
+                    <td 
+                      colSpan={DUKTableColumns.filter(col => visibleColumns.has(col.id)).length}
+                      className="p-8 text-center text-gray-500"
+                    >
+                      {isSearchMode 
+                        ? `Tidak ada data yang ditemukan untuk pencarian "${keyword}"`
+                        : "Tidak ada data pegawai"
+                      }
+                    </td>
                   </tr>
-                )) : ( currentEmployees.map((employee, index) => (
-                  <tr key={index} className="group group-hover:bg-gray-50 hover:cursor-pointer">
-                    {DUKTableColumns.map(
-                      (column) =>
-                        visibleColumns.has(column.id) && (
-                          <td
-                            key={column.id}
-                            className={`p-3 whitespace-nowrap group-hover:bg-gray-100 dark:group-hover:bg-gray-800    ${
-                              column.sticky === "left"
-                                ? "sticky-left bg-white group-hover:bg-gray-200 dark:group-hover:bg-gray-700  dark:bg-gray-900 z-20 text-center "
-                                : column.sticky === "right"
-                                ? "sticky-right bg-white  group-hover:bg-gray-200 dark:group-hover:bg-gray-700  dark:bg-gray-900 z-20"
-                                : ""
-                            }`}
-                          >
-                            {column.id === "no" ? (
-                              startIndex + index + 1
-                            ) : column.id === "actions" ? (
-                              <ActionDropdown
-                                index={index}
-                                isOpen={dropdownStates[index]}
-                                onToggle={(e) => toggleDropdown(index, e)}
-                                onView={() => handleView(employee)}
-                                onEdit={() => handleEdit(employee)}
-                                onDelete={() => handleDelete(employee)}
-                              />
-                            ) : (
-                              getColumnValue(employee, column.id)
-                            )}
-                          </td>
-                        )
-                    )}
-                  </tr>
-                )))}
+                ) : (
+                  // Data rows
+                  currentEmployees.map((employee, index) => (
+                    <tr key={index} className="group group-hover:bg-gray-50 hover:cursor-pointer" onClick={()=>{
+                      setPegawaiDrawer(true)
+                      setSelectedPegawai(employee)
+                      }}>
+                      {DUKTableColumns.map(
+                        (column) =>
+                          visibleColumns.has(column.id) && (
+                            <td
+                              key={column.id}
+                              className={`p-3 whitespace-nowrap group-hover:bg-gray-100 dark:group-hover:bg-gray-800    ${
+                                column.sticky === "left"
+                                  ? "sticky-left bg-white group-hover:bg-gray-200 dark:group-hover:bg-gray-700  dark:bg-gray-900 z-20 text-center "
+                                  : column.sticky === "right"
+                                  ? "sticky-right bg-white  group-hover:bg-gray-200 dark:group-hover:bg-gray-700  dark:bg-gray-900 z-20"
+                                  : ""
+                              }`}
+                            >
+                              {column.id === "no" ? (
+                                startIndex + index + 1
+                              ) : column.id === "actions" ? (
+                                <ActionDropdown
+                                  index={index}
+                                  isOpen={dropdownStates[index]}
+                                  onToggle={(e) => toggleDropdown(index, e)}
+                                  onView={() => handleView(employee)}
+                                  onEdit={() => handleEdit(employee)}
+                                  onDelete={() => handleDelete(employee)}
+                                />
+                              ) : (
+                                getColumnValue(employee, column.id)
+                              )}
+                            </td>
+                          )
+                      )}
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -326,12 +382,15 @@ function Page() {
         />
       </div>
     </div>
+
+    <LeftDrawer isOpen={pegawaiDrawer} onClose={()=>{
+        setPegawaiDrawer(false);
+        setSelectedPegawai(null);
+      }} title='Data Pegawai'>
+      <SelectedPegawai employee={selectedPegawai} />
+      </LeftDrawer>
     </Suspense>
   );
 }
 
 export default Page;
-function UsePegawaiSearch(arg0: any) {
-  throw new Error("Function not implemented.");
-}
-

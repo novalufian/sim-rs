@@ -271,6 +271,7 @@ function Page() {
             toggleColumn={toggleColumn}
             showColumnFilter={showColumnFilter}
             setShowColumnFilter={setShowColumnFilter}
+            onFilterChange={handleFilterChange}
         >
             {/* <PegawaiQueryFilter onFilterChange={handleFilterChange}/>  */}
 

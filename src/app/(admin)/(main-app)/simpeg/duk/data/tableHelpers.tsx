@@ -111,16 +111,16 @@ const renderJenisKelaminBadge = (gender: string) => {
 
 // --- date formatter ---
 const formatDate = (dateStr?: string | null): string => {
-if (!dateStr) return "";
-try {
-    return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    }).format(new Date(dateStr));
-} catch {
-    return dateStr; // fallback kalau invalid
-}
+    if (!dateStr) return "";
+    try {
+        return new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        }).format(new Date(dateStr));
+    } catch {
+        return dateStr; // fallback kalau invalid
+    }
 };
 
 // --- main renderer ---

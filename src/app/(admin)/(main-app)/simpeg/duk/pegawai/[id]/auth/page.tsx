@@ -1,9 +1,14 @@
-    "use client";
-    import React from "react";
-    import { useForm } from "react-hook-form";
+"use client";
+import React from "react";
+import { useParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { useGetPegawaiById, useUpdatePegawai } from '@/hooks/fetch/pegawai/usePegawai';
 
 
-    export default function Page() {
+export default function Page() {
+    const params = useParams();
+    const id = params?.id as string;
+    const idParam = id;
     const {
         register,
         handleSubmit,
@@ -22,16 +27,17 @@
     
     const newPassword = watch("new_password");
     
-    const handleFormSubmit = (data: any) => {
-        console.log("submit")
+    const handleFormSubmit = () => {
+        console.log("submit", idParam)
     };
 
     const handleOnCancel = () => {
         console.log("cancel")
     };
+
     
     return (
-        <div className="w-full mx-auto p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-6">
+        <div className="w-8/12 p-6 m-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-6">
         <form
             onSubmit={handleSubmit(handleFormSubmit)}
             className="max-w-lg m-auto"
@@ -89,7 +95,7 @@
                 {...register("old_password", { required: "Password lama wajib diisi" })}
                 type="password"
                 placeholder="Masukkan password lama"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
             />
             {errors.old_password && (
                 <p className="text-red-500 text-sm mt-1">
@@ -110,7 +116,7 @@
                 })}
                 type="password"
                 placeholder="Masukkan password baru"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
             />
             {errors.new_password && (
                 <p className="text-red-500 text-sm mt-1">
@@ -132,7 +138,7 @@
                 })}
                 type="password"
                 placeholder="Ulangi password baru"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
             />
             {errors.confirm_password && (
                 <p className="text-red-500 text-sm mt-1">
@@ -163,4 +169,5 @@
         </form>
         </div>
     );
-    }
+  }
+

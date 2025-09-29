@@ -63,19 +63,19 @@ export const usePegawaiSearch = (filters: PegawaiSearchFilters) => {
         queryKey: ['pegawaiSearch', filters],
         queryFn: async () => {
             const params = new URLSearchParams()
-            params.append('search', q) // 'search' parameter for the backend search endpoint
+            // params.append('keyword', q) // 'search' parameter for the backend search endpoint
             
             if (nama) params.append('nama', nama)
-                if (nip) params.append('nip', nip)
-                    if (jenis_kelamin) params.append('jenis_kelamin', jenis_kelamin)
-                        if (agama) params.append('agama', agama)
-                            if (status_perkawinan) params.append('status_perkawinan', status_perkawinan)
-                                if (status_pekerjaan) params.append('status_pekerjaan', status_pekerjaan)
+            if (nip) params.append('nip', nip)
+            if (jenis_kelamin) params.append('jenis_kelamin', jenis_kelamin)
+            if (agama) params.append('agama', agama)
+            if (status_perkawinan) params.append('status_perkawinan', status_perkawinan)
+            if (status_pekerjaan) params.append('status_pekerjaan', status_pekerjaan)
                                     
             params.append('page', page.toString())
             params.append('limit', limit.toString())
             
-            const res = await api.get(`/pegawai?${params.toString()}`) // Use the same /pegawai endpoint, backend distinguishes search by 'search' param
+            const res = await api.get(`/pegawai/search/${q}?${params.toString()}`) // Use the same /pegawai endpoint, backend distinguishes search by 'search' param
             return res.data
         },
         enabled: !!q, // Only run the query if 'q' (search keyword) is present

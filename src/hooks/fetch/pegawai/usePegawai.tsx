@@ -175,7 +175,6 @@ export const useUpdatePegawai = () => {
   return useMutation({
     mutationFn: async (data: { id: string; formData: any }) => {
       const res = await api.put('/pegawai/' + data.id, data.formData)
-      console.log(data.formData)
       return res.data
     },
     onSuccess: (data) => {

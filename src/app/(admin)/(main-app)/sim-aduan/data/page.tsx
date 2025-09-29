@@ -53,7 +53,6 @@ function Page() {
     const [totalPages, setTotalPages] = useState(0);
 
     const router = useRouter();
-    console.log(data);
     useEffect(() => {
         if(data) {
             setLapor(data.data.aduan);
@@ -233,6 +232,7 @@ function Page() {
             toggleColumn={toggleColumn}
             showColumnFilter={showColumnFilter}
             setShowColumnFilter={setShowColumnFilter}
+            onFilterChange={()=>{}}
         >
             <AduanQueryFilter onFilterChange={handleFilterChange}/>
 
