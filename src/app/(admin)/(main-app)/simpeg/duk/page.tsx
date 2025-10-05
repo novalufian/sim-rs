@@ -19,7 +19,7 @@ export default function page() {
         <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>Dedi Arpandi</h2>
       </div>
       <div className="col-span-4">
-        <Link href="duk/data" className='group'>
+        <Link href="duk/pegawai" className='group'>
           <div className="group-hover:dark:bg-amber-300 text-red-600 rounded-2xl border border-gray-200 bg-red-100/50 hover:bg-red-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03]  sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center ">
             <h1 className='text-2xl leading-tight font-semibold   tracking-tight '>Kelola <br /> Daftar Urut Kepegawaian</h1>
             <BsArrowUpRightCircle className='w-15 h-15 group-hover:scale-140 transition-all group-hover:rotate-45 '/>

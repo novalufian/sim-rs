@@ -9,11 +9,6 @@ import PageAdmin from "./page-admin";
 
 export default function BlankPage() {
     const user = useAppSelector((state) => state.auth.user);
-    const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-    const token = useAppSelector((state) => state.auth.token);
-
-    console.log(user?.role, isAuthenticated)
-
     return (
     <>
         <div className='flex flex-col mb-5'>

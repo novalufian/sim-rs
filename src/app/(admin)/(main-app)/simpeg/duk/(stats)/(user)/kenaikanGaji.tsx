@@ -26,9 +26,9 @@ ChartJS.register(
 export default function KenaikanGajiChart({ id_pegawai }: { id_pegawai: string }) {
     const { data, isLoading, error } = useKenaikanGaji({ id_pegawai, status: 'SELESAI'})
 
-    if (isLoading) return <div className='rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>Loading...</div>
-    if (error) return <div className='rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center text-red-500'>Error loading KGB</div>
-    if (!data?.data?.items?.length) return <div className='rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>No data</div>
+    if (isLoading) return <div className='rounded-2xl border border-gray-100 bg-white/50 backdrop-blur-sm dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>Loading...</div>
+    if (error) return <div className='rounded-2xl border border-gray-100 bg-white/50 backdrop-blur-sm dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center text-red-500'>Error loading KGB</div>
+    if (!data?.data?.items?.length) return <div className='rounded-2xl border border-gray-100 bg-white/50 backdrop-blur-sm dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>No data</div>
 
     const items = data.data.items
     // Sort by tanggal_pengajuan ascending to ensure line order
@@ -53,8 +53,8 @@ export default function KenaikanGajiChart({ id_pegawai }: { id_pegawai: string }
             {
                 label: 'Gaji Pokok Baru',
                 data: baru,
-                borderColor: 'rgba(16, 185, 129, 1)', // emerald
-                backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                borderColor: '#134686', // emerald
+                backgroundColor: '#134686',
                 tension: 0.3,
                 fill: false,
                 pointRadius: 3,
@@ -88,8 +88,8 @@ export default function KenaikanGajiChart({ id_pegawai }: { id_pegawai: string }
     }
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-5 min-h-[350px]">
-            <h3 className="text-3xl font-bold dark:text-white mb-2">Kenaikan Gaji Berkala</h3>
+        <div className="rounded-2xl   bg-transparent backdrop-blur-lg  p-10 min-h-[350px] pt-0">
+            <h3 className="text-3xl font-thin dark:text-white mb-5 text-center">Kenaikan Gaji Berkala</h3>
             <div className="h-[260px]">
                 <Line data={chartData as any} options={chartOptions as any} />
             </div>

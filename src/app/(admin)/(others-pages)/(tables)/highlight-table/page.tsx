@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Employee } from "@/app/(admin)/(main-app)/simpeg/duk/data/employee";
+import { Employee } from "@/app/(admin)/(main-app)/simpeg/duk/pegawai/employee";
 import { HiExternalLink } from "react-icons/hi";
 import Link from "next/link";
 

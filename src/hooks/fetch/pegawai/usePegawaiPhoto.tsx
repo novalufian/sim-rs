@@ -1,7 +1,7 @@
 import api from '@/libs/api'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-const BASE_PATH = '/kepegawaian/pegawai'
+const BASE_PATH = '/pegawai'
 
 export interface PegawaiPhotoMeta {
     description?: string

@@ -1,4 +1,4 @@
-import { Employee } from "@/app/(admin)/(main-app)/simpeg/duk/data/employee";
+import { Employee } from "@/app/(admin)/(main-app)/simpeg/duk/pegawai/employee";
 
 // --- badge helpers ---
 const renderStatusPekerjaanBadge = (status: string) => {

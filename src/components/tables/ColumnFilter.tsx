@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Column } from '@/app/(admin)/(main-app)/simpeg/duk/data/employee';
+import { Column } from '@/app/(admin)/(main-app)/simpeg/duk/pegawai/employee';
 import { AiOutlinePlus } from "react-icons/ai";
 import { CiExport } from "react-icons/ci";
 import { LuSettings2 } from "react-icons/lu";

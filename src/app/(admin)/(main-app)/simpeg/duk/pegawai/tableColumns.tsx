@@ -1,4 +1,4 @@
-import { Column } from '@/app/(admin)/(main-app)/simpeg/duk/data/employee';
+import { Column } from '@/app/(admin)/(main-app)/simpeg/duk/pegawai/employee';
 
 export const DUKTableColumns: Column[] = [
   { id: 'no', label: 'No', width: 'w-[60px]', sticky: 'left' },

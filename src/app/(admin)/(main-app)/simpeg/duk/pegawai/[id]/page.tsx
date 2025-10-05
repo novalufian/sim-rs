@@ -42,7 +42,6 @@ function PegawaiPage() {
     useEffect(() => {
         if (fetchedPegawai) {
             setPegawaiData(fetchedPegawai.data);
-            console.log(fetchedPegawai.data)
         }
     }, [fetchedPegawai]);
 

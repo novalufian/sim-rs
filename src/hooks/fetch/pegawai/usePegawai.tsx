@@ -11,16 +11,17 @@ interface PegawaiFilters {
   status_pekerjaan?: string
   page?: number
   limit?: number
-  sortBy?: string // Add if you want sorting
-  sortOrder?: 'asc' | 'desc' // Add if you want sorting
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
 }
 
-// Interface for the fetched Pegawai data (matching your Prisma schema)
 export interface Pegawai {
   id_pegawai: string;
   no_urut: number;
   nama: string;
   nip: string;
+  avatar_url: string;
+  avatar_id: string;
   tempat_lahir?: string | null;
   tanggal_lahir?: Date | null;
   umur?: number | null;
@@ -61,7 +62,7 @@ export const usePegawai = (filters: PegawaiFilters = {}) => {
     sortOrder,
   } = filters
   
-  return useQuery({ // Assuming your API returns { data: [], total: count }
+  return useQuery({
     queryKey: ['pegawai', filters],
     queryFn: async () => {
       const params = new URLSearchParams()
@@ -79,9 +80,8 @@ export const usePegawai = (filters: PegawaiFilters = {}) => {
       if (sortBy) params.append('sortBy', sortBy)
       if (sortOrder) params.append('sortOrder', sortOrder)
           
-      // const res = await api.get(`/pegawai`)
       const res = await api.get(`/pegawai?${params.toString()}`);
-      return res.data // This should contain { data: [], total: count }
+      return res.data
     },
     refetchOnWindowFocus: false,
     refetchInterval: false,
@@ -111,38 +111,37 @@ export const usePegawaiDelete = () => {
     },
     onSuccess: (data) => {
       console.log('✅ Pegawai berhasil dihapus!', data)
-      toast.success('Pegawai berhasil dihapus!')
+      toast.success('Pegawai berhasil dihapus!', { position: 'bottom-right' })
       queryClient.invalidateQueries({ queryKey: ['pegawai'] })
     },
     onError: (error: any) => {
       console.error('❌ Error deleting pegawai:', error)
-      toast.error('Gagal menghapus pegawai!')
+      toast.error('Gagal menghapus pegawai!', { position: 'bottom-right' })
     },
   })
 }
-
 
 export const usePostPegawai = () => {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async (formData: any) => { // formData will be type-checked by Zod validator
+    mutationFn: async (formData: any) => {
       const res = await api.post('/pegawai', formData)
       return res.data
     },
     onSuccess: (data) => {
       console.log('✅ Pegawai berhasil ditambahkan!', data)
-      toast.success('Pegawai berhasil ditambahkan!')
+      toast.success('Pegawai berhasil ditambahkan!', { position: 'bottom-right' })
       queryClient.invalidateQueries({ queryKey: ['pegawai'] })
     },
     onError: (error: any) => {
       if (error.response) {
         const message = error.response.data?.message || 'Unknown error'
-        const validationErrors = error.response.data?.errors // Assuming errors field from Zod validation
+        const validationErrors = error.response.data?.errors
         
         console.error('🛑 Validation error:', message)
         
-        if (validationErrors) { // Check if validationErrors exist and iterate
+        if (validationErrors) {
           Object.keys(validationErrors).forEach((key: string) => {
             const errMessages = validationErrors[key];
             if (Array.isArray(errMessages)) {
@@ -154,17 +153,18 @@ export const usePostPegawai = () => {
                     background: '#333',
                     color: '#fff',
                   },
-                  duration: 5000
+                  duration: 5000,
+                  position: 'bottom-right',
                 });
               });
             }
           });
         } else {
-          toast.error(message); // General error message if no specific validation errors
+          toast.error(message, { position: 'bottom-right' })
         }
       } else {
         console.error('❌ Unexpected error:', error)
-        toast.error('Gagal menambahkan pegawai!')
+        toast.error('Gagal menambahkan pegawai!', { position: 'bottom-right' })
       }
     },
   })
@@ -179,15 +179,15 @@ export const useUpdatePegawai = () => {
     },
     onSuccess: (data) => {
       console.log('✅ Pegawai berhasil diupdate!', data)
-      toast.success('Pegawai berhasil diupdate!')
+      toast.success('Pegawai berhasil diupdate!', { position: 'bottom-right' })
       queryClient.invalidateQueries({ queryKey: ['pegawai'] })
-      queryClient.invalidateQueries({ queryKey: ['whoami'] }) // Invalidate single item cache
-      queryClient.invalidateQueries({ queryKey: ['pegawai', data.id_pegawai] }) // Invalidate single item cache
+      queryClient.invalidateQueries({ queryKey: ['whoami'] })
+      queryClient.invalidateQueries({ queryKey: ['pegawai', data.id_pegawai] })
     },
     
     onError: (error: any) => {
       console.error('❌ Error updating pegawai:', error)
-      toast.error('Gagal mengupdate pegawai!')
+      toast.error('Gagal mengupdate pegawai!', { position: 'bottom-right' })
     },
   })
 }

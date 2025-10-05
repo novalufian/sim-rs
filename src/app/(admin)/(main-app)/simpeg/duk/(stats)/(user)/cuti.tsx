@@ -26,9 +26,9 @@ export default function UserStateCuti({id_pegawai}:{id_pegawai : string}) {
     const { data: cutiJatahData, isLoading, error } = useCutiJatahByPegawai(id_pegawai);
     const currentYear = new Date().getFullYear();
 
-    if (isLoading) return <div className='rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>Loading...</div>
-    if (error) return <div className='rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center text-red-500'>Error loading KGB</div>
-    if (!cutiJatahData) return <div className='rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>No data</div>
+    if (isLoading) return <div className='rounded-2xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>Loading...</div>
+    if (error) return <div className='rounded-2xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center text-red-500'>Error loading KGB</div>
+    if (!cutiJatahData) return <div className='rounded-2xl border border-gray-100 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>No data</div>
 
 
     const items = cutiJatahData.data.items || []
@@ -43,8 +43,8 @@ export default function UserStateCuti({id_pegawai}:{id_pegawai : string}) {
             {
                 label: 'Cuti',
                 data: [used, sisa],
-                backgroundColor: ['rgba(249, 115, 22, 0.8)', 'rgba(16, 185, 129, 0.8)'],
-                borderColor: ['rgba(249, 115, 22, 1)', 'rgba(16, 185, 129, 1)'],
+                backgroundColor: ['#ED3F27', '#FEB21A'],
+                borderColor: ['#ED3F27', '#FEB21A'],
                 borderWidth: 4,
                 circumference: 180,
                 rotation: 270,
@@ -72,9 +72,9 @@ export default function UserStateCuti({id_pegawai}:{id_pegawai : string}) {
     };
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex p-5 flex-col">
+        <div className="rounded-2xl border border-amber-300 bg-amber-100/60 dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex p-5 flex-col">
             <div className="flex flex-col items-center">
-                <h3 className="text-3xl font-bold dark:text-white">Jatah Cuti</h3>
+                <h3 className="text-3xl font-semibold tracking-tight dark:text-white">Jatah Cuti</h3>
                 <h3>{currentYear}</h3>
                 
                 <div className="w-full mt-4 max-h-[260px] pb-2 flex justify-center items-center">
@@ -82,7 +82,7 @@ export default function UserStateCuti({id_pegawai}:{id_pegawai : string}) {
                 </div>
                 <div className='flex justify-around items-center w-full'>
                     <p className='text-orange-500 text-lg'>Terpakai : {used}</p>
-                    <p className='text-teal-500 text-lg'>{sisa} : Sisa</p>
+                    <p className='text-amber-500 text-lg'>{sisa} : Sisa</p>
                 </div>
             </div>
         </div>

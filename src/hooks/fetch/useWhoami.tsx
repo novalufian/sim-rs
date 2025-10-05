@@ -10,7 +10,6 @@ export const useWhoami = () => {
         queryFn: async () => {
             try{
                 const res = await api.get(`/auth/whoami`)
-                console.log(res)
                 return res.data
             } catch (error: any) {
                 return error.response.data

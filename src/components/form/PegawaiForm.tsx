@@ -1,9 +1,27 @@
-    "use client";
-        import React, { useMemo, useState, useCallback, useEffect } from 'react';
-    import { useForm } from 'react-hook-form';
-    import { useUpdatePegawai } from '@/hooks/fetch/pegawai/usePegawai';
-    import { useUploadPegawaiPhoto } from '@/hooks/fetch/usePegawaiPhoto';
-    import { useDropzone } from 'react-dropzone';
+"use client";
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useUpdatePegawai } from '@/hooks/fetch/pegawai/usePegawai';
+import { useUploadPegawaiPhoto } from '@/hooks/fetch/pegawai/usePegawaiPhoto';
+import { useDropzone } from 'react-dropzone';
+import {z} from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+    const pegawaiSchema = z.object({
+        nama: z.string().min(1, "wajib diisi"),
+        nip: z.string().min(1, "wajib diisi"),
+        tempat_lahir: z.string().min(1, "wajib diisi"),
+        tanggal_lahir: z.string().min(1, "wajib diisi"),
+        jenis_kelamin: z.string().min(1, "wajib diisi"),
+        agama: z.string().min(1, "wajib diisi"),
+        status_perkawinan: z.string().min(1, "wajib diisi"),
+        status_pekerjaan: z.string().min(1, "wajib diisi"),
+        alamat_ktp: z.string().min(1, "wajib diisi"),
+        alamat_domisili: z.string().min(1, "wajib diisi"),
+        no_hp: z.string().min(1, "wajib diisi "),
+        email: z.string().min(1, "wajib diisi"),
+        avatar_url: z.string().min(1, "wajib diisi"),
+    });
 
     interface PegawaiData {
     id: string;
@@ -20,12 +38,8 @@
     alamat_ktp: string;
     alamat_domisili: string;
     avatar_url: string;
-        // no_kk: { masked: string; unmasked: string };
-        // no_rekening: { masked: string; unmasked: string };
     no_hp: { masked: string; unmasked: string };
     email: string;
-        // tmt_pangkat: string | null;
-        // tmt_jabatan: string | null;
     is_deleted: boolean;
     }
 
@@ -37,34 +51,37 @@
     }
 
     export default function PegawaiForm({ data, onSubmit, onCancel, isLoading }: PegawaiFormProps) {
-    const { register, handleSubmit, formState: { errors }, reset } = useForm({
+    const { 
+        register, 
+        handleSubmit, 
+        formState: { errors }, 
+        reset 
+    } = useForm({
+        resolver: zodResolver(pegawaiSchema),
+        reValidateMode: "onBlur",
+        mode: "onBlur",
         defaultValues: {
-        id: data.id,
-        nama: data.nama,
-        nip: data.nip,
-        tempat_lahir: data.tempat_lahir,
-        tanggal_lahir: data.tanggal_lahir ? new Date(data.tanggal_lahir).toISOString().split('T')[0] : '',
-        jenis_kelamin: data.jenis_kelamin,
-        agama: data.agama,
-        status_perkawinan: data.status_perkawinan,
-        status_pekerjaan: data.status_pekerjaan,
-        alamat_ktp: data.alamat_ktp,
-        alamat_domisili: data.alamat_domisili,
-        email: data.email,
-        // no_kk: data.no_kk?.unmasked || '',
-        // no_rekening: data.no_rekening?.unmasked || '',
-        no_hp: data.no_hp?.unmasked || '',
-        avatar_url : data.avatar_url || '',
-
-        // tmt_pangkat: data.tmt_pangkat ? new Date(data.tmt_pangkat).toISOString().split('T')[0] : '',
-        // tmt_jabatan: data.tmt_jabatan ? new Date(data.tmt_jabatan).toISOString().split('T')[0] : '',
+        // id: data.id,
+            nama: data.nama,
+            nip: data.nip,
+            tempat_lahir: data.tempat_lahir,
+            tanggal_lahir: data.tanggal_lahir ? new Date(data.tanggal_lahir).toISOString().split('T')[0] : '',
+            jenis_kelamin: data.jenis_kelamin,
+            agama: data.agama,
+            status_perkawinan: data.status_perkawinan,
+            status_pekerjaan: data.status_pekerjaan,
+            alamat_ktp: data.alamat_ktp,
+            alamat_domisili: data.alamat_domisili,
+            email: data.email,
+            no_hp: data.no_hp?.unmasked || '',
+            avatar_url : data.avatar_url || '',
         }
     });
 
     // Update form when data changes
     React.useEffect(() => {
         reset({
-        id: data.id,
+        // id: data.id,
         nama: data.nama,
         nip: data.nip,
         tempat_lahir: data.tempat_lahir,
@@ -76,21 +93,18 @@
         alamat_ktp: data.alamat_ktp,
         alamat_domisili: data.alamat_domisili,
         email: data.email,
-        // no_kk: data.no_kk?.unmasked || '',
-        // no_rekening: data.no_rekening?.unmasked || '',
         no_hp: data.no_hp?.unmasked || '',
         avatar_url : data.avatar_url || '',
-        // tmt_pangkat: data.tmt_pangkat ? new Date(data.tmt_pangkat).toISOString().split('T')[0] : '',
-        // tmt_jabatan: data.tmt_jabatan ? new Date(data.tmt_jabatan).toISOString().split('T')[0] : '',
         });
     }, [data, reset]);
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     // const updatePegawai = useUpdatePegawai();
-    const { mutate: updatePegawai, isPending : isLoadingUpdate,  isError : errorOnSubmit, error, isSuccess } = useUpdatePegawai()
-    const isFormLoading = isLoadingUpdate || isLoading;
-    const uploadPhoto = useUploadPegawaiPhoto();
+    const { mutate: updatePegawai, isPending : isLoadingUpdate,  isError : errorOnSubmit, error : errorMessage, isSuccess } = useUpdatePegawai()
+    const uploadPhoto= useUploadPegawaiPhoto();
+    const isFormLoading = isLoadingUpdate || isLoading   ;
+
 
     const previewUrl = useMemo(() => selectedFile ? URL.createObjectURL(selectedFile) : data.avatar_url || '', [selectedFile, data.avatar_url]);
 
@@ -108,29 +122,54 @@
     });
 
     const onFormSubmit = async (formData: any) => {
-        const payload = { ...formData , id: data.id};
         try {
-        await updatePegawai({ id: data.id_pegawai || data.id, formData: payload });
-        if (selectedFile) {
-            await uploadPhoto.mutateAsync({ id_pegawai: data.id_pegawai || data.id, file: selectedFile });
-        }
-        onSubmit({ ...formData, avatar_url: (selectedFile) ? selectedFile : data.avatar_url });
+            let avatarUrl = data.avatar_url; // default lama
+        
+            if (selectedFile) {
+                const resUploadPhoto = await uploadPhoto.mutateAsync({
+                id_pegawai: data.id_pegawai || data.id,
+                file: selectedFile,
+                });
+                avatarUrl = resUploadPhoto.data.file_url;
+            }
+        
+            const payload = { 
+                ...formData, 
+                id: data.id, 
+                avatar_url: avatarUrl, // ✅ masukkan ke payload update
+            };
+        
+            await updatePegawai({ 
+                id: data.id_pegawai || data.id, 
+                formData: payload 
+            });
+        
+            onSubmit(payload); // update state dengan data yang sudah fix
         } catch (err) {
         console.error(err);
         }
     };
 
-    const inputClass = "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed";
+    const inputClass = "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed outline-none focus:ring-0 focus:border-gray-300";
 
     useEffect(() => {
         if(errorOnSubmit){
             console.log(errorOnSubmit)
         }
-    },[errorOnSubmit])
+
+        if(errorMessage){
+            console.log(errorMessage.response.data.data)
+        }
+
+        if(isSuccess){
+            console.log(isSuccess)
+        }
+    },[errorOnSubmit, errorMessage, isSuccess, uploadPhoto.isError, uploadPhoto.error, uploadPhoto.isSuccess])
 
     return (
-        <div className="w-full mx-auto p-6">
-        <form onSubmit={handleSubmit(onFormSubmit)} className="grid grid-cols-12 gap-2 relative auto-rows-auto">
+        <div className={`w-full mx-auto p-6  relative ${isFormLoading ? ' opacity-50' : ''}`}>
+            {isFormLoading && (<div className='absolute top-0 left-0 w-full h-full z-10 cursor-not-allowed'></div>)}
+        <form onSubmit={handleSubmit(onFormSubmit)} className="grid grid-cols-12 gap-2 relative auto-rows-auto ">
 
             {/* Left Panel: Form Fields */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 col-span-8">
@@ -148,40 +187,38 @@
             </div>
 
             {/* Personal Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opa">
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Lengkap</label>
-                <input {...register('nama', { required: 'Nama wajib diisi' })} type="text" className={inputClass} placeholder="Masukkan nama lengkap" disabled={isFormLoading} />
-                {errors.nama && <p className="text-red-500 text-sm mt-1">{errors.nama.message}</p>}
+                    <label className=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Nama Lengkap <p className="text-red-500 text-sm mt-1">{errors.nama && errors.nama.message ? `${errors.nama.message}` : ""}</p></label>
+                    <input {...register('nama', { required: 'wajib diisi' })} type="text" className={inputClass + " " + (errors.nama ? 'border-red-500' : "")} placeholder="Masukkan nama lengkap" disabled={isFormLoading} />
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">NIP</label>
-                <input {...register('nip', { required: 'NIP wajib diisi' })} type="text" className={inputClass} placeholder="Masukkan NIP" disabled={isFormLoading} />
-                {errors.nip && <p className="text-red-500 text-sm mt-1">{errors.nip.message}</p>}
+                <label className=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">NIP <p className="text-red-500 text-sm mt-1">{errors.nip && errors.nip.message ? `${errors.nip.message}` : ""}</p></label>
+                <input {...register('nip', { required: 'wajib diisi' })} type="text" className={inputClass + " " + (errors.nip ? 'border-red-500' : "")} placeholder="Masukkan NIP" disabled={isFormLoading} />
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tempat Lahir</label>
-                <input {...register('tempat_lahir')} type="text" className={inputClass} placeholder="Masukkan tempat lahir" disabled={isFormLoading} />
+                <label className=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Tempat Lahir <p className="text-red-500 text-sm mt-1">{errors.tempat_lahir && errors.tempat_lahir.message ? `${errors.tempat_lahir.message}` : ""}</p></label>
+                <input {...register('tempat_lahir')} type="text" className={inputClass + " " + (errors.tempat_lahir ? 'border-red-500' : "")} placeholder="Masukkan tempat lahir" disabled={isFormLoading} />
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tanggal Lahir</label>
-                <input {...register('tanggal_lahir')} type="date" className={inputClass} disabled={isFormLoading} />
+                <label className=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Tanggal Lahir <p className="text-red-500 text-sm mt-1">{errors.tanggal_lahir && errors.tanggal_lahir.message ? `${errors.tanggal_lahir.message}` : ""}</p></label>
+                <input {...register('tanggal_lahir')} type="date" className={inputClass + " " + (errors.tanggal_lahir ? 'border-red-500' : "")} disabled={isFormLoading} />
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jenis Kelamin</label>
-                <select {...register('jenis_kelamin')} className={inputClass} disabled={isFormLoading}>
+                <label className=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Jenis Kelamin <p className="text-red-500 text-sm mt-1">{errors.jenis_kelamin && errors.jenis_kelamin.message ? `${errors.jenis_kelamin.message}` : ""}</p></label>
+                <select {...register('jenis_kelamin')} className={inputClass + " " + (errors.jenis_kelamin ? 'border-red-500' : "")} disabled={isFormLoading}>
                     <option value="Laki-laki">Laki-laki</option>
                     <option value="Perempuan">Perempuan</option>
                 </select>
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Agama</label>
-                <select {...register('agama')} className={inputClass} disabled={isFormLoading}>
+                <label className=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Agama <p className="text-red-500 text-sm mt-1">{errors.agama && errors.agama.message ? `${errors.agama.message}` : ""}</p></label>
+                <select {...register('agama')} className={inputClass + " " + (errors.agama ? 'border-red-500' : "")} disabled={isFormLoading}>
                     <option value="Islam">Islam</option>
                     <option value="Kristen">Kristen</option>
                     <option value="Katolik">Katolik</option>
@@ -192,8 +229,8 @@
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status Perkawinan</label>
-                <select {...register('status_perkawinan')} className={inputClass} disabled={isFormLoading}>
+                <label className=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Status Perkawinan <p className="text-red-500 text-sm mt-1">{errors.status_perkawinan && errors.status_perkawinan.message ? `${errors.status_perkawinan.message}` : ""}</p></label>
+                <select {...register('status_perkawinan')} className={inputClass + " " + (errors.status_perkawinan ? 'border-red-500' : "")} disabled={isFormLoading}>
                     <option value="Belum Kawin">Belum Kawin</option>
                     <option value="Kawin">Kawin</option>
                     <option value="Cerai Hidup">Cerai Hidup</option>
@@ -202,8 +239,8 @@
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status Pekerjaan</label>
-                <select {...register('status_pekerjaan')} className={inputClass} disabled={isFormLoading}>
+                <label className=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Status Pekerjaan <p className="text-red-500 text-sm mt-1">{errors.status_pekerjaan && errors.status_pekerjaan.message ? `${errors.status_pekerjaan.message}` : ""}</p></label>
+                <select {...register('status_pekerjaan')} className={inputClass + " " + (errors.status_pekerjaan ? 'border-red-500' : "")} disabled={isFormLoading}>
                     <option value="PNS">PNS</option>
                     <option value="Kontrak">Kontrak</option>
                     <option value="Honorer">Honorer</option>
@@ -211,17 +248,19 @@
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Email <p className="text-red-500 text-sm mt-1">{errors.email && errors.email.message ? `${errors.email.message}` : ""}</p></label>
                 <input {...register('email', { 
-                    required: 'Email wajib diisi',
+                    required: 'wajib diisi',
                     pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: 'Format email tidak valid' }
-                })} type="email" className={inputClass} placeholder="Masukkan email" disabled={isFormLoading} />
-                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+                })} type="email" className={inputClass + " " + (errors.email ? 'border-red-500' : "")} placeholder="Masukkan email" disabled={isFormLoading} />
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">No. HP</label>
-                <input {...register('no_hp')} type="tel" className={inputClass} placeholder="Masukkan nomor HP" disabled={isFormLoading} />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">No. HP <p className="text-red-500 text-sm mt-1">{errors.no_hp && errors.no_hp.message ? `${errors.no_hp.message}` : ""}</p></label>
+                <input 
+                    {...register('no_hp', { required: 'wajib diisi' })} 
+                    type="tel" 
+                    className={inputClass + " " + (errors.no_hp ? 'border-red-500' : "")} placeholder="Masukkan nomor HP" disabled={isFormLoading} />
                 </div>
 
             </div>
@@ -229,19 +268,19 @@
             {/* Address */}
             <div className="space-y-6 mt-6">
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Alamat KTP</label>
-                <textarea {...register('alamat_ktp')} rows={3} className={inputClass} placeholder="Masukkan alamat sesuai KTP" disabled={isFormLoading} />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Alamat KTP <p className="text-red-500 text-sm mt-1">{errors.alamat_ktp && errors.alamat_ktp.message ? `${errors.alamat_ktp.message}` : ""}</p></label>
+                <textarea {...register('alamat_ktp', { required: 'wajib diisi' })} rows={3} className={inputClass + " " + (errors.alamat_ktp ? 'border-red-500' : "")} placeholder="Masukkan alamat sesuai KTP" disabled={isFormLoading} />
                 </div>
                 <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Alamat Domisili</label>
-                <textarea {...register('alamat_domisili')} rows={3} className={inputClass} placeholder="Masukkan alamat domisili" disabled={isFormLoading} />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">Alamat Domisili <p className="text-red-500 text-sm mt-1">{errors.alamat_domisili && errors.alamat_domisili.message ? `${errors.alamat_domisili.message}` : ""}</p></label>
+                <textarea {...register('alamat_domisili', { required: 'wajib diisi' })} rows={3} className={inputClass + " " + (errors.alamat_domisili ? 'border-red-500' : "")} placeholder="Masukkan alamat domisili" disabled={isFormLoading} />
                 </div>
             </div>
 
             </div>
 
             {/* Right Panel: Upload */}
-            <div className='bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 col-span-4 sticky top-0 z-10'>
+            <div className='bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 col-span-4 sticky top-0 z-5'>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-5">Upload Photo</h2>
             <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer ${isDragActive ? 'border-blue-400 bg-blue-50/40 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'} ${isFormLoading ? 'pointer-events-none opacity-50' : ''}`}>
                 <input {...getInputProps()} />
