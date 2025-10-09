@@ -48,6 +48,48 @@ export interface Pegawai {
   is_deleted: boolean;
 }
 
+export const useCreatePegawaiAndUser = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (formData: any) => {
+      console.log(formData)
+      const res = await api.post('/pegawai/create-initial-pegawai-with-user', formData)
+      return res.data
+    },
+    onSuccess: (data) => {
+      toast.success('✅ Pegawai dan user berhasil dibuat!', { position: 'bottom-right' })
+      console.log('🟢 Data:', data)
+      queryClient.invalidateQueries({ queryKey: ['pegawai'] })
+    },
+    onError: (error: any) => {
+      if (error.response) {
+        const message = error.response.data?.message || 'Terjadi kesalahan'
+        const validationErrors = error.response.data?.errors
+
+        if (validationErrors) {
+          Object.entries(validationErrors).forEach(([field, messages]: [string, any]) => {
+            if (Array.isArray(messages)) {
+              messages.forEach((msg) => {
+                toast(`${field}: ${msg}`, {
+                  icon: '❌',
+                  position: 'bottom-right',
+                  style: { background: '#333', color: '#fff' },
+                })
+              })
+            }
+          })
+        } else {
+          toast.error(message, { position: 'bottom-right' })
+        }
+      } else {
+        console.error('❌ Unexpected error:', error)
+        toast.error('Gagal menambahkan pegawai!', { position: 'bottom-right' })
+      }
+    },
+  })
+}
+
 export const usePegawai = (filters: PegawaiFilters = {}) => {
   const {
     nama,

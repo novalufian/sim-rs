@@ -3,10 +3,9 @@ import { Column } from '@/app/(admin)/(main-app)/simpeg/duk/pegawai/employee';
 import { AiOutlinePlus } from "react-icons/ai";
 import { CiExport } from "react-icons/ci";
 import { LuSettings2 } from "react-icons/lu";
-import Link from 'next/link';
-import ModalCustom from '../modals/modal';
 import PegawaiQueryFilter from '@/components/tables/queryFilterPegawai';
 import LeftDrawer from '@/components/drawer/leftDrawer';
+import PegawaiInitForm from '../form/PegawaiInitForm';
 interface ColumnFilterProps {
   addLink : string;
   columns: Column[];
@@ -30,6 +29,7 @@ export default function ColumnFilter({
 }: ColumnFilterProps) {
 
   const [showDataFilter, setShowDataFilter] = useState(false);
+  const [showAddPegawai, setShowAddPegawai] = useState(false);
 
   return (
     <div className="mb-8">
@@ -50,9 +50,9 @@ export default function ColumnFilter({
             <CiExport className='h-6 w-6 mr-2'/> export
           </button>
 
-          <Link href={addLink} className='flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-yellow-300 dark:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white px-4'>
-            <AiOutlinePlus className='h-4 w-4 mr-2 rounded-full'/> Add new
-          </Link>
+          <button className='flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white mr-1 px-4' onClick={()=>{setShowAddPegawai(true)}}>
+            <AiOutlinePlus className='h-4 w-4 mr-2 rounded-full'/> Tambah Pegawai
+          </button>
         </div>
       </div>
       
@@ -87,6 +87,13 @@ export default function ColumnFilter({
           )}
 
           <PegawaiQueryFilter onFilterChange={(data)=>{onFilterChange(data)}}/>
+        </div>
+        
+      </LeftDrawer>
+
+      <LeftDrawer isOpen={showAddPegawai} onClose={() => setShowAddPegawai(false)} title='Tambah Pegawai'>
+        <div className="flex flex-col rounded-lg">
+          <PegawaiInitForm/>
         </div>
         
       </LeftDrawer>
