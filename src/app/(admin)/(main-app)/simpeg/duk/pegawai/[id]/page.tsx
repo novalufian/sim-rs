@@ -45,17 +45,12 @@ function PegawaiPage() {
         }
     }, [fetchedPegawai]);
 
-
     return (
         <div>
             <PegawaiForm 
                 isLoading={isLoading}
                 data={pegawaiData} 
-                onSubmit={(data) => {
-                    setPegawaiData(data);
-                    setEditing(false);
-                    console.log(data);
-                }}
+                
                 onCancel={() => setEditing(false)}
             />
         </div>

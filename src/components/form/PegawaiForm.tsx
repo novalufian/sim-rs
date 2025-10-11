@@ -6,6 +6,7 @@ import { useUploadPegawaiPhoto } from '@/hooks/fetch/pegawai/usePegawaiPhoto';
 import { useDropzone } from 'react-dropzone';
 import {z} from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { env } from 'process';
 
     const pegawaiSchema = z.object({
         nama: z.string().min(1, "wajib diisi"),
@@ -45,12 +46,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
     interface PegawaiFormProps {
     data: PegawaiData;
-    onSubmit: (data: any) => void;
     onCancel: () => void;
     isLoading: boolean;
     }
 
-    export default function PegawaiForm({ data, onSubmit, onCancel, isLoading }: PegawaiFormProps) {
+    export default function PegawaiForm({ data, onCancel, isLoading }: PegawaiFormProps) {
     const { 
         register, 
         handleSubmit, 
@@ -123,7 +123,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
     const onFormSubmit = async (formData: any) => {
         try {
-            let avatarUrl = data.avatar_url; // default lama
+            let avatarUrl = data.avatar_url.split('3001')[1] || data.avatar_url; // default lama
         
             if (selectedFile) {
                 const resUploadPhoto = await uploadPhoto.mutateAsync({
@@ -138,13 +138,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
                 id: data.id, 
                 avatar_url: avatarUrl, // ✅ masukkan ke payload update
             };
+
+            console.log(payload)
         
             await updatePegawai({ 
                 id: data.id_pegawai || data.id, 
                 formData: payload 
             });
         
-            onSubmit(payload); // update state dengan data yang sudah fix
+            // onSubmit(payload); // update state dengan data yang sudah fix
         } catch (err) {
         console.error(err);
         }
