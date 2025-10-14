@@ -17,7 +17,7 @@ import Cookies from 'js-cookie';
 
 // 1. Define Zod schema
 const SignInSchema = z.object({
-  email: z.string().email("Format email tidak valid"),
+  username: z.string().min(5, "username tidak boleh kosong"),
   password: z.string().min(4, "Password minimal 4 karakter"),
 });
 
@@ -42,7 +42,7 @@ export default function SignInForm() {
 
   const onSubmit = async (formData: SignInFormData) => {
     setGeneralError(null); // Clear previous general errors
-    setError("email", { message: undefined }); // Clear previous specific errors
+    setError("username", { message: undefined }); // Clear previous specific errors
     setError("password", { message: undefined });
 
     doAuth(formData, {
@@ -56,7 +56,7 @@ export default function SignInForm() {
         // It's the ideal place to map backend errors to form fields or general messages.
 
         // Clear existing Zod errors (important for re-attempts after server error)
-        setError("email", { message: undefined });
+        setError("username", { message: undefined });
         setError("password", { message: undefined });
 
         if (err.code === 'ERR_NETWORK') {
@@ -69,14 +69,14 @@ export default function SignInForm() {
             // Backend sent specific validation errors
             validationErrors.forEach((valErr: { path: string[], message: string }) => {
               if (valErr.path && valErr.path.length > 0) {
-                const fieldName = valErr.path[0] as keyof SignInFormData; // Assuming path[0] is 'email' or 'password'
-                if (fieldName === 'email' || fieldName === 'password') {
+                const fieldName = valErr.path[0] as keyof SignInFormData; // Assuming path[0] is 'username' or 'password'
+                if (fieldName === 'username' || fieldName === 'password') {
                   setError(fieldName, { type: 'server', message: valErr.message });
                 }
               }
             });
             // If there are validation errors but none map to our fields, or if a general message is also present
-            if (apiMessage && !errors.email && !errors.password) {
+            if (apiMessage && !errors.username && !errors.password) {
                  setGeneralError(apiMessage); // Fallback to general API message
             }
           } else {
@@ -122,7 +122,7 @@ export default function SignInForm() {
               Sign In
             </h1>
             <p className="text-lg text-gray-500 dark:text-gray-400">
-              Masukkan email dan password dengan benar!
+              Masukkan username dan password dengan benar!
             </p>
           </div>
 
@@ -135,16 +135,16 @@ export default function SignInForm() {
               )}
 
               <div>
-                <Label>Email <span className="text-error-500">*</span></Label>
+                <Label>username <span className="text-error-500">*</span></Label>
                 <Input
-                  placeholder="info@gmail.com"
-                  type="email"
+                  placeholder="nip: 1234567890"
+                  type="text"
                   // error prop should receive a boolean (true if there's an error for this field)
-                  error={!!errors.email}
-                  {...register("email")}
+                  error={!!errors.username}
+                  {...register("username")}
                 />
-                {errors.email && (
-                  <p className="text-sm text-error-500 mt-1">{errors.email.message}</p>
+                {errors.username && (
+                  <p className="text-sm text-error-500 mt-1">{errors.username.message}</p>
                 )}
               </div>
 
