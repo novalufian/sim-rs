@@ -23,7 +23,7 @@ ChartJS.register(
     Tooltip,
 );
 export default function UserStateCuti({id_pegawai}:{id_pegawai : string}) {
-    const { data: cutiJatahData, isLoading, error } = useCutiJatahByPegawai(id_pegawai);
+    const { data: cutiJatahData, isLoading, error } = useCutiJatahByPegawai(id_pegawai, new Date().getFullYear());
     const currentYear = new Date().getFullYear();
 
     if (isLoading) return <div className='rounded-2xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-white/[0.03] min-h-[350px] flex justify-center items-center'>Loading...</div>

@@ -9,7 +9,7 @@ import { BsArrowUpRightCircle } from "react-icons/bs";
 import KenaikanGajiChart from "./duk/(stats)/(user)/kenaikanGaji";
 
 export default function PageUser() {
-    const user = useAppSelector((state) => state.auth.user);
+    const user = useAppSelector((state) => state?.auth?.user);
 
 
     if(!user?.id_pegawai) { 
@@ -86,35 +86,35 @@ export default function PageUser() {
                 />
 
                 <LinkMenu 
-                href="simpeg/duk/pegawai/ajukan-cuti" 
+                href="simpeg/cuti" 
                 className="group col-start-3 col-end-5 row-start-1 row-end-3" 
                 title="Ajukan Cuti" 
                 description="Ajukan cuti tahunan, sakit, atau alasan lain secara online dan pantau status persetujuannya." 
                 />
 
                 <LinkMenu 
-                href="simpeg/duk/pegawai/mutasi" 
+                href="simpeg/mutasi" 
                 className="group col-start-1 col-end-3 row-start-4 row-end-6" 
                 title="Mutasi" 
                 description="Ajukan dan kelola proses mutasi jabatan atau lokasi kerja dengan transparan." 
                 />
 
                 <LinkMenu 
-                href="simpeg/duk/pegawai/kenaikan-gaji" 
+                href="simpeg/kenaikan-gaji" 
                 className="group col-start-3 col-end-5 row-start-3 row-end-5" 
                 title="Kenaikan Gaji" 
                 description="Lacak riwayat kenaikan gaji dan ajukan permohonan sesuai ketentuan." 
                 />
 
                 <LinkMenu 
-                href="simpeg/duk/pegawai/ijin-belajar" 
+                href="simpeg/ijin-belajar" 
                 className="group col-start-5 col-end-7 row-start-1 row-end-4" 
                 title="Ijin Belajar" 
                 description="Ajukan izin belajar untuk studi lanjut tanpa mengganggu status kepegawaian." 
                 />
 
                 <LinkMenu 
-                href="simpeg/duk/pegawai/dokumen" 
+                href="simpeg/dokumen" 
                 className="group col-start-5 col-end-7 row-start-4 row-end-6" 
                 title="Dokumen" 
                 description="Simpan, kelola, dan akses dokumen penting pegawai secara digital dan aman." 
