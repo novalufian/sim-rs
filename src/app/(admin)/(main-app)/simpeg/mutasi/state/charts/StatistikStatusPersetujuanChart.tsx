@@ -1,0 +1,123 @@
+"use client";
+import React from "react";
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+import { useStatistikStatusPersetujuan } from "@/hooks/fetch/mutasi/useMutasiState";
+import SpinerLoading from "@/components/loading/spiner";
+import { BsCloudSlash } from "react-icons/bs";
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
+
+export default function StatistikStatusPersetujuanChart() {
+    const { data, isLoading, isError } = useStatistikStatusPersetujuan();
+    const statistik = data?.data;
+
+    if (isLoading) {
+        return (
+            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[360px] h-full flex flex-col items-center justify-center">
+                <SpinerLoading title="Statistik Status Persetujuan" />
+            </div>
+        );
+    }
+
+    if (isError || !statistik) {
+        return (
+            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[360px] h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                <BsCloudSlash className="w-10 h-10" />
+                <p>Server bermasalah</p>
+            </div>
+        );
+    }
+
+    const chartData = {
+        labels: statistik.per_level.map((item) => `Level ${item.urutan}`),
+        datasets: [
+            {
+                label: 'Menunggu',
+                data: statistik.per_level.map((item) => item.menunggu),
+                backgroundColor: 'rgba(245, 158, 11, 0.8)',
+            },
+            {
+                label: 'Disetujui',
+                data: statistik.per_level.map((item) => item.disetujui),
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+            },
+            {
+                label: 'Ditolak',
+                data: statistik.per_level.map((item) => item.ditolak),
+                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+            },
+            {
+                label: 'Direvisi',
+                data: statistik.per_level.map((item) => item.direvisi),
+                backgroundColor: 'rgba(139, 92, 246, 0.8)',
+            },
+        ],
+    };
+
+    const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom' as const,
+                labels: {
+                    color: isDark ? '#d1d5db' : '#374151',
+                    padding: 15,
+                    font: { size: 12 },
+                    usePointStyle: true,
+                },
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                stacked: false,
+                ticks: {
+                    color: isDark ? '#9ca3af' : '#6b7280',
+                },
+                grid: {
+                    color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                },
+            },
+            x: {
+                ticks: {
+                    color: isDark ? '#9ca3af' : '#6b7280',
+                },
+                grid: {
+                    color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                },
+            },
+        },
+    };
+
+    return (
+        <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[360px] h-full flex flex-col">
+            <h2 className="text-lg font-semibold text-center text-gray-500 dark:text-gray-400">Grafik</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-gray-200">Statistik Status Persetujuan</h2>
+            <div className="w-full h-[260px]">
+                <Bar data={chartData} options={options as any} />
+            </div>
+            <div className="mt-4 text-center">
+                <p className="text-xs text-gray-400 dark:text-gray-500">Tahun: {statistik.tahun}</p>
+            </div>
+        </div>
+    );
+}
+

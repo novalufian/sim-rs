@@ -19,5 +19,5 @@ export const globalStore = () => {
 
 // TypeScript types (keep these as is)
 export type AppStore = ReturnType<typeof globalStore>
-export type RootState = ReturnType<AppStore['getState']>
+export type RootState = ReturnType<ReturnType<typeof globalStore>['getState']>
 export type AppDispatch = AppStore['dispatch']

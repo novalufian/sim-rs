@@ -2,23 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { AllStatistikCutiDashboard } from './state/chart';
 import { StatistikFilters } from '@/hooks/fetch/cuti/useCutiState';
 import moment from 'moment';
 import 'react-dates/initialize';
 import "react-dates/lib/css/_datepicker.css";
-import { RiResetRightLine } from "react-icons/ri";
 import { DistribusiSisaCutiChart, TrendTahunanCutiChart } from './state/jatahChart';
-import { DistribusiStatusCutiChart, DistribusiJenisCutiChart, TrendPermohonanCutiChart, TopPegawaiCutiChart, RataRataLamaCutiCard, TotalPermohonanCard } from './state/permohonanChart';
-import getGreeting from '@/utils/greatingMsg';
 import { useAppSelector } from "@/hooks/useAppDispatch";
+import GreetingHeader from '@/components/common/GreetingHeader';
 import type { RootState } from '@/libs/store';
 import { FaRegCalendarCheck } from "react-icons/fa";
 import { GrPowerReset } from "react-icons/gr";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { BsArrowUpRightCircle } from "react-icons/bs";
 import Link from "next/link";
-import DetailApproverStackedBarChart from './state/detailArpporvalChart';
+import SuperAdminPage from './superadmin-page';
+import UserPage from './user-page';
 
 // Dynamic import untuk DateRangePicker agar tidak ada masalah dengan SSR
 const DateRangePicker = dynamic(
@@ -122,10 +120,10 @@ export default function Page() {
             </div>
 
             <div className="col-span-6 min-h-40 flex justify-between flex-col items-start">
-                <div className='flex flex-col'>
-                    <h2 className='text-4xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2'> 👋 Hi, {getGreeting()}</h2>
-                    <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>{user?.name?.toLocaleLowerCase()}</h2>
-                </div>
+                <GreetingHeader 
+                    userName={user?.nama}
+                    structuralName={user?.struktural_nama}
+                />
                 <div className='flex gap-[2px]'>
                     <div className={"relative cursor-pinter text-gray-500 "+ _CLASSNAME_}>
                         <DateRangePicker
@@ -173,48 +171,9 @@ export default function Page() {
                 <hr className='w-6/8 border-t border-white/[0.03]'/>
             </div>
 
-            {/* Seksi konten chart/statistik */}
-            <div className="col-span-12 grid grid-cols-12 gap-2 mb-10">
-                {/* <AllStatistikCutiDashboard filters={filters} /> */}
-                {/* Alternatif/eksperimen */}
-                
-                <div className="col-span-4">
-                    <DistribusiSisaCutiChart filters={filters} />
-                </div>
-                <div className="col-span-8">
-                    <TrendTahunanCutiChart filters={filters} />
-                </div>
-                {/* <AllStatistikCutiDashboardCopy filters={filters as any} /> */}
-            </div>
 
-            <div className="col-span-12 grid grid-cols-12 gap-2">
-                <div className="col-span-4 flex flex-col gap-2">
-                    <RataRataLamaCutiCard filters={filters} />
-                    <TotalPermohonanCard filters={filters} />
-                </div>
-
-                <div className="col-span-4">
-                    <TrendPermohonanCutiChart filters={filters} />
-                </div>
-
-                <div className="col-span-4 row-span-2">
-                    <TopPegawaiCutiChart filters={filters} />
-                </div>
-
-                <div className="col-span-4">
-                    <DistribusiJenisCutiChart filters={filters} />
-                </div>
-            
-                <div className="col-span-4">
-                    <DistribusiStatusCutiChart filters={filters} />
-                </div>
-            </div>
-
-            <div className="col-span-12 grid grid-cols-12 mt-10 gap-2">
-                <div className="col-span-8">
-                    <DetailApproverStackedBarChart filters={filters} />
-                </div>
-            </div>
+            {userRole && userRole === "super_admin" && <SuperAdminPage filters={filters} />}
+            {userRole && userRole === "user" && <UserPage />}
         </div>
     );
 }

@@ -10,7 +10,7 @@ function useLayout({
     children: React.ReactNode;
 }) {
     const user = useAppSelector((state) => state.auth.user);
-    if (user?.role != "super_admin") {
+    if (user?.role !== "super_admin") {
         return <Unauthorized />
     }
 

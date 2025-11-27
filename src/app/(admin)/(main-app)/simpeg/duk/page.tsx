@@ -1,22 +1,25 @@
+"use client";
 import React from 'react'
 import GenderStats from './(stats)/(super-admin)/gender';
 import { BsArrowUpRightCircle } from "react-icons/bs";
 import Link from 'next/link';
 import UmurStats from './(stats)/(super-admin)/umur';
-import getGreeting from '@/utils/greatingMsg';
 import AgamaStats from './(stats)/(super-admin)/agama';
 import StatusPerkawinanStats from './(stats)/(super-admin)/statusPerkawinan';
 import StatusPekerjaanStats from './(stats)/(super-admin)/statusPekerjaan';
-
-// Function to generate greeting based on time
-
+import GreetingHeader from '@/components/common/GreetingHeader';
+import { useAppSelector } from '@/hooks/useAppDispatch';
 
 export default function page() {
+  const user = useAppSelector((state) => state.auth.user);
+  
   return (
     <div className="grid grid-cols-12 gap-2 md:gap-3">
       <div className="col-span-8 min-h-40 flex justify-center flex-col">
-        <h2 className='text-4xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2'> 👋 Hi, {getGreeting()}</h2>
-        <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>Dedi Arpandi</h2>
+        <GreetingHeader 
+          userName={user?.nama}
+          structuralName={user?.struktural_nama}
+        />
       </div>
       <div className="col-span-4">
         <Link href="duk/pegawai" className='group'>

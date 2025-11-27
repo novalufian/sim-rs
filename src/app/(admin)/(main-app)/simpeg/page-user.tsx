@@ -63,6 +63,7 @@ export default function PageUser() {
 
                     </div>
                 </div>
+                
             </div>
 
             <div className="col-span-6">
@@ -75,7 +76,7 @@ export default function PageUser() {
             
             
 
-            {/* <h1 className="col-span-12 text-center text-2xl my-5 text-gray-500">Menu Utama</h1> */}
+            {/* LIST MENU UTAMA */}
 
             <div className="grid grid-cols-6 grid-rows-5 gap-3 mt-10 w-full h-[500px] col-span-12">
                 <LinkMenu 

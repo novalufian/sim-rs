@@ -3,10 +3,19 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface User {
     id: string;
+    username: string;
+    role: string;
     id_pegawai: string;
-    name: string;
+    nama: string;
+    nip: string;
     email: string;
-    role?: string;
+    jenis_kelamin: string;
+    unit_kerja: string | null;
+    struktural_id: string;
+    struktural_nama: string;
+    fungsional_id: string;
+    fungsional_nama: string;
+    avatar: string;
 }
 
 interface AuthState {

@@ -54,10 +54,19 @@ useEffect(() => {
     if (whoamiData?.data) {
         const userData = {
             id: whoamiData.data.id,
-            name: whoamiData.data.nama,
-            email: whoamiData.data.username,
+            username: whoamiData.data.username,
             role: whoamiData.data.role,
             id_pegawai: whoamiData.data.id_pegawai,
+            nama: whoamiData.data.nama,
+            nip: whoamiData.data.nip,
+            email: whoamiData.data.email,
+            jenis_kelamin: whoamiData.data.jenis_kelamin,
+            unit_kerja: whoamiData.data.unit_kerja,
+            struktural_id: whoamiData.data.struktural_id,
+            struktural_nama: whoamiData.data.struktural_nama,
+            fungsional_id: whoamiData.data.fungsional_id,
+            fungsional_nama: whoamiData.data.fungsional_nama,
+            avatar: whoamiData.data.avatar,
         };
 
         if (!user) {
@@ -71,6 +80,7 @@ if (isLoading) {
     <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
     );
 }
+console.log(user)
 
 if (whoamiError && !user) {
     // console.error("Error fetching user data:", whoamiError);
@@ -93,11 +103,16 @@ return (
             width={44}
             height={44}
             src="/images/user/owner.jpg"
-            alt="User"
+            alt={user?.nama || "User"}
+            className="object-cover rounded-full"
+            onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/images/user/owner.jpg";
+            }}
         />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">{user?.name}</span>
+        <span className="block mr-1 font-medium text-theme-sm">{user?.nama}</span>
 
         <svg
         className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
@@ -125,7 +140,7 @@ return (
     >
         <div>
         <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {user?.name}
+            {user?.nama}
         </span>
         <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
             {user?.email}

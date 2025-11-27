@@ -44,7 +44,7 @@ export default function ActionDropdown({
               <FiEdit className="mr-2" />
               View
             </button>
-            {role != "user" && (
+            {role !== "user" && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -57,7 +57,7 @@ export default function ActionDropdown({
               </button>
             )}  
 
-            {role != "user" && (
+            {role !== "user" && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

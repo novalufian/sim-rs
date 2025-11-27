@@ -32,10 +32,36 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'http',
+        hostname: '192.168.1.4',
+        port: '3001',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
         hostname: '192.168.1.5',
         port: '3001',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: '192.168.1.6',
+        port: '3001',
+        pathname: '/**',
+      },
+      // Support dynamic API URL from env
+      ...(process.env.NEXT_PUBLIC_API_URL ? (() => {
+        try {
+          const apiUrl = new URL(process.env.NEXT_PUBLIC_API_URL);
+          return [{
+            protocol: apiUrl.protocol.replace(':', '') as 'http' | 'https',
+            hostname: apiUrl.hostname,
+            port: apiUrl.port || '',
+            pathname: '/**',
+          }];
+        } catch {
+          return [];
+        }
+      })() : []),
     ],
   },
 };

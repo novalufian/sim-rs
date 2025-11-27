@@ -111,7 +111,7 @@ function page() {
             <div className="col-span-6 min-h-40 flex justify-between flex-col items-start">
                 <div className='flex flex-col'>
                     <h2 className='text-4xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2'> 👋 Hi, {getGreeting()}</h2>
-                    <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>{user?.name.toLocaleLowerCase()}</h2>
+                    <h2 className='text-4xl font-bold tracking-tight bg-gradient-to-r from-red-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent'>{user?.nama?.toLocaleLowerCase()}</h2>
                 </div>
                 {/* <DateRangePicker/> */}
                 <div className='flex gap-[2px]'>
