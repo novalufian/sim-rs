@@ -34,14 +34,20 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
 }
 
 function dologout() {
-    queryClient.removeQueries({ queryKey: ['whoami'] });
-
-    setTimeout(function(){
-        Cookies.remove('token');
-        closeDropdown();
-        dispatch(logout());
-        router.refresh();
-    }, 500);
+    // Close dropdown first
+    closeDropdown();
+    
+    // Clear all queries from cache
+    queryClient.clear();
+    
+    // Remove token cookie
+    Cookies.remove('token');
+    
+    // Dispatch logout action to clear Redux state
+    dispatch(logout());
+    
+    // Redirect to signin page
+    router.push('/signin');
 }
 
 

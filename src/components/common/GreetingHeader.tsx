@@ -24,7 +24,7 @@ export default function GreetingHeader({
                 </h2>
             )}
             {structuralName && (
-                <p className='text-lg text-gray-500 dark:text-blue-400 mt-0 ml-4'>
+                <p className='text-2xl font-extralight tracking-tight text-gray-600 dark:text-gray-300 mb-2 w-6/12 ml-1 mt-3'>
                     {structuralName}
                 </p>
             )}

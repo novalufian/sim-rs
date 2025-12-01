@@ -1,25 +1,25 @@
 "use client";
 import React from "react";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
-import DistribusiStatusPernikahanChart from "./data/charts/DistribusiStatusPernikahanChart";
-import StatistikPernikahanPerTahunChart from "./data/charts/StatistikPernikahanPerTahunChart";
-import StatistikPerceraianPerTahunChart from "./data/charts/StatistikPerceraianPerTahunChart";
-import TrendPernikahanPerBulanChart from "./data/charts/TrendPernikahanPerBulanChart";
-import TrendPerceraianPerBulanChart from "./data/charts/TrendPerceraianPerBulanChart";
-import DistribusiAlasanPerceraianChart from "./data/charts/DistribusiAlasanPerceraianChart";
-import RataRataUsiaPernikahanCard from "./data/charts/RataRataUsiaPernikahanCard";
-import RataRataDurasiPernikahanCard from "./data/charts/RataRataDurasiPernikahanCard";
-import StatistikStatusPersetujuanPernikahanChart from "./data/charts/StatistikStatusPersetujuanPernikahanChart";
-import StatistikStatusPersetujuanPerceraianChart from "./data/charts/StatistikStatusPersetujuanPerceraianChart";
-import RiwayatPernikahanPegawaiTable from "./data/charts/RiwayatPernikahanPegawaiTable";
-import RiwayatPerceraianPegawaiTable from "./data/charts/RiwayatPerceraianPegawaiTable";
-import ProyeksiPernikahan5TahunChart from "./data/charts/ProyeksiPernikahan5TahunChart";
-import PerbandinganPernikahanVsPerceraianChart from "./data/charts/PerbandinganPernikahanVsPerceraianChart";
-import StatistikPerUnitKerjaChart from "./data/charts/StatistikPerUnitKerjaChart";
+import DistribusiStatusPernikahanChart from "./state/charts/DistribusiStatusPernikahanChart";
+import StatistikPernikahanPerTahunChart from "./state/charts/StatistikPernikahanPerTahunChart";
+import StatistikPerceraianPerTahunChart from "./state/charts/StatistikPerceraianPerTahunChart";
+import TrendPernikahanPerBulanChart from "./state/charts/TrendPernikahanPerBulanChart";
+import TrendPerceraianPerBulanChart from "./state/charts/TrendPerceraianPerBulanChart";
+import DistribusiAlasanPerceraianChart from "./state/charts/DistribusiAlasanPerceraianChart";
+import RataRataUsiaPernikahanCard from "./state/charts/RataRataUsiaPernikahanCard";
+import RataRataDurasiPernikahanCard from "./state/charts/RataRataDurasiPernikahanCard";
+import StatistikStatusPersetujuanPernikahanChart from "./state/charts/StatistikStatusPersetujuanPernikahanChart";
+import StatistikStatusPersetujuanPerceraianChart from "./state/charts/StatistikStatusPersetujuanPerceraianChart";
+import RiwayatPernikahanPegawaiTable from "./state/charts/RiwayatPernikahanPegawaiTable";
+import RiwayatPerceraianPegawaiTable from "./state/charts/RiwayatPerceraianPegawaiTable";
+import ProyeksiPernikahan5TahunChart from "./state/charts/ProyeksiPernikahan5TahunChart";
+import PerbandinganPernikahanVsPerceraianChart from "./state/charts/PerbandinganPernikahanVsPerceraianChart";
+import StatistikPerUnitKerjaChart from "./state/charts/StatistikPerUnitKerjaChart";
 
 export default function SuperAdminState() {
     return (
-        <div className="grid grid-cols-12 gap-2">
+        <div className="grid grid-cols-12 gap-2 col-span-12">
             <div className="col-span-12">
                 <PathBreadcrumb defaultTitle="Super Admin - Statistik Kawin Cerai" />
             </div>

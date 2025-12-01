@@ -4,9 +4,11 @@ import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { IoAddCircleSharp } from "react-icons/io5";
-import { LuSettings2 } from "react-icons/lu";
+import { LuSettings2, LuFolderSearch, LuShieldX, LuHouse, LuArrowLeft } from "react-icons/lu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/hooks/useAppDispatch";
+import type { RootState } from '@/libs/store';
 
 import { 
     usePermohonanBelajarList, 
@@ -60,10 +62,11 @@ const renderStatusBadge = (status: string) => {
 
     switch (s) {
         case "DIAJUKAN":
-        case "MENUNGGU":
             classes += " bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"; break;
-        case "DISETUJUI":
-        case "DISETUJUI_AKHIR":
+        case "PERSETUJUAN_ATASAN":
+        case "VALIDASI_KEPEGAWAIAN":
+            classes += " bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"; break;
+        case "PERSETUJUAN_AKHIR":
         case "SELESAI":
             classes += " bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"; break;
         case "DITOLAK":
@@ -71,9 +74,6 @@ const renderStatusBadge = (status: string) => {
             classes += " bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"; break;
         case "DIREVISI":
             classes += " bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"; break;
-        case "VALIDASI":
-        case "PROSES":
-            classes += " bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"; break;
         default:
             classes += " bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"; break;
     }
@@ -132,6 +132,8 @@ const ITEMS_PER_PAGE = 10;
 
 function Page() {
     const router = useRouter();
+    const user = useAppSelector((state: RootState) => state.auth.user);
+    const userRole = user?.role;
     const [currentPage, setCurrentPage] = useState(1);
     const [dropdownStates, setDropdownStates] = useState<Record<number, boolean>>({});
     
@@ -164,26 +166,83 @@ function Page() {
     });
 
     // Hooks untuk fetching data dan mutasi delete
+    // Pastikan page selalu sesuai dengan currentPage
     const { data: queryResult, isLoading: isLoadingList, isError, error } = usePermohonanBelajarList({
         ...filters,
         page: currentPage, 
+        limit: filters.limit || ITEMS_PER_PAGE,
     });
     
-    // Debug: log error jika ada
-    if (isError) {
-        console.error('❌ Error fetching ijin belajar:', error);
-    }
-    
     const deleteMutation = useDeletePermohonanBelajar();
+
+    // Guard: Cek apakah user memiliki akses (hanya super_admin)
+    if (userRole !== "super_admin") {
+        return (
+            <div className="flex items-center justify-center min-h-[80vh] p-6">
+                <div className="max-w-2xl w-full text-center">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-8 md:p-12">
+                        {/* Icon */}
+                        <div className="flex justify-center mb-6">
+                            <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full">
+                                <LuShieldX className="w-16 h-16 text-red-600 dark:text-red-400" />
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+                            Akses Ditolak
+                        </h1>
+
+                        {/* Description */}
+                        <div className="space-y-3 mb-8">
+                            <p className="text-lg text-gray-600 dark:text-gray-300">
+                                Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.
+                            </p>
+                            <p className="text-base text-gray-500 dark:text-gray-400">
+                                Halaman <span className="font-semibold text-gray-700 dark:text-gray-300">Kelola Data Ijin Belajar</span> hanya dapat diakses oleh <span className="font-semibold text-blue-600 dark:text-blue-400">Super Admin</span>.
+                            </p>
+                            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <p className="text-sm text-blue-800 dark:text-blue-300">
+                                    <strong>Informasi:</strong> Sebagai pengguna biasa, Anda dapat mengajukan permohonan ijin belajar melalui halaman <span className="font-semibold">Permohonan Ijin Belajar</span> dan melihat statistik permohonan Anda di halaman utama.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button
+                                onClick={() => router.back()}
+                                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
+                            >
+                                <LuArrowLeft className="w-5 h-5" />
+                                Kembali
+                            </button>
+                            <Link
+                                href="/simpeg/ijin-belajar"
+                                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                            >
+                                <LuHouse className="w-5 h-5" />
+                                Ke Halaman Utama
+                            </Link>
+                        </div>
+
+                        {/* Additional Help */}
+                        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Jika Anda merasa ini adalah kesalahan, silakan hubungi administrator sistem.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     // Ekstraksi Data Ijin Belajar
     const permohonanList: PermohonanBelajarWithRelations[] = queryResult?.data?.items || [];
     const totalItems = queryResult?.data?.pagination?.total || 0;
     const totalPages = queryResult?.data?.pagination?.totalPages || 0;
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    
-    console.log('🔍 Query Result:', queryResult);
-    console.log('✅ Extracted data - count:', permohonanList.length, 'total:', totalItems, 'totalPages:', totalPages);
     
     // Menutup semua dropdown jika klik di luar
     React.useEffect(() => {
@@ -210,7 +269,47 @@ function Page() {
     };
 
     const handleFilterChange = (newFilters: PermohonanBelajarFilters) => {
-        setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
+        // Jika newFilters kosong (reset), set ke default (hanya limit dan page)
+        // Ini akan menghapus semua filter sebelumnya
+        if (Object.keys(newFilters).length === 0) {
+            const resetFilters = {
+                limit: ITEMS_PER_PAGE,
+                page: 1,
+            };
+            setFilters(resetFilters);
+        } else {
+            // Merge dengan filter yang ada, tapi hapus filter yang undefined/null/empty
+            setFilters(prev => {
+                // Hapus property yang undefined/null/empty dari newFilters
+                const cleanedNewFilters: PermohonanBelajarFilters = {};
+                
+                if (newFilters.status && newFilters.status !== '') {
+                    cleanedNewFilters.status = newFilters.status;
+                }
+                if (newFilters.institusi_pendidikan_id && newFilters.institusi_pendidikan_id !== '') {
+                    cleanedNewFilters.institusi_pendidikan_id = newFilters.institusi_pendidikan_id;
+                }
+                if (newFilters.program_studi_id && newFilters.program_studi_id !== '') {
+                    cleanedNewFilters.program_studi_id = newFilters.program_studi_id;
+                }
+                if (newFilters.startDate && newFilters.startDate !== '') {
+                    cleanedNewFilters.startDate = newFilters.startDate;
+                }
+                if (newFilters.endDate && newFilters.endDate !== '') {
+                    cleanedNewFilters.endDate = newFilters.endDate;
+                }
+                
+                // Buat filter baru dengan hanya field yang ada di cleanedNewFilters
+                // Ini memastikan filter yang tidak ada di newFilters akan dihapus
+                const updated: PermohonanBelajarFilters = {
+                    limit: ITEMS_PER_PAGE,
+                    page: 1,
+                    ...cleanedNewFilters,
+                };
+                
+                return updated;
+            });
+        }
         setCurrentPage(1); 
     };
 
@@ -406,9 +505,30 @@ function Page() {
                             <tr >
                                 <td 
                                 colSpan={BELAJAR_TABLE_COLUMNS.filter(col => visibleColumns.has(String(col.id))).length}
-                                className="p-8 text-center text-gray-500"
+                                className="p-8 text-center min-h-[400px]"
                                 >
-                                Tidak ada data permohonan ijin belajar.
+                                    <div className="flex flex-col items-center justify-center h-full py-10">
+                                        {/* Empty State Illustration */}
+                                        <div className="relative mb-6">
+                                            {/* Search Icon Background */}
+                                            <div className="w-32 h-32 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-inner">
+                                                <LuFolderSearch className="w-16 h-16 text-gray-400 dark:text-gray-600" />
+                                            </div>
+                                            {/* Decorative Elements */}
+                                            <div className="absolute -top-2 -left-2 w-6 h-6 bg-blue-200 dark:bg-blue-900 rounded-full opacity-60"></div>
+                                            <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-purple-200 dark:bg-purple-900 rounded-full opacity-60"></div>
+                                        </div>
+                                        
+                                        {/* Message */}
+                                        <div className="text-center">
+                                            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                Tidak ada data permohonan ijin belajar
+                                            </h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                Coba ubah filter atau tambahkan permohonan ijin belajar baru
+                                            </p>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             ) : (

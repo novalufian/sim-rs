@@ -4,7 +4,7 @@ import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { IoAddCircleSharp } from "react-icons/io5";
-import { LuSettings2 } from "react-icons/lu";
+import { LuSettings2, LuFolderSearch } from "react-icons/lu";
 import { FiTrendingUp, FiTrendingDown } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -448,9 +448,30 @@ function Page() {
                             <tr >
                                 <td 
                                 colSpan={GAJI_TABLE_COLUMNS.filter(col => visibleColumns.has(String(col.id))).length}
-                                className="p-8 text-center text-gray-500"
+                                className="p-8 text-center min-h-[400px]"
                                 >
-                                Tidak ada data permohonan kenaikan gaji.
+                                    <div className="flex flex-col items-center justify-center h-full py-10">
+                                        {/* Empty State Illustration */}
+                                        <div className="relative mb-6">
+                                            {/* Search Icon Background */}
+                                            <div className="w-32 h-32 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-inner">
+                                                <LuFolderSearch className="w-16 h-16 text-gray-400 dark:text-gray-600" />
+                                            </div>
+                                            {/* Decorative Elements */}
+                                            <div className="absolute -top-2 -left-2 w-6 h-6 bg-blue-200 dark:bg-blue-900 rounded-full opacity-60"></div>
+                                            <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-purple-200 dark:bg-purple-900 rounded-full opacity-60"></div>
+                                        </div>
+                                        
+                                        {/* Message */}
+                                        <div className="text-center">
+                                            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                Tidak ada data permohonan kenaikan gaji
+                                            </h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                Coba ubah filter atau tambahkan permohonan kenaikan gaji baru
+                                            </p>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             ) : (

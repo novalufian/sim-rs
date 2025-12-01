@@ -26,35 +26,34 @@ export default function SuperAdminState() {
             </div>
 
             <div className="col-span-12 grid grid-cols-12 gap-2">
-                <div className="col-span-4 flex flex-col gap-2">
-                    <SLAPersetujuanCard />
-                    <StatistikDisetujuiVsPendingChart />
-                </div>
-
-                <div className="col-span-4">
+                <div className="col-span-6">
                     <TrendPerBulanChart />
                 </div>
-
-                <div className="col-span-4 row-span-2">
-                    <TopInstansiTujuanChart />
-                </div>
-
-                <div className="col-span-4">
+                <div className="col-span-6">
                     <PerUnitKerjaAsalChart />
                 </div>
-            
+
                 <div className="col-span-4">
                     <StatistikStatusPersetujuanChart />
                 </div>
+                <div className="col-span-4 flex flex-col gap-2">
+                    <StatistikDisetujuiVsPendingChart />
+                </div>
+                <div className="col-span-4">
+                    <SLAPersetujuanCard />
+                </div>
             </div>
 
-            <div className="col-span-12 grid grid-cols-12 mt-10 gap-2">
+            <div className="col-span-12 grid grid-cols-12 gap-2 mt-10">
+                <div className="col-span-4">
+                    <TopInstansiTujuanChart />
+                </div>
                 <div className="col-span-8">
                     <Proyeksi5TahunChart />
                 </div>
             </div>
 
-            <div className="col-span-12 grid grid-cols-12 mt-10 gap-2">
+            <div className="col-span-12 grid grid-cols-12 gap-2 mt-10">
                 <div className="col-span-12">
                     <RiwayatPegawaiTable />
                 </div>
@@ -62,4 +61,3 @@ export default function SuperAdminState() {
         </>
     );
 }
-

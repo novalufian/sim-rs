@@ -77,18 +77,17 @@ export default function BelajarStatusFilter({ onFilterChange, currentFilters }: 
         program_studi_id: '',
         }
         setFilters(reset)
+        // Kirim object kosong untuk reset semua filter
         const resetOutput: PermohonanBelajarFilters = {};
         onFilterChange(resetOutput)
     }
 
-    // Status options untuk ijin belajar
+    // Status options untuk ijin belajar - sesuai dengan valid values dari server
     const statusOptions = [
         { value: 'DIAJUKAN', label: 'Diajukan' },
-        { value: 'MENUNGGU', label: 'Menunggu' },
-        { value: 'PROSES', label: 'Proses' },
-        { value: 'VALIDASI', label: 'Validasi' },
-        { value: 'DISETUJUI', label: 'Disetujui' },
-        { value: 'DISETUJUI_AKHIR', label: 'Disetujui Akhir' },
+        { value: 'PERSETUJUAN_ATASAN', label: 'Persetujuan Atasan' },
+        { value: 'VALIDASI_KEPEGAWAIAN', label: 'Validasi Kepegawaian' },
+        { value: 'PERSETUJUAN_AKHIR', label: 'Persetujuan Akhir' },
         { value: 'DITOLAK', label: 'Ditolak' },
         { value: 'DIREVISI', label: 'Direvisi' },
         { value: 'DIBATALKAN', label: 'Dibatalkan' },

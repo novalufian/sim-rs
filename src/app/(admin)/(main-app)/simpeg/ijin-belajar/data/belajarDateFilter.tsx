@@ -60,7 +60,7 @@ export default function BelajarDateFilter({ onFilterChange, currentFilters }: Pr
     };
 
     return (
-        <div className={"relative " + _CLASSNAME_}>
+        <div className={"relative z-[99] " + _CLASSNAME_}>
             <DateRangePicker
                 startDate={startDate ? moment(startDate) : null}
                 endDate={endDate ? moment(endDate) : null}

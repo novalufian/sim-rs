@@ -10,7 +10,7 @@ export default function SLAPersetujuanCard() {
 
     if (isLoading) {
         return (
-            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-6 min-h-[200px] flex flex-col items-center justify-center">
+            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-6 min-h-[200px] h-full flex flex-col items-center justify-center">
                 <SpinerLoading title="SLA Persetujuan" />
             </div>
         );
@@ -18,7 +18,7 @@ export default function SLAPersetujuanCard() {
 
     if (isError || !statistik) {
         return (
-            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-6 min-h-[200px] flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-6 min-h-[200px] h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                 <BsCloudSlash className="w-10 h-10" />
                 <p>Server bermasalah</p>
             </div>

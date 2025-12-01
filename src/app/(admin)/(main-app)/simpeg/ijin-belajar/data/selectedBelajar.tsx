@@ -26,11 +26,13 @@ const renderStatusBadge = (status: string) => {
 
     switch (s) {
         case "DIAJUKAN":
-        case "MENUNGGU":
             colorClass = "text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900";
             break;
-        case "DISETUJUI":
-        case "DISETUJUI_AKHIR":
+        case "PERSETUJUAN_ATASAN":
+        case "VALIDASI_KEPEGAWAIAN":
+            colorClass = "text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900";
+            break;
+        case "PERSETUJUAN_AKHIR":
         case "SELESAI":
             colorClass = "text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900";
             break;
@@ -40,10 +42,6 @@ const renderStatusBadge = (status: string) => {
             break;
         case "DIREVISI":
             colorClass = "text-orange-700 bg-orange-100 dark:text-orange-300 dark:bg-orange-900";
-            break;
-        case "VALIDASI":
-        case "PROSES":
-            colorClass = "text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900";
             break;
         default:
             colorClass = "text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700";

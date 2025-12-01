@@ -7,20 +7,20 @@ import {
     Legend,
 } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-import { useDistribusiStatusPermohonan } from "@/hooks/fetch/belajar/useBelajarState";
+import { useStatistikStatusPermohonan } from "@/hooks/fetch/pensiun/usePensiunState";
 import SpinerLoading from "@/components/loading/spiner";
 import { BsCloudSlash } from "react-icons/bs";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function DistribusiStatusPermohonanChart() {
-    const { data, isLoading, isError } = useDistribusiStatusPermohonan();
+export default function StatistikStatusPermohonanChart() {
+    const { data, isLoading, isError } = useStatistikStatusPermohonan();
     const statistik = data?.data;
 
     if (isLoading) {
         return (
             <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[360px] h-full flex flex-col items-center justify-center">
-                <SpinerLoading title="Distribusi Status Permohonan" />
+                <SpinerLoading title="Statistik Status Permohonan" />
             </div>
         );
     }
@@ -34,14 +34,22 @@ export default function DistribusiStatusPermohonanChart() {
         );
     }
 
+    if (statistik.data.length === 0) {
+        return (
+            <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[360px] h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                <p>Tidak ada data</p>
+            </div>
+        );
+    }
+
     const colors = ["#3b82f6", "#10b981", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899", "#14b8a6"];
 
     const chartData = {
-        labels: statistik.per_status.map((item) => item.status.replace(/_/g, ' ')),
+        labels: statistik.data.map((item) => item.status.replace(/_/g, ' ')),
         datasets: [
             {
-                data: statistik.per_status.map((item) => item.jumlah),
-                backgroundColor: colors.slice(0, statistik.per_status.length),
+                data: statistik.data.map((item) => item.jumlah),
+                backgroundColor: colors.slice(0, statistik.data.length),
                 borderWidth: 1,
                 borderRadius: 10,
                 spacing: 5,
@@ -56,14 +64,14 @@ export default function DistribusiStatusPermohonanChart() {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: false, // Hilangkan legend
+                display: false,
             },
             tooltip: {
                 callbacks: {
                     label: function(context: any) {
                         const value = context.raw;
-                        const item = statistik.per_status[context.dataIndex];
-                        return `${item.status.replace(/_/g, ' ')}: ${value} (${item.persentase}%)`;
+                        const item = statistik.data[context.dataIndex];
+                        return `${item.status.replace(/_/g, ' ')}: ${value}${item.persentase ? ` (${item.persentase}%)` : ''}`;
                     }
                 }
             }
@@ -73,7 +81,7 @@ export default function DistribusiStatusPermohonanChart() {
     return (
         <div className="rounded-4xl bg-white dark:border-gray-800 dark:bg-white/[0.03] box-border p-5 min-h-[360px] h-full flex flex-col">
             <h2 className="text-lg font-semibold text-center text-gray-500 dark:text-gray-400">Grafik</h2>
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-gray-200">Distribusi Status Permohonan</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-gray-200">Statistik Status Permohonan</h2>
             
             <div className="flex-1 flex gap-4">
                 {/* Kolom utama - Chart */}
@@ -86,7 +94,7 @@ export default function DistribusiStatusPermohonanChart() {
                 {/* Kolom kanan - Custom List Label */}
                 <div className="flex-shrink-0 w-[200px] flex flex-col justify-center">
                     <div className="space-y-3">
-                        {statistik.per_status.map((item, index) => (
+                        {statistik.data.map((item, index) => (
                             <div 
                                 key={index}
                                 className="flex items-center gap-3"
@@ -100,7 +108,7 @@ export default function DistribusiStatusPermohonanChart() {
                                         {item.status.replace(/_/g, ' ')}
                                     </div>
                                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                                        {item.jumlah} ({item.persentase}%)
+                                        {item.jumlah} {item.persentase ? `(${item.persentase}%)` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -111,10 +119,11 @@ export default function DistribusiStatusPermohonanChart() {
             
             <div className="mt-4 text-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Total Permohonan: <span className="font-bold text-blue-600 dark:text-blue-400">{statistik.total_permohonan}</span>
+                    Total: <span className="font-bold text-blue-600 dark:text-blue-400">{statistik.total}</span>
                 </p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Tahun: {statistik.tahun}</p>
             </div>
         </div>
     );
 }
+

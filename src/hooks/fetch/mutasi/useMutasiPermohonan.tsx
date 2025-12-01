@@ -104,23 +104,18 @@ export const usePermohonanMutasiList = (filters: PermohonanMutasiFilters = {}) =
             })
 
             const url = `/kepegawaian/mutasi/permohonan?${params.toString()}`;
-            console.log('🔍 Fetching mutasi with URL:', url);
-            console.log('📋 Filters:', filters);
             
             const res = await api.get(url);
-            console.log('📦 Raw API Response:', res.data);
             
             // Response structure: { success, message, data: { items: [...], pagination: {...} } }
             const responseData = res.data;
             
             // Jika response sudah dalam format yang benar
             if (responseData && responseData.data && Array.isArray(responseData.data.items) && responseData.data.pagination) {
-                console.log('✅ Using standard format - data count:', responseData.data.items.length);
                 return responseData as ApiListResponse<PermohonanMutasiWithRelations>;
             }
             
             // Fallback: return empty
-            console.warn('⚠️ Unexpected response format:', responseData);
             return {
                 success: false,
                 message: 'Unexpected response format',

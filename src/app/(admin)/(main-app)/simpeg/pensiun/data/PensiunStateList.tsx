@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { usePensiunStateList, useDeletePensiunState, PensiunStateWithRelations, PensiunStateFilters } from "@/hooks/fetch/pensiun/usePensiunState";
 import Pagination from "@/components/tables/Pagination";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import LeftDrawer from "@/components/drawer/leftDrawer";
-import PensiunStateDetail from "./PensiunStateDetail";
+import PensiunStateDetail from "../state/PensiunStateDetail";
 
 interface PensiunStateColumn {
     id: keyof PensiunStateWithRelations | 'actions' | 'no' | 'pegawai_info';
@@ -91,6 +92,7 @@ const getColumnValue = (state: PensiunStateWithRelations, columnId: string, inde
 const ITEMS_PER_PAGE = 10;
 
 export default function PensiunStateList() {
+    const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
     const [dropdownStates, setDropdownStates] = useState<Record<number, boolean>>({});
     const [stateDrawer, setStateDrawer] = useState(false);
@@ -235,7 +237,7 @@ export default function PensiunStateList() {
                                                             isOpen={dropdownStates[index]}
                                                             onToggle={(e) => toggleDropdown(index, e)}
                                                             onView={() => handleView(state)}
-                                                            onEdit={() => {}}
+                                                            onEdit={() => router.push(`/simpeg/pensiun/data/tambah?id=${state.id}`)}
                                                             onDelete={() => handleDelete(state)}
                                                         />
                                                     ) : (

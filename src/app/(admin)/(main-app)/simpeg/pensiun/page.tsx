@@ -33,7 +33,9 @@ export default function Page() {
                 <hr className='w-6/8 border-t border-white/[0.03]'/>
             </div>
 
-            {userRole && userRole === "super_admin" && <SuperAdminPage />}
+            <div className="col-span-12">   
+                {userRole && userRole === "super_admin" && <SuperAdminPage />}
+            </div>
         </div>
     );
 }

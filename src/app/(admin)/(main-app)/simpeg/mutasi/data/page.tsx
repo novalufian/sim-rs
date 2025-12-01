@@ -4,6 +4,7 @@ import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { IoAddCircleSharp } from "react-icons/io5";
+import { LuFolderSearch, LuSearch } from "react-icons/lu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -56,9 +57,11 @@ const renderStatusBadge = (status: string) => {
 
     switch (s) {
         case "DIAJUKAN":
-        case "MENUNGGU":
             classes += " bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"; break;
-        case "DISETUJUI":
+        case "DISETUJUI_KA_UNIT":
+        case "DISETUJUI_KA_BIDANG":
+        case "VALIDASI_KEPEGAWAIAN":
+            classes += " bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"; break;
         case "DISETUJUI_AKHIR":
         case "SELESAI":
             classes += " bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"; break;
@@ -67,9 +70,6 @@ const renderStatusBadge = (status: string) => {
             classes += " bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"; break;
         case "DIREVISI":
             classes += " bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"; break;
-        case "VALIDASI":
-        case "PROSES":
-            classes += " bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"; break;
         default:
             classes += " bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"; break;
     }
@@ -138,15 +138,12 @@ function Page() {
     });
 
     // Hooks untuk fetching data dan mutasi delete
+    // Pastikan page selalu sesuai dengan currentPage
     const { data: queryResult, isLoading: isLoadingList, isError, error } = usePermohonanMutasiList({
         ...filters,
-        page: currentPage, 
+        page: currentPage,
+        limit: filters.limit || ITEMS_PER_PAGE,
     });
-    
-    // Debug: log error jika ada
-    if (isError) {
-        console.error('❌ Error fetching mutasi:', error);
-    }
     
     const deleteMutation = useDeletePermohonanMutasi();
 
@@ -156,9 +153,6 @@ function Page() {
     const totalItems = queryResult?.data?.pagination?.total || 0;
     const totalPages = queryResult?.data?.pagination?.totalPages || 0;
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    
-    console.log('🔍 Query Result:', queryResult);
-    console.log('✅ Extracted data - count:', permohonanList.length, 'total:', totalItems, 'totalPages:', totalPages);
     
     // Menutup semua dropdown jika klik di luar
     React.useEffect(() => {
@@ -174,7 +168,44 @@ function Page() {
 
 
     const handleFilterChange = (newFilters: PermohonanMutasiFilters) => {
-        setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
+        // Jika newFilters kosong (reset), set ke default (hanya limit dan page)
+        // Ini akan menghapus semua filter sebelumnya
+        if (Object.keys(newFilters).length === 0) {
+            const resetFilters = {
+                limit: ITEMS_PER_PAGE,
+                page: 1,
+            };
+            setFilters(resetFilters);
+        } else {
+            // Merge dengan filter yang ada, tapi hapus filter yang undefined/null/empty
+            setFilters(prev => {
+                // Hapus property yang undefined/null/empty dari newFilters
+                const cleanedNewFilters: PermohonanMutasiFilters = {};
+                
+                if (newFilters.status && newFilters.status !== '') {
+                    cleanedNewFilters.status = newFilters.status;
+                }
+                if (newFilters.jenis_mutasi && newFilters.jenis_mutasi !== '') {
+                    cleanedNewFilters.jenis_mutasi = newFilters.jenis_mutasi;
+                }
+                if (newFilters.startDate && newFilters.startDate !== '') {
+                    cleanedNewFilters.startDate = newFilters.startDate;
+                }
+                if (newFilters.endDate && newFilters.endDate !== '') {
+                    cleanedNewFilters.endDate = newFilters.endDate;
+                }
+                
+                // Buat filter baru dengan hanya field yang ada di cleanedNewFilters
+                // Ini memastikan filter yang tidak ada di newFilters akan dihapus
+                const updated: PermohonanMutasiFilters = {
+                    limit: ITEMS_PER_PAGE,
+                    page: 1,
+                    ...cleanedNewFilters,
+                };
+                
+                return updated;
+            });
+        }
         setCurrentPage(1); 
     };
 
@@ -344,9 +375,30 @@ function Page() {
                             <tr >
                                 <td 
                                 colSpan={MUTASI_TABLE_COLUMNS.length}
-                                className="p-8 text-center text-gray-500"
+                                className="p-8 text-center min-h-[400px]"
                                 >
-                                Tidak ada data permohonan mutasi.
+                                    <div className="flex flex-col items-center justify-center h-full py-10">
+                                        {/* Empty State Illustration */}
+                                        <div className="relative mb-6">
+                                            {/* Search Icon Background */}
+                                            <div className="w-32 h-32 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-inner">
+                                                <LuFolderSearch className="w-16 h-16 text-gray-400 dark:text-gray-600" />
+                                            </div>
+                                            {/* Decorative Elements */}
+                                            <div className="absolute -top-2 -left-2 w-6 h-6 bg-blue-200 dark:bg-blue-900 rounded-full opacity-60"></div>
+                                            <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-purple-200 dark:bg-purple-900 rounded-full opacity-60"></div>
+                                        </div>
+                                        
+                                        {/* Message */}
+                                        <div className="text-center">
+                                            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                Tidak ada data permohonan mutasi
+                                            </h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                Coba ubah filter atau tambahkan permohonan mutasi baru
+                                            </p>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             ) : (

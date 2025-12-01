@@ -18,7 +18,7 @@ import StatistikGelarDiperolehChart from "./charts/StatistikGelarDiperolehChart"
 
 export default function SuperAdminState() {
     return (
-        <div className="grid grid-cols-12 gap-2">
+        <div className="grid grid-cols-12 gap-2 col-span-12">
             <div className="col-span-12">
                 <PathBreadcrumb defaultTitle="Super Admin - Statistik Ijin Belajar" />
             </div>
@@ -27,20 +27,23 @@ export default function SuperAdminState() {
             <div className="col-span-4">
                 <StatistikJenisPermohonanChart />
             </div>
-            <div className="col-span-4">
+            <div className="col-span-8">
                 <DistribusiStatusPermohonanChart />
             </div>
-            <div className="col-span-4">
-                <DistribusiBiayaDitanggungChart />
-            </div>
+            
 
             {/* Row 2: Top Program Studi & Top Institusi Pendidikan */}
-            <div className="col-span-6">
+            <div className="col-span-4">
                 <TopProgramStudiChart />
             </div>
-            <div className="col-span-6">
+            <div className="col-span-4">
                 <TopInstitusiPendidikanChart />
             </div>
+            <div className="col-span-4">
+                <RataRataLamaStudiCard />
+            </div>
+
+            
 
             {/* Row 3: Trend Per Bulan & Permohonan Per Unit Kerja */}
             <div className="col-span-6">
@@ -52,7 +55,7 @@ export default function SuperAdminState() {
 
             {/* Row 4: Rata-Rata Lama Studi Card & Statistik Status Persetujuan */}
             <div className="col-span-4">
-                <RataRataLamaStudiCard />
+                <DistribusiBiayaDitanggungChart />
             </div>
             <div className="col-span-4">
                 <StatistikStatusPersetujuanChart />

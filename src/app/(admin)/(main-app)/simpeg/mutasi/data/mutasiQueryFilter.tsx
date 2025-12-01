@@ -82,17 +82,19 @@ export default function MutasiQueryFilter({ onFilterChange }: Props) {
         endDate: '',
         }
         setFilters(reset)
+        // Reset focused input untuk DateRangePicker
+        setFocusedInput(null)
+        // Kirim object kosong untuk reset semua filter
         const resetOutput: PermohonanMutasiFilters = {};
         onFilterChange(resetOutput)
     }
 
-    // Status options untuk mutasi
+    // Status options untuk mutasi - sesuai dengan valid values dari server
     const statusOptions = [
         { value: 'DIAJUKAN', label: 'Diajukan' },
-        { value: 'MENUNGGU', label: 'Menunggu' },
-        { value: 'PROSES', label: 'Proses' },
-        { value: 'VALIDASI', label: 'Validasi' },
-        { value: 'DISETUJUI', label: 'Disetujui' },
+        { value: 'DISETUJUI_KA_UNIT', label: 'Disetujui KA Unit' },
+        { value: 'DISETUJUI_KA_BIDANG', label: 'Disetujui KA Bidang' },
+        { value: 'VALIDASI_KEPEGAWAIAN', label: 'Validasi Kepegawaian' },
         { value: 'DISETUJUI_AKHIR', label: 'Disetujui Akhir' },
         { value: 'DITOLAK', label: 'Ditolak' },
         { value: 'DIREVISI', label: 'Direvisi' },
@@ -111,6 +113,20 @@ export default function MutasiQueryFilter({ onFilterChange }: Props) {
 
     return (
         <div className="flex flex-wrap gap-2">
+        {/* Date Range (Tanggal Pengajuan) */}
+        <div className={"relative z-[99] " + _CLASSNAME_}>
+            <DateRangePicker
+            startDate={filters.startDate ? moment(filters.startDate) : null}
+            endDate={filters.endDate ? moment(filters.endDate) : null}
+            onDatesChange={handleDateChange}
+            startDateId="start_date_mutasi"
+            focusedInput={focusedInput}
+            onFocusChange={setFocusedInput}
+            endDateId="end_date_mutasi"
+            displayFormat="YYYY-MM-DD"
+            isOutsideRange={() => false}
+            />
+        </div>
         {/* Status Permohonan Mutasi */}
         <select name="status" className={`${_CLASSNAME_} pr-10`} value={filters.status} onChange={handleChange}>
             <option value="">Status Mutasi</option>
@@ -131,20 +147,7 @@ export default function MutasiQueryFilter({ onFilterChange }: Props) {
             ))}
         </select>
 
-        {/* Date Range (Tanggal Pengajuan) */}
-        <div className={"relative " + _CLASSNAME_}>
-            <DateRangePicker
-            startDate={filters.startDate ? moment(filters.startDate) : null}
-            endDate={filters.endDate ? moment(filters.endDate) : null}
-            onDatesChange={handleDateChange}
-            startDateId="start_date_mutasi"
-            focusedInput={focusedInput}
-            onFocusChange={setFocusedInput}
-            endDateId="end_date_mutasi"
-            displayFormat="YYYY-MM-DD"
-            isOutsideRange={() => false}
-            />
-        </div>
+        
 
         {/* Reset */}
         <button className={`${_CLASSNAME_} flex flex-row items-center gap-1`} onClick={resetFilters}>

@@ -128,55 +128,53 @@ export const usePermohonanBelajarList = (filters: PermohonanBelajarFilters = {})
             })
 
             const url = `/kepegawaian/ijinbelajar?${params.toString()}`;
-            console.log('🔍 Fetching ijin belajar with URL:', url);
-            console.log('📋 Filters:', filters);
             
-            const res = await api.get(url);
-            console.log('📦 Raw API Response:', res.data);
+            try {
+                const res = await api.get(url);
             
-            // Response structure: { success, message, data: { items: [...], pagination: {...} } }
-            const responseData = res.data;
-            
-            // Jika response sudah dalam format yang benar
-            if (responseData && responseData.data && Array.isArray(responseData.data.items) && responseData.data.pagination) {
-                console.log('✅ Using standard format - data count:', responseData.data.items.length);
-                return responseData as ApiListResponse<PermohonanBelajarWithRelations>;
-            }
-            
-            // Fallback untuk struktur lama: { data: { page, limit, total, items } }
-            if (responseData && responseData.data && Array.isArray(responseData.data.items)) {
-                const oldData = responseData.data;
-                console.log('✅ Using legacy format - data count:', oldData.items.length);
+                // Response structure: { success, message, data: { items: [...], pagination: {...} } }
+                const responseData = res.data;
+
+                // Jika response sudah dalam format yang benar
+                if (responseData && responseData.data && Array.isArray(responseData.data.items) && responseData.data.pagination) {
+                    return responseData as ApiListResponse<PermohonanBelajarWithRelations>;
+                }
+                
+                // Fallback untuk struktur lama: { data: { page, limit, total, items } }
+                if (responseData && responseData.data && Array.isArray(responseData.data.items)) {
+                    const oldData = responseData.data;
+                    return {
+                        success: responseData.success || true,
+                        message: responseData.message || 'Success',
+                        data: {
+                            items: oldData.items,
+                            pagination: {
+                                page: oldData.page || page,
+                                limit: oldData.limit || limit,
+                                total: oldData.total || oldData.items.length,
+                                totalPages: Math.ceil((oldData.total || oldData.items.length) / (oldData.limit || limit))
+                            }
+                        }
+                    } as ApiListResponse<PermohonanBelajarWithRelations>;
+                }
+                
+                // Fallback: return empty
                 return {
-                    success: responseData.success || true,
-                    message: responseData.message || 'Success',
+                    success: false,
+                    message: 'Unexpected response format',
                     data: {
-                        items: oldData.items,
+                        items: [],
                         pagination: {
-                            page: oldData.page || page,
-                            limit: oldData.limit || limit,
-                            total: oldData.total || oldData.items.length,
-                            totalPages: Math.ceil((oldData.total || oldData.items.length) / (oldData.limit || limit))
+                            page: page,
+                            limit: limit,
+                            total: 0,
+                            totalPages: 0
                         }
                     }
-                } as ApiListResponse<PermohonanBelajarWithRelations>;
+                };
+            } catch (error: any) {
+                throw error;
             }
-            
-            // Fallback: return empty
-            console.warn('⚠️ Unexpected response format:', responseData);
-            return {
-                success: false,
-                message: 'Unexpected response format',
-                data: {
-                    items: [],
-                    pagination: {
-                        page: page,
-                        limit: limit,
-                        total: 0,
-                        totalPages: 0
-                    }
-                }
-            };
         },
         refetchOnWindowFocus: false,
     })

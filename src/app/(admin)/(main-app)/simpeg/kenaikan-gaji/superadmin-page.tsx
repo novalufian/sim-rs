@@ -16,7 +16,7 @@ import TotalPengeluaranGajiCard from "./state/charts/TotalPengeluaranGajiCard";
 
 export default function SuperAdminPage() {
     return (
-        <div className="grid grid-cols-12 gap-2">
+        <div className="grid grid-cols-12 gap-2 col-span-12">
             <div className="col-span-12">
                 <PathBreadcrumb defaultTitle="Super Admin - Statistik Kenaikan Gaji Berkala" />
             </div>
