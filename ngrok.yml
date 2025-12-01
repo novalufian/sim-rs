@@ -1,0 +1,15 @@
+version: '2'
+authtoken: 36EVBxtLrd47czCvz89kzzFtf9j_MTHtQgbb4q1yVJbKTSpC
+
+tunnels:
+  next:
+    proto: http
+    addr: 3000
+    schemes:
+      - https
+
+  backend:
+    proto: http
+    addr: 3001
+    schemes:
+      - https

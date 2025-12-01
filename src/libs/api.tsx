@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 // 1.  Define the environment variable name
 const API_URL_ENV_NAME = 'API_URL';
@@ -24,7 +25,8 @@ const api = axios.create({
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-cache' // Disable HTTP cache, we'll handle our own
-    }
+    },
+    withCredentials: true, // Important for cookies with sameSite: 'none'
 });
 
 /*
@@ -33,22 +35,16 @@ const api = axios.create({
  */
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = getCookie('token');
+    // Use js-cookie instead of manual cookie parsing for better compatibility
+    const token = Cookies.get('token');
     if (token) {
       config.headers.authorization = `Bearer ${token}`;
+    } else {
+      // Debug: Log if token is not found
+      console.warn('⚠️ Token cookie not found in request interceptor');
     }
   }
   return config;
 });
-
-function getCookie(name: string): string | undefined {
-  if (typeof window === 'undefined') {
-        return undefined;
-  }
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-  return undefined;
-}
 
 export default api;

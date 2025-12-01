@@ -43,9 +43,8 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'http',
-        hostname: '192.168.1.6',
-        port: '3001',
+        protocol: 'https',
+        hostname: 'https://8de6abf68b0a.ngrok-free.app',
         pathname: '/**',
       },
       // Support dynamic API URL from env
