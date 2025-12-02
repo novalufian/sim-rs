@@ -124,19 +124,119 @@ interface Props {
         </select>
 
         {/* Date Range (Tanggal Cuti) */}
-        <div className={"relative " + _CLASSNAME_}>
-            <DateRangePicker
-            startDate={filters.startDate ? moment(filters.startDate) : null}
-            endDate={filters.endDate ? moment(filters.endDate) : null}
-            onDatesChange={handleDateChange}
-            startDateId="start_date_cuti"
-            focusedInput={focusedInput}
-            onFocusChange={setFocusedInput}
-            endDateId="end_date_cuti"
-            displayFormat="YYYY-MM-DD"
-            isOutsideRange={() => false}
-            />
-        </div>
+        <>
+            <style jsx global>{`
+                .DateInput div {
+                    font-size: 16px !important;
+                }
+
+                .DateInput_input {
+                    font-size: 16px;
+                    font-weight: 400;
+                    color: inherit;
+                    padding: 9px;
+                    border: none;
+                    text-align: center;
+                    background: transparent !important;
+                }
+
+                .DateRangePickerInput {
+                    border: none;
+                    color: inherit;
+                    background: transparent;
+                }
+
+                .DateRangePicker {
+                    color: inherit;
+                }
+
+                .DateRangePicker_picker {
+                    border-radius: 20px;
+                    overflow: hidden;
+                    border: solid 1px lightgray;
+                    backdrop-filter: blur(10px);
+                    background: #ffffff80;
+                    z-index: 9999 !important;
+                }
+
+                .dark .DateRangePicker_picker {
+                    border: solid 1px rgb(55 65 81);
+                    background: rgba(17, 24, 39, 0.8);
+                }
+
+                .DateInput {
+                    background: transparent;
+                }
+
+                .CalendarDay {
+                    color: inherit;
+                }
+
+                .CalendarDay__default {
+                    color: inherit;
+                }
+
+                .CalendarDay__selected_span {
+                    background: #3b82f6;
+                    color: white;
+                }
+
+                .dark .CalendarDay__selected_span {
+                    background: #2563eb;
+                }
+
+                .CalendarDay__selected {
+                    background: #1e40af;
+                    color: white;
+                }
+
+                .dark .CalendarDay__selected {
+                    background: #1d4ed8;
+                }
+
+                .CalendarDay__hovered_span {
+                    background: #60a5fa;
+                    color: white;
+                }
+
+                .dark .CalendarDay__hovered_span {
+                    background: #3b82f6;
+                }
+
+                .DayPicker_weekHeader {
+                    color: inherit;
+                }
+
+                .DayPicker_weekHeader_li {
+                    color: inherit;
+                }
+
+                .DayPickerNavigation_button {
+                    color: inherit;
+                }
+
+                .DayPickerNavigation_button__default {
+                    color: inherit;
+                }
+
+                .DayPicker__withBorder {
+                    box-shadow: none;
+                }
+            `}</style>
+            <div className={"relative z-[99] " + _CLASSNAME_}>
+                <DateRangePicker
+                    startDate={filters.startDate ? moment(filters.startDate) : null}
+                    endDate={filters.endDate ? moment(filters.endDate) : null}
+                    onDatesChange={handleDateChange}
+                    startDateId="start_date_cuti"
+                    focusedInput={focusedInput}
+                    onFocusChange={setFocusedInput}
+                    endDateId="end_date_cuti"
+                    displayFormat="YYYY-MM-DD"
+                    isOutsideRange={() => false}
+                />
+            </div>
+        </>
 
         {/* Reset */}
         <button className={`${_CLASSNAME_} flex flex-row items-center gap-1`} onClick={resetFilters}>
