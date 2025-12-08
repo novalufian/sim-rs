@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
+import { useAppSelector } from '@/hooks/useAppDispatch';
+import type { RootState } from '@/libs/store';
 import { FiUsers } from "react-icons/fi";
 import { RxDashboard } from "react-icons/rx";
 import { LuBuilding2, LuArchive, LuTicket,LuScale ,LuNotebookText} from "react-icons/lu";
@@ -97,6 +99,15 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered } = useSidebar();
   const pathname = usePathname();
   const splitedPath = pathname.split("/");
+  const user = useAppSelector((state: RootState) => state.auth.user);
+  const userRole = user?.role;
+  
+  // Determine icon active color based on user role
+  const getIconActiveClass = useCallback(() => {
+    return userRole === "user" 
+      ? "text-green-500 dark:text-green-400"
+      : "menu-item-icon-active";
+  }, [userRole]);
 
   const renderMenuItems = (
     navItems: NavItem[],
@@ -121,7 +132,7 @@ const AppSidebar: React.FC = () => {
               <span
                 className={` ${
                   openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "menu-item-icon-active"
+                    ? getIconActiveClass()
                     : "menu-item-icon-inactive"
                 }`}
               >
@@ -152,7 +163,7 @@ const AppSidebar: React.FC = () => {
                 <span
                   className={`${
                     isActive(nav.path)
-                      ? "menu-item-icon-active"
+                      ? getIconActiveClass()
                       : "menu-item-icon-inactive"
                   }`}
                 >

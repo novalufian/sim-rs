@@ -33,7 +33,7 @@ export default function Page() {
             ) : (
                 <div className="col-span-4">
                     <Link href="/simpeg/ijin-belajar/permohonan" className='group'>
-                        <div className="group-hover:dark:bg-blue-300 text-blue-600 rounded-2xl border border-gray-200 bg-blue-100/50 hover:bg-blue-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-blue-300 group-hover:dark:text-gray-800 flex justify-between items-center">
+                        <div className="group-hover:dark:bg-green-300 text-green-600 rounded-2xl border border-gray-200 bg-green-100/50 hover:bg-green-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-green-300 group-hover:dark:text-gray-800 flex justify-between items-center">
                             <h1 className='text-2xl leading-tight font-semibold tracking-tight'>Ajukan <br /> Ijin Belajar</h1>
                             <BsArrowUpRightCircle className='w-15 h-15 group-hover:scale-140 transition-all group-hover:rotate-45'/>
                         </div>

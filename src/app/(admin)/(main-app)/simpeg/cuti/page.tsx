@@ -146,26 +146,31 @@ export default function Page() {
                 </div>
             </div>
 
+            {userRole && userRole === "user" && (
+                <div className="col-span-3">
+                </div>
+            )}
 
             <div className="col-span-3">
-                {userRole && userRole !== "user" && (
-                    <Link href="/simpeg/cuti/permohonan" className='group'>
-                        <div className="group-hover:dark:bg-amber-300 text-red-600 rounded-4xl bg-red-100/50 hover:bg-red-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center">
-                            <h1 className='text-2xl leading-tight font-semibold tracking-tight'>Ajukan <br /> Cuti Baru</h1>
-                            <IoIosAddCircleOutline className='w-18 h-18 group-hover:scale-140 transition-all group-hover:rotate-90'/>
-                        </div>
-                    </Link>
-                )}
-            </div>
-
-            <div className="col-span-3">
-                <Link href="/simpeg/cuti/data" className='group'>
-                    <div className="group-hover:dark:bg-amber-300 text-gray-600 rounded-4xl bg-white hover:bg-gray-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center">
-                        <h1 className='text-2xl leading-tight font-semibold tracking-tight'>Kelola <br /> Data Cuti</h1>
-                        <BsArrowUpRightCircle className='w-15 h-15 group-hover:scale-140 transition-all group-hover:rotate-45'/>
+                <Link href="/simpeg/cuti/permohonan" className='group'>
+                    <div className="group-hover:dark:bg-amber-300 text-red-600 rounded-4xl bg-red-100/50 hover:bg-red-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center">
+                        <h1 className='text-2xl leading-tight font-semibold tracking-tight'>Ajukan <br /> Cuti Baru</h1>
+                        <IoIosAddCircleOutline className='w-18 h-18 group-hover:scale-140 transition-all group-hover:rotate-90'/>
                     </div>
                 </Link>
             </div>
+
+            
+                {userRole && userRole === "super_admin" && (
+                    <div className="col-span-3">
+                    <Link href="/simpeg/cuti/data" className='group'>
+                        <div className="group-hover:dark:bg-amber-300 text-gray-600 rounded-4xl bg-white hover:bg-gray-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center">
+                            <h1 className='text-2xl leading-tight font-semibold tracking-tight'>Kelola <br /> Data Cuti</h1>
+                            <BsArrowUpRightCircle className='w-15 h-15 group-hover:scale-140 transition-all group-hover:rotate-45'/>
+                        </div>
+                    </Link>
+                    </div>
+                )}
 
             <div className="col-span-12 h-20 flex justify-center items-center">
                 <hr className='w-6/8 border-t border-white/[0.03]'/>

@@ -23,7 +23,7 @@ export default function AdminLayout({
 
   const bggradient: Record<Role, string> = {
     super_admin: "bg-gradient-to-b from-blue-100 via-gray-100/20 to-gray-100/20",
-    user: "bg-gradient-to-b from-amber-100/20 via-amber-100/50 to-amber-300",
+    user: "bg-gradient-to-b from-amber-50/10 via-amber-50/10 to-amber-50/50",
     admin: "bg-gradient-to-b from-red-400 via-red-800 to-dark-red-600",
     default: "bg-gradient-to-b from-gray-100/20 via-gray-100/20 to-gray-200",
   };

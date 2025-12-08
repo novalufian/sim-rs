@@ -1,9 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useGetPermohonanCutiDetail } from '@/hooks/fetch/cuti/useCutiPermohonan';
 import { usePersetujuanCutiByPermohonan } from '@/hooks/fetch/cuti/useCutiPersetujuan';
+import { useGetPegawaiById } from '@/hooks/fetch/pegawai/usePegawai';
+import { downloadCutiDocument, CutiExportData } from '@/components/export/doc/cuti.export';
 import { 
     FiUser, 
     FiCalendar, 
@@ -15,9 +17,11 @@ import {
     FiCheckCircle, 
     FiXCircle, 
     FiMinusCircle,
-    FiArrowLeft
+    FiArrowLeft,
+    FiDownload
 } from 'react-icons/fi';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 // Helper function untuk format tanggal
 const formatDate = (dateStr?: Date | string | null): string => {
@@ -126,6 +130,7 @@ export default function PermohonanCutiDetailPage() {
     const params = useParams();
     const router = useRouter();
     const idCuti = params?.idCuti as string;
+    const [isExporting, setIsExporting] = useState(false);
 
     // Fetch detail permohonan cuti
     const { data: permohonanData, isLoading: isLoadingPermohonan } = useGetPermohonanCutiDetail(
@@ -134,6 +139,15 @@ export default function PermohonanCutiDetailPage() {
     );
 
     const permohonan = permohonanData?.data;
+
+    // Fetch data pegawai lengkap untuk export (jika diperlukan)
+    // Hanya fetch jika id_pegawai tersedia
+    const shouldFetchPegawai = !!permohonan?.id_pegawai;
+    const { data: pegawaiData } = useGetPegawaiById(
+        shouldFetchPegawai ? permohonan.id_pegawai : ''
+    );
+
+    const pegawai = shouldFetchPegawai && pegawaiData?.data ? pegawaiData.data : null;
 
     // Fetch persetujuan cuti untuk permohonan
     const { data: persetujuanData, isLoading: isLoadingPersetujuan } = usePersetujuanCutiByPermohonan(
@@ -181,6 +195,44 @@ export default function PermohonanCutiDetailPage() {
         (a, b) => (a.urutan_persetujuan || 0) - (b.urutan_persetujuan || 0)
     );
 
+    // Handler untuk export dokumen cuti
+    const handleExportCuti = async () => {
+        if (!permohonan) {
+            toast.error('Data permohonan cuti tidak tersedia');
+            return;
+        }
+
+        setIsExporting(true);
+        try {
+            // Siapkan data export
+            const exportData: CutiExportData = {
+                cuti: permohonan,
+                // Data pegawai dari API atau dari data yang sudah ada
+                pangkat: (pegawai as any)?.pangkat_tmt || null,
+                golongan: null, // Jika ada field golongan terpisah, bisa ditambahkan
+                jabatan: (pegawai as any)?.jabatan || null,
+                unit_ruangan: null, // Jika ada field unit_ruangan, bisa ditambahkan
+                satuan_organisasi: 'RSUD dr. Abdul Rivai Kabupaten Berau',
+                // Data surat
+                nomor_surat: permohonan.nomor_surat_cuti || undefined,
+                tanggal_surat: permohonan.tanggal_surat_cuti || new Date(),
+                // Data penandatangan (default, bisa diubah sesuai kebutuhan)
+                nama_penandatangan: 'Arif Rudi Hermawan, S.Si.,M.Si.,Apt',
+                nip_penandatangan: '197310102003121014',
+                jabatan_penandatangan: 'Plh. Direktur',
+                pangkat_penandatangan: 'Pembina',
+            };
+
+            await downloadCutiDocument(exportData);
+            toast.success('Dokumen cuti berhasil diunduh!');
+        } catch (error) {
+            console.error('Error exporting cuti document:', error);
+            toast.error('Gagal mengunduh dokumen cuti');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <div className="flex justify-center items-start min-h-screen p-4 md:p-8">
             <div className="w-11/12 max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -197,13 +249,23 @@ export default function PermohonanCutiDetailPage() {
                                     Informasi lengkap permohonan cuti
                                 </p>
                             </div>
-                            <Link
-                                href="/simpeg/cuti/permohonan"
-                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                            >
-                                <FiArrowLeft />
-                                Kembali
-                            </Link>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleExportCuti}
+                                    disabled={isExporting}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <FiDownload className={isExporting ? 'animate-spin' : ''} />
+                                    {isExporting ? 'Mengunduh...' : 'Export Dokumen'}
+                                </button>
+                                <Link
+                                    href="/simpeg/cuti/permohonan"
+                                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    <FiArrowLeft />
+                                    Kembali
+                                </Link>
+                            </div>
                         </div>
 
                         {/* Status Permohonan */}

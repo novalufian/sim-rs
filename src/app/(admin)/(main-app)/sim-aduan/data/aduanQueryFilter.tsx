@@ -173,21 +173,6 @@ export default function AduanQueryFilter({ onFilterChange }: Props) {
                 </div>
             </div>
 
-            {/* Date Range Picker */}
-            <div className={"relative "+ _CLASSNAME_}>
-                <DateRangePicker
-                startDate={filters.startDate ? moment(filters.startDate) : null}
-                endDate={filters.endDate ? moment(filters.endDate) : null}
-                onDatesChange={handleDateChange}
-                startDateId="start_date"
-                focusedInput={focusedInput}
-                onFocusChange={focusedInput => setFocusedInput(focusedInput)}
-                endDateId="end_date"
-                displayFormat="YYYY-MM-DD"
-                isOutsideRange={() => false}
-                />
-            </div>
-
             {/* Reset Button */}
             <button
                 className={`${_CLASSNAME_} flex flex-row items-center gap-1`}

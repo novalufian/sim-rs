@@ -33,7 +33,7 @@ const getStatusColor = (status: string): string => {
     const statusUpper = status.toUpperCase();
     switch (statusUpper) {
         case 'DIAJUKAN':
-            return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+            return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
         case 'PERSETUJUAN_ATASAN':
             return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
         case 'VALIDASI_KEPEGAWAIAN':
@@ -161,8 +161,8 @@ export default function UserState() {
             <div className="col-span-12 md:col-span-6 lg:col-span-4">
                 <div className="rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-gray-800 p-6">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                            <LuFileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <LuFileText className="w-5 h-5 text-green-600 dark:text-green-400" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                             Status Permohonan
@@ -278,7 +278,7 @@ export default function UserState() {
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-600 dark:text-gray-400">Dalam Proses</span>
-                            <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                            <span className="text-lg font-semibold text-green-600 dark:text-green-400">
                                 {permohonanList.filter(p => 
                                     ['DIAJUKAN', 'PERSETUJUAN_ATASAN', 'VALIDASI_KEPEGAWAIAN', 'PERSETUJUAN_AKHIR'].includes(p.status)
                                 ).length}
@@ -380,7 +380,7 @@ export default function UserState() {
                                             <LuX className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                                         )}
                                         {permohonan.catatan_kepegawaian && !permohonan.catatan_penolakan && (
-                                            <LuInfo className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                                            <LuInfo className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                                         )}
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2">
@@ -406,7 +406,7 @@ export default function UserState() {
                                             )}
                                             {permohonan.catatan_kepegawaian && (
                                                 <div>
-                                                    <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                                                    <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">
                                                         Catatan Kepegawaian:
                                                     </p>
                                                     <p className="text-sm text-gray-700 dark:text-gray-300">

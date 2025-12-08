@@ -17,6 +17,13 @@ import {TableEmptyState, TableLoading, TableError} from "./tableEmptyState";
 import { useAppSelector } from '@/hooks/useAppDispatch';
 import nProgress from "nprogress";
 import DeleteModal from "@/components/modals/deleteModal";
+import moment from 'moment';
+import 'react-dates/initialize';
+import { DateRangePicker } from "react-dates";
+import "react-dates/lib/css/_datepicker.css";
+import { exportAduanToExcelWithFilters } from "@/components/export/xls/aduan.export";
+import api from "@/libs/api";
+import toast from "react-hot-toast";
 
 
 function Page() {
@@ -33,8 +40,17 @@ function Page() {
     const [showColumnFilter, setShowColumnFilter] = useState(false);
     // const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
     const [openDropdownIndex, setOpenDropdownIndex] = useState<number| string | null>(null);
-    const [filters, setFilters] = useState({})
+    const [filters, setFilters] = useState<{
+        status?: string;
+        klasifikasi?: string;
+        priority?: string;
+        startDate?: string;
+        endDate?: string;
+    }>({})
     const [retryError, setRetryError] = useState(0)
+    const [dateRangeFocusedInput, setDateRangeFocusedInput] = useState<any>(null)
+    const [dateRangeStartDate, setDateRangeStartDate] = useState<moment.Moment | null>(null)
+    const [dateRangeEndDate, setDateRangeEndDate] = useState<moment.Moment | null>(null)
 
     const itemsPerPage = 10;
 
@@ -53,6 +69,47 @@ function Page() {
     const [totalPages, setTotalPages] = useState(0);
 
     const router = useRouter();
+    
+    // Initialize filters and date range from URL params on mount
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            
+            // Get all filter params
+            const statusParam = params.get("status");
+            const klasifikasiParam = params.get("klasifikasi");
+            const priorityParam = params.get("priority");
+            const startDateParam = params.get("startDate");
+            const endDateParam = params.get("endDate");
+            
+            // Initialize filters state
+            const initialFilters: {
+                status?: string;
+                klasifikasi?: string;
+                priority?: string;
+                startDate?: string;
+                endDate?: string;
+            } = {};
+            
+            if (statusParam) initialFilters.status = statusParam.toUpperCase();
+            if (klasifikasiParam) initialFilters.klasifikasi = klasifikasiParam.toUpperCase();
+            if (priorityParam) initialFilters.priority = priorityParam.toUpperCase();
+            if (startDateParam) {
+                initialFilters.startDate = startDateParam;
+                setDateRangeStartDate(moment(startDateParam));
+            }
+            if (endDateParam) {
+                initialFilters.endDate = endDateParam;
+                setDateRangeEndDate(moment(endDateParam));
+            }
+            
+            // Set filters to state so hooks can use them
+            if (Object.keys(initialFilters).length > 0) {
+                setFilters(initialFilters);
+            }
+        }
+    }, []);
+
     useEffect(() => {
         if(data) {
             setLapor(data.data.aduan);
@@ -73,21 +130,50 @@ function Page() {
         setFilters(newFilters);
         setCurrentPage(1);
 
+        // Update date range state if dates are provided
+        if (newFilters.startDate) {
+            setDateRangeStartDate(moment(newFilters.startDate));
+        } else if (newFilters.startDate === '') {
+            setDateRangeStartDate(null);
+        }
+        if (newFilters.endDate) {
+            setDateRangeEndDate(moment(newFilters.endDate));
+        } else if (newFilters.endDate === '') {
+            setDateRangeEndDate(null);
+        }
+
         const params = new URLSearchParams(window.location.search)
         params.delete('status')
         params.delete('klasifikasi')
         params.delete('priority')
+        params.delete('startDate')
+        params.delete('endDate')
 
         // Add only non-empty filters
         if (newFilters.status) params.set('status', newFilters.status.toLowerCase())
         if (newFilters.klasifikasi) params.set('klasifikasi', newFilters.klasifikasi.toLowerCase())
         if (newFilters.priority) params.set('priority', newFilters.priority.toLowerCase())
+        if (newFilters.startDate) params.set('startDate', newFilters.startDate)
+        if (newFilters.endDate) params.set('endDate', newFilters.endDate)
 
         router.replace(`?${params.toString()}`);
         nProgress.start();
         setTimeout(() => {
             nProgress.done();
         }, 300);
+    };
+
+    const handleDateRangeChange = ({ startDate, endDate }: { startDate: moment.Moment | null, endDate: moment.Moment | null }) => {
+        setDateRangeStartDate(startDate);
+        setDateRangeEndDate(endDate);
+        
+        const updatedFilters = {
+            ...filters,
+            startDate: startDate ? startDate.format('YYYY-MM-DD') : '',
+            endDate: endDate ? endDate.format('YYYY-MM-DD') : '',
+        };
+        
+        handleFilterChange(updatedFilters);
     };
 
     const toggleColumn = (columnId: string) => {
@@ -123,6 +209,47 @@ function Page() {
     const handleFirmDelete = (lapor: Lapor) => {
         console.log("Delete:", lapor);
         setOpenModal(false);
+    };
+
+    // Handler untuk export Excel
+    const handleExportExcel = async () => {
+        try {
+            nProgress.start();
+            toast.loading('Mengunduh data...', { id: 'export' });
+
+            // Fetch semua data dengan filter yang sama (tanpa pagination)
+            const params = new URLSearchParams();
+            
+            if (filters.status) params.append('status', filters.status);
+            if (filters.klasifikasi) params.append('klasifikasi', filters.klasifikasi);
+            if (filters.priority) params.append('priority', filters.priority);
+            if (filters.startDate) params.append('startDate', filters.startDate);
+            if (filters.endDate) params.append('endDate', filters.endDate);
+            
+            // Jika menggunakan search, gunakan endpoint search
+            if (isUsingSearch && keyword) {
+                params.append('q', keyword);
+                params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+                const res = await api.get(`/aduan/search?${params.toString()}`);
+                const allData: Lapor[] = res.data?.data?.aduan || [];
+                
+                exportAduanToExcelWithFilters(allData, filters as any);
+            } else {
+                // Fetch semua data tanpa pagination
+                params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+                const res = await api.get(`/aduan?${params.toString()}`);
+                const allData: Lapor[] = res.data?.data?.aduan || [];
+                
+                exportAduanToExcelWithFilters(allData, filters as any);
+            }
+
+            toast.success('Data berhasil diekspor!', { id: 'export' });
+        } catch (error: any) {
+            console.error('Error exporting data:', error);
+            toast.error(error?.response?.data?.message || 'Gagal mengekspor data', { id: 'export' });
+        } finally {
+            nProgress.done();
+        }
     };
 
     // Calculate pagination
@@ -225,6 +352,105 @@ function Page() {
         <PathBreadcrumb defaultTitle="Daftar data"/>
         {/* <PageBreadcrumb pageTitle="Data urut kepegawaian" /> */}
 
+        <style jsx global>{`
+            .DateInput div {
+                font-size: 16px !important;
+            }
+
+            .DateInput_input {
+                font-size: 16px;
+                font-weight: 400;
+                color: inherit;
+                padding: 9px;
+                border: none;
+                text-align: center;
+                background: transparent !important;
+            }
+
+            .DateRangePickerInput {
+                border: none;
+                color: inherit;
+                background: transparent;
+            }
+
+            .DateRangePicker {
+                color: inherit;
+            }
+
+            .DateRangePicker_picker {
+                border-radius: 20px;
+                overflow: hidden;
+                border: solid 1px lightgray;
+                backdrop-filter: blur(10px);
+                background: #ffffff80;
+                z-index: 9999 !important;
+            }
+
+            .dark .DateRangePicker_picker {
+                border: solid 1px rgb(55 65 81);
+                background: rgba(17, 24, 39, 0.8);
+            }
+
+            .DateInput {
+                background: transparent;
+            }
+
+            .CalendarDay {
+                color: inherit;
+            }
+
+            .CalendarDay__default {
+                color: inherit;
+            }
+
+            .CalendarDay__selected_span {
+                background: #3b82f6;
+                color: white;
+            }
+
+            .dark .CalendarDay__selected_span {
+                background: #2563eb;
+            }
+
+            .CalendarDay__selected {
+                background: #1e40af;
+                color: white;
+            }
+
+            .dark .CalendarDay__selected {
+                background: #1d4ed8;
+            }
+
+            .CalendarDay__hovered_span {
+                background: #60a5fa;
+                color: white;
+            }
+
+            .dark .CalendarDay__hovered_span {
+                background: #3b82f6;
+            }
+
+            .DayPicker_weekHeader {
+                color: inherit;
+            }
+
+            .DayPicker_weekHeader_li {
+                color: inherit;
+            }
+
+            .DayPickerNavigation_button {
+                color: inherit;
+            }
+
+            .DayPickerNavigation_button__default {
+                color: inherit;
+            }
+
+            .DayPicker__withBorder {
+                box-shadow: none;
+            }
+        `}</style>
+
         <ColumnFilter
             addLink="/sim-aduan/lapor"
             columns={LaporTableColumns}
@@ -233,6 +459,22 @@ function Page() {
             showColumnFilter={showColumnFilter}
             setShowColumnFilter={setShowColumnFilter}
             onFilterChange={()=>{}}
+            onExport={handleExportExcel}
+            additionalLeftContent={
+                <div className="relative z-[99] appearance-none text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4 cursor-pointer">
+                    <DateRangePicker
+                        startDate={dateRangeStartDate}
+                        endDate={dateRangeEndDate}
+                        onDatesChange={handleDateRangeChange}
+                        startDateId="start_date_aduan"
+                        focusedInput={dateRangeFocusedInput}
+                        onFocusChange={setDateRangeFocusedInput}
+                        endDateId="end_date_aduan"
+                        displayFormat="YYYY-MM-DD"
+                        isOutsideRange={() => false}
+                    />
+                </div>
+            }
         >
             <AduanQueryFilter onFilterChange={handleFilterChange}/>
 
@@ -321,7 +563,6 @@ function Page() {
             currentPage={currentPage}
             onPageChange={(page) =>{
                 setCurrentPage(page)
-                setFilters({ ...filters, page })
             }}
             />
         </div>
