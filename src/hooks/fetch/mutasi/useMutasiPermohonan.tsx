@@ -39,7 +39,7 @@ export interface PermohonanMutasiFilters {
 
 export interface PermohonanMutasiInput {
     id_pegawai: string
-    jenis_mutasi: string
+    instansi_tujuan: string
     alasan_mutasi: string
     tanggal_pengajuan?: string | Date
     // Tambahkan field lain sesuai kebutuhan

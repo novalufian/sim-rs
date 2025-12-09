@@ -40,13 +40,16 @@ export interface PermohonanBelajarFilters {
 
 export interface PermohonanBelajarInput {
     id_pegawai: string
-    nama_sekolah?: string
-    jenjang_pendidikan?: string
-    jurusan?: string
-    alamat_sekolah?: string
-    tanggal_mulai?: string | Date
-    tanggal_selesai?: string | Date
-    // Tambahkan field lain sesuai kebutuhan
+    jenis_permohonan: string // "TUGAS_BELAJAR" | "IZIN_BELAJAR"
+    id_program_studi: string
+    id_institusi_pendidikan: string
+    gelar_yang_diperoleh?: string
+    tanggal_mulai_belajar: string | Date
+    tanggal_selesai_belajar: string | Date
+    lama_studi_bulan?: number
+    biaya_ditanggung: string // "INSTANSI" | "MANDIRI" | "CAMPURAN"
+    status_pegawai_selama_belajar?: string
+    kewajiban_setelah_belajar?: string
 }
 
 // Tipe data dasar Permohonan Ijin Belajar (sesuai API response)

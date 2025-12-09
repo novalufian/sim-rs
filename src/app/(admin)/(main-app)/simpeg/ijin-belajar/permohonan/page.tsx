@@ -70,9 +70,27 @@ export default function PermohonanIjinBelajarPage() {
     }, [tanggalMulai, tanggalSelesai, setValue]);
 
     const onSubmit: SubmitHandler<PermohonanBelajarFormData> = (data) => {
-        createMutation.mutate(data as any, {
+        if (!user?.id_pegawai) {
+            return;
+        }
+
+        const formData = {
+            id_pegawai: user.id_pegawai,
+            jenis_permohonan: data.jenis_permohonan,
+            id_program_studi: data.id_program_studi,
+            id_institusi_pendidikan: data.id_institusi_pendidikan,
+            gelar_yang_diperoleh: data.gelar_yang_diperoleh || undefined,
+            tanggal_mulai_belajar: new Date(data.tanggal_mulai_belajar),
+            tanggal_selesai_belajar: new Date(data.tanggal_selesai_belajar),
+            lama_studi_bulan: data.lama_studi_bulan || undefined,
+            biaya_ditanggung: data.biaya_ditanggung,
+            status_pegawai_selama_belajar: data.status_pegawai_selama_belajar || undefined,
+            kewajiban_setelah_belajar: data.kewajiban_setelah_belajar || undefined,
+        };
+
+        createMutation.mutate(formData, {
             onSuccess: () => {
-                router.push('/simpeg/ijin-belajar/permohonan');
+                router.push('/simpeg/ijin-belajar');
             },
         });
     };

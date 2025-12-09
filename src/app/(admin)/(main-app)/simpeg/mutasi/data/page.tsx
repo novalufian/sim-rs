@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect } from "react";
 import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { IoAddCircleSharp } from "react-icons/io5";
 import { LuFolderSearch, LuSearch } from "react-icons/lu";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import { 
     usePermohonanMutasiList, 
@@ -124,8 +124,10 @@ const ITEMS_PER_PAGE = 10;
 
 function Page() {
     const router = useRouter();
+    const pathname = usePathname();
     const [currentPage, setCurrentPage] = useState(1);
     const [dropdownStates, setDropdownStates] = useState<Record<number, boolean>>({});
+    const [isInitialized, setIsInitialized] = useState(false);
     
     // State untuk Drawer
     const [mutasiDrawer, setMutasiDrawer] = useState(false);
@@ -136,6 +138,54 @@ function Page() {
         limit: ITEMS_PER_PAGE,
         page: currentPage,
     });
+
+    // Helper function untuk update URL dengan query parameters
+    const updateURLParams = (newFilters: PermohonanMutasiFilters, page: number = 1) => {
+        const params = new URLSearchParams();
+        
+        if (newFilters.status) params.set('status', newFilters.status);
+        if (newFilters.jenis_mutasi) params.set('jenis_mutasi', newFilters.jenis_mutasi);
+        if (newFilters.startDate) params.set('startDate', newFilters.startDate);
+        if (newFilters.endDate) params.set('endDate', newFilters.endDate);
+        if (page > 1) params.set('page', page.toString());
+        
+        const queryString = params.toString();
+        const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+        router.replace(newUrl, { scroll: false });
+    };
+
+    // Baca query parameter saat pertama kali load
+    useEffect(() => {
+        if (typeof window !== "undefined" && !isInitialized) {
+            const params = new URLSearchParams(window.location.search);
+            
+            const initialFilters: PermohonanMutasiFilters = {
+                limit: ITEMS_PER_PAGE,
+                page: 1,
+            };
+            
+            const statusParam = params.get("status");
+            const jenisMutasiParam = params.get("jenis_mutasi");
+            const startDateParam = params.get("startDate");
+            const endDateParam = params.get("endDate");
+            const pageParam = params.get("page");
+            
+            if (statusParam) initialFilters.status = statusParam;
+            if (jenisMutasiParam) initialFilters.jenis_mutasi = jenisMutasiParam;
+            if (startDateParam) initialFilters.startDate = startDateParam;
+            if (endDateParam) initialFilters.endDate = endDateParam;
+            if (pageParam) {
+                const pageNum = parseInt(pageParam, 10);
+                if (!isNaN(pageNum) && pageNum > 0) {
+                    initialFilters.page = pageNum;
+                    setCurrentPage(pageNum);
+                }
+            }
+            
+            setFilters(initialFilters);
+            setIsInitialized(true);
+        }
+    }, [isInitialized]);
 
     // Hooks untuk fetching data dan mutasi delete
     // Pastikan page selalu sesuai dengan currentPage
@@ -170,12 +220,15 @@ function Page() {
     const handleFilterChange = (newFilters: PermohonanMutasiFilters) => {
         // Jika newFilters kosong (reset), set ke default (hanya limit dan page)
         // Ini akan menghapus semua filter sebelumnya
-        if (Object.keys(newFilters).length === 0) {
+        if (Object.keys(newFilters).length === 0 || (!newFilters.status && !newFilters.jenis_mutasi && !newFilters.startDate && !newFilters.endDate)) {
             const resetFilters = {
                 limit: ITEMS_PER_PAGE,
                 page: 1,
             };
             setFilters(resetFilters);
+            setCurrentPage(1);
+            // Hapus semua query parameter dari URL
+            router.replace(pathname, { scroll: false });
         } else {
             // Merge dengan filter yang ada, tapi hapus filter yang undefined/null/empty
             setFilters(prev => {
@@ -203,14 +256,19 @@ function Page() {
                     ...cleanedNewFilters,
                 };
                 
+                // Update URL dengan filter baru
+                updateURLParams(updated, 1);
+                
                 return updated;
             });
+            setCurrentPage(1); 
         }
-        setCurrentPage(1); 
     };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
+        // Update URL dengan page baru
+        updateURLParams(filters, page);
     };
 
     const toggleDropdown = (index: number, event: React.MouseEvent) => {

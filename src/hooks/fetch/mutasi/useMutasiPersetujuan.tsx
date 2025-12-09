@@ -62,7 +62,8 @@ export interface PersetujuanMutasiWithApprover extends PersetujuanMutasi {
 export interface PermohonanMutasiDetail {
     id: string
     id_pegawai: string
-    jenis_mutasi: string
+    jenis_mutasi?: string
+    instansi_tujuan?: string
     alasan_mutasi: string
     status: string
     tanggal_pengajuan: string

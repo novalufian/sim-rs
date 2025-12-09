@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react'
 import { RiResetRightLine } from "react-icons/ri";
 import { DateRangePicker } from "react-dates";
 import "react-dates/lib/css/_datepicker.css";
-import { PermohonanMutasiFilters } from "@/hooks/fetch/mutasi/useMutasiPermohonan"; 
+import { PermohonanMutasiFilters } from "@/hooks/fetch/mutasi/useMutasiPermohonan";
+import { useRouter, usePathname } from "next/navigation"; 
 
 // Internal state menggunakan string karena diambil langsung dari <select>
 interface InternalFilterState {
@@ -21,6 +22,8 @@ interface Props {
 }
 
 export default function MutasiQueryFilter({ onFilterChange }: Props) {
+    const router = useRouter();
+    const pathname = usePathname();
     const [filters, setFilters] = useState<InternalFilterState>({})
     const [isInitialized, setIsInitialized] = useState(false)
     const [focusedInput, setFocusedInput] = useState<any>(null)
@@ -87,6 +90,8 @@ export default function MutasiQueryFilter({ onFilterChange }: Props) {
         // Kirim object kosong untuk reset semua filter
         const resetOutput: PermohonanMutasiFilters = {};
         onFilterChange(resetOutput)
+        // Hapus semua query parameter dari URL
+        router.replace(pathname, { scroll: false });
     }
 
     // Status options untuk mutasi - sesuai dengan valid values dari server
