@@ -71,12 +71,14 @@ export default function PerUnitKerjaChart() {
             {
                 label: 'Jumlah KGB',
                 data: unitData.map((item) => item.jumlah_kgb),
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                backgroundColor: 'rgba(255, 179, 186, 0.8)', // Pastel Pink
+                borderRadius: 8,
             },
             {
                 label: 'Total Biaya Tahunan',
                 data: unitData.map((item) => parseFloat(item.total_biaya_tahunan)),
-                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                backgroundColor: 'rgba(255, 223, 186, 0.8)', // Pastel Peach
+                borderRadius: 8,
                 yAxisID: 'y1',
             },
         ],

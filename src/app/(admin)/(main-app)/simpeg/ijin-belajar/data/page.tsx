@@ -1,14 +1,20 @@
 "use client";
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { IoAddCircleSharp } from "react-icons/io5";
 import { LuSettings2, LuFolderSearch, LuShieldX, LuHouse, LuArrowLeft } from "react-icons/lu";
+import { CiExport } from "react-icons/ci";
+import { FiFile, FiFileText } from "react-icons/fi";
+import { TbFileExport } from "react-icons/tb";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/hooks/useAppDispatch";
 import type { RootState } from '@/libs/store';
+import nProgress from "nprogress";
+import toast from "react-hot-toast";
+import api from "@/libs/api";
 
 import { 
     usePermohonanBelajarList, 
@@ -20,6 +26,11 @@ import BelajarStatusFilter from "./belajarStatusFilter";
 import BelajarDateFilter from "./belajarDateFilter";
 import LeftDrawer from "@/components/drawer/leftDrawer";
 import SelectedBelajar from "./selectedBelajar";
+import { exportBelajarToExcelWithFilters } from "@/components/export/xls/belajar.export";
+import { exportBelajarToDocWithFilters } from "@/components/export/doc/belajar.export";
+import { exportBelajarToPdf } from "@/components/export/pdf/belajar.export";
+
+type ExportType = 'excel' | 'docx' | 'pdf';
 
 
 // Tipe untuk kolom tabel ijin belajar
@@ -158,6 +169,8 @@ function Page() {
     );
     const [showColumnFilter, setShowColumnFilter] = useState(false);
     const [showDataFilter, setShowDataFilter] = useState(false);
+    const [showExportDropdown, setShowExportDropdown] = useState(false);
+    const exportDropdownRef = useRef<HTMLDivElement>(null);
     
     // State untuk filtering dan pagination
     const [filters, setFilters] = useState<PermohonanBelajarFilters>({
@@ -174,6 +187,32 @@ function Page() {
     });
     
     const deleteMutation = useDeletePermohonanBelajar();
+
+    // Menutup semua dropdown jika klik di luar
+    useEffect(() => {
+        const handleClickOutside = () => {
+            setDropdownStates({});
+        };
+
+        document.addEventListener("click", handleClickOutside);
+        return () => {
+            document.removeEventListener("click", handleClickOutside);
+        };
+    }, []);
+
+    // Close export dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+                setShowExportDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Guard: Cek apakah user memiliki akses (hanya super_admin)
     if (userRole !== "super_admin") {
@@ -243,18 +282,6 @@ function Page() {
     const totalItems = queryResult?.data?.pagination?.total || 0;
     const totalPages = queryResult?.data?.pagination?.totalPages || 0;
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    
-    // Menutup semua dropdown jika klik di luar
-    React.useEffect(() => {
-        const handleClickOutside = () => {
-        setDropdownStates({});
-        };
-
-        document.addEventListener("click", handleClickOutside);
-        return () => {
-        document.removeEventListener("click", handleClickOutside);
-        };
-    }, []);
 
     const toggleColumn = (columnId: string) => {
         setVisibleColumns(prev => {
@@ -351,6 +378,58 @@ function Page() {
         }
     };
 
+    // Handler untuk export dengan berbagai format
+    const handleExport = async (type: ExportType) => {
+        try {
+            nProgress.start();
+            toast.loading('Mengunduh data...', { id: 'export' });
+
+            // Fetch semua data dengan filter yang sama (tanpa pagination)
+            const params = new URLSearchParams();
+            
+            // Apply filters yang sama seperti saat list ditampilkan
+            if (filters.status) params.append('status', filters.status);
+            if (filters.institusi_pendidikan_id) params.append('institusi_pendidikan_id', filters.institusi_pendidikan_id);
+            if (filters.program_studi_id) params.append('program_studi_id', filters.program_studi_id);
+            if (filters.startDate) params.append('startDate', filters.startDate);
+            if (filters.endDate) params.append('endDate', filters.endDate);
+            
+            // Fetch semua data tanpa pagination menggunakan export endpoint
+            params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+            const res = await api.get(`/kepegawaian/ijinbelajar/export?${params.toString()}`);
+            
+            // Handle different response structures
+            const allData: PermohonanBelajarWithRelations[] = res.data?.data?.items || res.data?.items || [];
+
+            // Data sudah difilter dari API, langsung export
+            switch (type) {
+                case 'excel':
+                    exportBelajarToExcelWithFilters(allData, {
+                        status: filters.status,
+                        startDate: filters.startDate,
+                        endDate: filters.endDate,
+                    });
+                    break;
+                case 'docx':
+                    await exportBelajarToDocWithFilters(allData, {
+                        status: filters.status,
+                        startDate: filters.startDate,
+                        endDate: filters.endDate,
+                    });
+                    break;
+                case 'pdf':
+                    exportBelajarToPdf(allData);
+                    break;
+            }
+
+            toast.success('Data berhasil diekspor!', { id: 'export' });
+        } catch (error: any) {
+            console.error('Error exporting data:', error);
+            toast.error(error?.response?.data?.message || 'Gagal mengekspor data', { id: 'export' });
+        } finally {
+            nProgress.done();
+        }
+    };
 
     const isLoading = isLoadingList || deleteMutation.isPending;
 
@@ -427,6 +506,53 @@ function Page() {
                         >
                             <LuSettings2 className='h-5 w-5 mr-2'/>Data Filter
                         </button>
+
+                        {/* Export Dropdown */}
+                        <div className="relative" ref={exportDropdownRef}>
+                            <button 
+                                onClick={() => setShowExportDropdown(!showExportDropdown)}
+                                className='flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4'
+                            >
+                                <CiExport className='h-5 w-5 mr-2'/> Export
+                            </button>
+
+                            {showExportDropdown && (
+                                <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                                    <div className="py-1">
+                                        <button
+                                            onClick={() => {
+                                                handleExport('excel');
+                                                setShowExportDropdown(false);
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                                        >
+                                            <FiFile className="mr-2 h-4 w-4" />
+                                            Export Excel
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                handleExport('docx');
+                                                setShowExportDropdown(false);
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                                        >
+                                            <FiFileText className="mr-2 h-4 w-4" />
+                                            Export DOCX
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                handleExport('pdf');
+                                                setShowExportDropdown(false);
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                                        >
+                                            <TbFileExport className="mr-2 h-4 w-4" />
+                                            Export PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     
                     <div className="flex items-center space-x-2">

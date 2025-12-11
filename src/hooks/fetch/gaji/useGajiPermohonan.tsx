@@ -182,6 +182,32 @@ export const useGetPermohonanGajiDetail = (id: string, enabled: boolean = true) 
 }
 
 /**
+ * Hook untuk export semua data Permohonan Gaji (tanpa pagination)
+ * GET /kepegawaian/gajiberkala/export
+ */
+export const useExportPermohonanGaji = (filters: Omit<PermohonanGajiFilters, 'page' | 'limit'> = {}, enabled: boolean = false) => {
+    return useQuery<ApiListResponse<PermohonanGajiWithRelations>>({
+        queryKey: ['permohonanGaji', 'export', filters],
+        queryFn: async () => {
+            const params = new URLSearchParams({
+                ...Object.entries(filters).reduce((acc: Record<string, string>, [key, value]) => {
+                    if (value !== undefined && value !== null && value !== '') {
+                        acc[key] = String(value)
+                    }
+                    return acc
+                }, {}),
+            })
+
+            const res = await api.get(`/kepegawaian/gajiberkala/export?${params.toString()}`)
+            return res.data as ApiListResponse<PermohonanGajiWithRelations>
+        },
+        enabled: enabled,
+        refetchOnWindowFocus: false,
+        staleTime: 5 * 60 * 1000, // Cache 5 minutes
+    })
+}
+
+/**
  * Hook untuk menghitung gaji baru
  * GET /api/kepegawaian/gajiberkala/:id/calculate
  */

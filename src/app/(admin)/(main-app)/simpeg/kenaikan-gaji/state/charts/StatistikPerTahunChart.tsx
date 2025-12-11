@@ -71,12 +71,14 @@ export default function StatistikPerTahunChart() {
             {
                 label: 'Jumlah KGB',
                 data: tahunData.map((item) => item.jumlah_kgb),
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                backgroundColor: 'rgba(186, 225, 255, 0.8)', // Pastel Sky Blue
+                borderRadius: 8,
             },
             {
                 label: 'Total Biaya Tahunan',
                 data: tahunData.map((item) => parseFloat(item.total_biaya_tahunan)),
-                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                backgroundColor: 'rgba(186, 255, 201, 0.8)', // Pastel Mint
+                borderRadius: 8,
                 yAxisID: 'y1',
             },
         ],

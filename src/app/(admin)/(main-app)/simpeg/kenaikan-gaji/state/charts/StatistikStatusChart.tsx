@@ -36,13 +36,28 @@ export default function StatistikStatusChart() {
 
     const statusData = Array.isArray(statistik.per_status) ? statistik.per_status : [];
 
+    // Pastel/Warm color palette
+    const pastelColors = [
+        "#FFB3BA", // Pastel Pink
+        "#FFDFBA", // Pastel Peach
+        "#FFFFBA", // Pastel Yellow
+        "#BAFFC9", // Pastel Mint
+        "#BAE1FF", // Pastel Sky Blue
+        "#D4A5FF", // Pastel Lavender
+        "#FFCCCB", // Pastel Coral
+        "#FFE4B5", // Pastel Cream
+        "#E6E6FA", // Lavender
+        "#F0E68C", // Khaki
+    ];
+
     const chartData = {
         labels: statusData.map((item) => item.status.replace(/_/g, ' ')),
         datasets: [
             {
                 data: statusData.map((item) => item.jumlah),
-                backgroundColor: ["#3b82f6", "#10b981", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899", "#14b8a6"],
-                borderWidth: 1,
+                backgroundColor: pastelColors.slice(0, statusData.length),
+                borderWidth: 2,
+                borderColor: "#ffffff",
                 borderRadius: 10,
                 spacing: 5,
             },

@@ -16,25 +16,27 @@ import TotalPengeluaranGajiCard from "./state/charts/TotalPengeluaranGajiCard";
 
 export default function SuperAdminPage() {
     return (
-        <div className="grid grid-cols-12 gap-2 col-span-12">
+        <div className="grid grid-cols-12 gap-3 col-span-12">
             <div className="col-span-12">
                 <PathBreadcrumb defaultTitle="Super Admin - Statistik Kenaikan Gaji Berkala" />
             </div>
 
-            {/* Row 1: Total Biaya Per Tahun & Rata-Rata Kenaikan */}
-            <div className="col-span-8">
-                <TotalBiayaPerTahunChart />
-            </div>
-            <div className="col-span-4 flex flex-col gap-2">
+            {/* Row 1: Cards - Rata-Rata Kenaikan & Total Pengeluaran */}
+            <div className="col-span-4 flex flex-col gap-3">
                 <RataRataKenaikanGajiCard />
                 <TotalPengeluaranGajiCard />
             </div>
 
+            {/* Row 1: Total Biaya Per Tahun */}
+            <div className="col-span-8">
+                <TotalBiayaPerTahunChart />
+            </div>
+
             {/* Row 2: Distribusi Per Golongan & Trend Biaya Per Bulan */}
-            <div className="col-span-6">
+            <div className="col-span-4">
                 <DistribusiPerGolonganChart />
             </div>
-            <div className="col-span-6">
+            <div className="col-span-8">
                 <TrendBiayaPerBulanChart />
             </div>
 
@@ -55,16 +57,16 @@ export default function SuperAdminPage() {
             </div>
 
             {/* Row 5: Statistik Per Tahun */}
-            <div className="col-span-8">
+            <div className="col-span-6">
                 <StatistikPerTahunChart />
             </div>
 
-            {/* Row 6: Per Unit Kerja */}
-            <div className="col-span-8">
+            {/* Row 5: Per Unit Kerja */}
+            <div className="col-span-6">
                 <PerUnitKerjaChart />
             </div>
 
-            {/* Row 7: Pegawai Akan Naik Gaji */}
+            {/* Row 6: Pegawai Akan Naik Gaji */}
             <div className="col-span-12">
                 <PegawaiAkanNaikGajiTable />
             </div>

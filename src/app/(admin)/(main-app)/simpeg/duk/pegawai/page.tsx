@@ -1,19 +1,24 @@
 "use client";
 import React, { useEffect, useState, Suspense } from "react";
 import Pagination from "@/components/tables/Pagination";
-import ColumnFilter from "@/components/tables/ColumnFilter";
+import ColumnFilter, { ExportType } from "@/components/tables/ColumnFilter";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { DUKTableColumns } from "@/app/(admin)/(main-app)/simpeg/duk/pegawai/tableColumns";
 import { Employee, DropdownState } from "@/app/(admin)/(main-app)/simpeg/duk/pegawai/employee";
 import { getColumnValue } from "@/app/(admin)/(main-app)/simpeg/duk/pegawai/tableHelpers";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
-import { usePegawai } from "@/hooks/fetch/pegawai/usePegawai";
+import { usePegawai, useExportPegawai } from "@/hooks/fetch/pegawai/usePegawai";
 import { useAppSelector } from '@/hooks/useAppDispatch';
 import router from "next/router";
 import nProgress from "nprogress";
 import { usePegawaiSearch } from "@/hooks/fetch/pegawai/usePegawaiSearch";
 import LeftDrawer from "@/components/drawer/leftDrawer";
 import SelectedPegawai from "./selectedPegawai";
+import toast from "react-hot-toast";
+import api from "@/libs/api";
+import { exportPegawaiToExcelWithFilters } from "@/components/export/xls/pegawai.export";
+import { exportPegawaiToDocWithFilters } from "@/components/export/doc/pegawai.export";
+import { exportPegawaiToPdfWithFilters } from "@/components/export/pdf/pegawai.export";
 
 
 function Page() {
@@ -54,7 +59,14 @@ function Page() {
   const [ employees, setEmployees ] = useState<Employee[]>([]);
   // Filter and UI states
   
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<{
+    nama?: string;
+    nip?: string;
+    jenis_kelamin?: string;
+    agama?: string;
+    status_perkawinan?: string;
+    status_pekerjaan?: string;
+  }>({});
   const [showColumnFilter, setShowColumnFilter] = useState(false);
   const [dropdownStates, setDropdownStates] = useState<DropdownState>({});
   const itemsPerPage = 10;
@@ -151,6 +163,94 @@ function Page() {
 
   const handleDelete = (employee: Employee) => {
     console.log("Delete:", employee);
+  };
+
+  // Handler untuk export dengan berbagai format
+  const handleExport = async (type: ExportType) => {
+    try {
+      nProgress.start();
+      toast.loading('Mengunduh data...', { id: 'export' });
+
+      // Fetch semua data dengan filter yang sama (tanpa pagination)
+      const params = new URLSearchParams();
+      
+      // Apply filters yang sama seperti saat list ditampilkan
+      if (filters.nama) params.append('nama', filters.nama);
+      if (filters.nip) params.append('nip', filters.nip);
+      if (filters.jenis_kelamin) params.append('jenis_kelamin', filters.jenis_kelamin);
+      if (filters.agama) params.append('agama', filters.agama);
+      if (filters.status_perkawinan) params.append('status_perkawinan', filters.status_perkawinan);
+      if (filters.status_pekerjaan) params.append('status_pekerjaan', filters.status_pekerjaan);
+      
+      // Jika menggunakan search, gunakan endpoint search
+      let allData: any[] = [];
+      if (isSearchMode && keyword) {
+        params.append('q', keyword);
+        params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+        const res = await api.get(`/pegawai/search/${keyword}?${params.toString()}`);
+        allData = res.data?.data?.pegawai || res.data?.pegawai || [];
+      } else {
+        // Fetch semua data tanpa pagination menggunakan export endpoint
+        params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+        const res = await api.get(`/pegawai/export?${params.toString()}`);
+        // Handle different response structures
+        allData = res.data?.data?.pegawai || res.data?.pegawai || res.data?.data || [];
+      }
+
+      // Convert to Employee format if needed
+      const employeeData: Employee[] = allData.map((item: any) => ({
+        id: item.id_pegawai || item.id,
+        id_pegawai: item.id_pegawai || item.id,
+        nama: item.nama || '',
+        nip: item.nip || '',
+        email: item.email || null,
+        tempat_lahir: item.tempat_lahir || null,
+        tanggal_lahir: item.tanggal_lahir || null,
+        umur: item.umur || null,
+        jenis_kelamin: item.jenis_kelamin || null,
+        agama: item.agama || null,
+        status_perkawinan: item.status_perkawinan || null,
+        status_pekerjaan: item.status_pekerjaan || '',
+        alamat_ktp: item.alamat_ktp || null,
+        alamat_domisili: item.alamat_domisili || null,
+        avatar_url: item.avatar_url || null,
+        no_kk: item.no_kk ? (typeof item.no_kk === 'object' ? item.no_kk : { masked: item.no_kk, unmasked: item.no_kk }) : null,
+        no_rekening: item.no_rekening ? (typeof item.no_rekening === 'object' ? item.no_rekening : { masked: item.no_rekening, unmasked: item.no_rekening }) : null,
+        no_hp: item.no_hp ? (typeof item.no_hp === 'object' ? item.no_hp : { masked: item.no_hp, unmasked: item.no_hp }) : null,
+        pengangkatan_tmt: item.pengangkatan_tmt || null,
+        pengangkatan_nomor_sk: item.pengangkatan_nomor_sk || null,
+        pengangkatan_masakerja: item.pengangkatan_masakerja || null,
+        pangkat_tmt: item.pangkat_tmt || null,
+        jabatan: item.jabatan || null,
+        jabatan_tmt: item.jabatan_tmt || null,
+        pendidikan_jenjang: item.pendidikan_jenjang || null,
+        pendidikan_jurusan: item.pendidikan_jurusan || null,
+        pendidikan_institusi: item.pendidikan_institusi || null,
+        pendidikan_tahun_selesai: item.pendidikan_tahun_selesai || null,
+        pendidikan_gelar: item.pendidikan_gelar || null,
+        is_deleted: item.is_deleted || false,
+      }));
+
+      // Export berdasarkan type
+      switch (type) {
+        case 'excel':
+          exportPegawaiToExcelWithFilters(employeeData, filters);
+          break;
+        case 'docx':
+          await exportPegawaiToDocWithFilters(employeeData, filters);
+          break;
+        case 'pdf':
+          exportPegawaiToPdfWithFilters(employeeData, filters);
+          break;
+      }
+
+      toast.success('Data berhasil diekspor!', { id: 'export' });
+    } catch (error: any) {
+      console.error('Error exporting data:', error);
+      toast.error(error?.response?.data?.message || 'Gagal mengekspor data', { id: 'export' });
+    } finally {
+      nProgress.done();
+    }
   };
 
   if (error) {
@@ -267,6 +367,7 @@ function Page() {
         showColumnFilter={showColumnFilter}
         setShowColumnFilter={setShowColumnFilter}
         onFilterChange={handleFilterChange}
+        onExport={handleExport}
       />
 
       <div className="relative sm:rounded-lg bg-transparent">

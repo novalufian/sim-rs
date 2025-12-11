@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,6 +11,9 @@ import { useJatahCutiByPegawaiTahun } from '@/hooks/fetch/cuti/useCutiJatah';
 import { useRouter } from 'next/navigation';
 import { FiUser, FiMail, FiPhone, FiCalendar, FiFileText, FiMapPin, FiClock, FiInfo } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import 'react-dates/initialize';
+import { DateRangePicker } from 'react-dates';
+import 'react-dates/lib/css/_datepicker.css';
 
 // Schema validasi
 const permohonanCutiSchema = z.object({
@@ -77,10 +80,47 @@ export default function PermohonanCutiPage() {
         },
     });
 
+    // State untuk date range picker
+    const [focusedInput, setFocusedInput] = useState<any>(null);
+    const [startDate, setStartDate] = useState<moment.Moment | null>(null);
+    const [endDate, setEndDate] = useState<moment.Moment | null>(null);
+
     // Watch tanggal untuk auto-calculate jumlah_hari
     const tanggalMulai = watch('tanggal_mulai_cuti');
     const tanggalSelesai = watch('tanggal_selesai_cuti');
     const jumlahHari = watch('jumlah_hari');
+
+    // Sync date range picker dengan form values
+    useEffect(() => {
+        if (tanggalMulai) {
+            setStartDate(moment(tanggalMulai));
+        } else {
+            setStartDate(null);
+        }
+        if (tanggalSelesai) {
+            setEndDate(moment(tanggalSelesai));
+        } else {
+            setEndDate(null);
+        }
+    }, [tanggalMulai, tanggalSelesai]);
+
+    // Handle date range change
+    const handleDateRangeChange = ({ startDate: newStartDate, endDate: newEndDate }: any) => {
+        setStartDate(newStartDate);
+        setEndDate(newEndDate);
+        
+        if (newStartDate) {
+            setValue('tanggal_mulai_cuti', newStartDate.format('YYYY-MM-DD'));
+        } else {
+            setValue('tanggal_mulai_cuti', '');
+        }
+        
+        if (newEndDate) {
+            setValue('tanggal_selesai_cuti', newEndDate.format('YYYY-MM-DD'));
+        } else {
+            setValue('tanggal_selesai_cuti', '');
+        }
+    };
 
     useEffect(() => {
         if (tanggalMulai && tanggalSelesai) {
@@ -290,40 +330,110 @@ export default function PermohonanCutiPage() {
                         )}
                     </div>
 
-                    {/* Tanggal Cuti */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Tanggal Cuti - Date Range Picker */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 <FiCalendar className="inline mr-2" />
-                                Tanggal Awal Cuti <span className="text-red-500">*</span>
+                            Periode Cuti <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                type="date"
-                                {...register('tanggal_mulai_cuti')}
-                                className={`w-full px-4 py-3 border rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                                    errors.tanggal_mulai_cuti ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
-                                }`}
+                        <div className="relative z-[99] appearance-none text-gray-500 transition-colors bg-white border border-gray-200 rounded-lg hover:text-dark-900 h-11 w-full hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4 cursor-pointer">
+                            <DateRangePicker
+                                startDate={startDate}
+                                endDate={endDate}
+                                onDatesChange={handleDateRangeChange}
+                                startDateId="tanggal_mulai_cuti"
+                                endDateId="tanggal_selesai_cuti"
+                                focusedInput={focusedInput}
+                                onFocusChange={setFocusedInput}
+                                displayFormat="YYYY-MM-DD"
+                                isOutsideRange={() => false}
                             />
+                        </div>
                             {errors.tanggal_mulai_cuti && (
                                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.tanggal_mulai_cuti.message}</p>
                             )}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                <FiCalendar className="inline mr-2" />
-                                Tanggal Akhir Cuti <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                {...register('tanggal_selesai_cuti')}
-                                className={`w-full px-4 py-3 border rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                                    errors.tanggal_selesai_cuti ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-gray-600'
-                                }`}
-                            />
                             {errors.tanggal_selesai_cuti && (
                                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.tanggal_selesai_cuti.message}</p>
                             )}
-                        </div>
+                        <style jsx global>{`
+                            .DateInput div {
+                                font-size: 16px !important;
+                            }
+                            .DateInput_input {
+                                font-size: 16px;
+                                font-weight: 400;
+                                color: inherit;
+                                padding: 9px;
+                                border: none;
+                                text-align: center;
+                                background: transparent !important;
+                            }
+                            .DateRangePickerInput {
+                                border: none;
+                                color: inherit;
+                                background: transparent;
+                            }
+                            .DateRangePicker {
+                                color: inherit;
+                            }
+                            .DateRangePicker_picker {
+                                border-radius: 20px;
+                                overflow: hidden;
+                                border: solid 1px lightgray;
+                                backdrop-filter: blur(10px);
+                                background: #ffffff80;
+                                z-index: 9999 !important;
+                            }
+                            .dark .DateRangePicker_picker {
+                                border: solid 1px rgb(55 65 81);
+                                background: rgba(17, 24, 39, 0.8);
+                            }
+                            .DateInput {
+                                background: transparent;
+                            }
+                            .CalendarDay {
+                                color: inherit;
+                            }
+                            .CalendarDay__default {
+                                color: inherit;
+                            }
+                            .CalendarDay__selected_span {
+                                background: #3b82f6;
+                                color: white;
+                            }
+                            .dark .CalendarDay__selected_span {
+                                background: #2563eb;
+                            }
+                            .CalendarDay__selected {
+                                background: #1e40af;
+                                color: white;
+                            }
+                            .dark .CalendarDay__selected {
+                                background: #1d4ed8;
+                            }
+                            .CalendarDay__hovered_span {
+                                background: #60a5fa;
+                                color: white;
+                            }
+                            .dark .CalendarDay__hovered_span {
+                                background: #3b82f6;
+                            }
+                            .DayPicker_weekHeader {
+                                color: inherit;
+                            }
+                            .DayPicker_weekHeader_li {
+                                color: inherit;
+                            }
+                            .DayPickerNavigation_button {
+                                color: inherit;
+                            }
+                            .DayPickerNavigation_button__default {
+                                color: inherit;
+                            }
+                            .DayPicker__withBorder {
+                                box-shadow: none;
+                            }
+                        `}</style>
                     </div>
 
                     {/* Jumlah Hari (Auto-calculated) */}

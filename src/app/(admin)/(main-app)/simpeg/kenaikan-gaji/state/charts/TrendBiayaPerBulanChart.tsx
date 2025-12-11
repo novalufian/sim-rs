@@ -71,12 +71,14 @@ export default function TrendBiayaPerBulanChart() {
             {
                 label: 'Total Biaya Tahunan',
                 data: trendData.map((item) => parseFloat(item.total_biaya_tahunan)),
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                backgroundColor: 'rgba(255, 179, 186, 0.8)', // Pastel Pink
+                borderRadius: 8,
             },
             {
                 label: 'Total Selisih Bulanan',
                 data: trendData.map((item) => parseFloat(item.total_selisih_bulanan)),
-                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                backgroundColor: 'rgba(186, 255, 201, 0.8)', // Pastel Mint
+                borderRadius: 8,
             },
         ],
     };

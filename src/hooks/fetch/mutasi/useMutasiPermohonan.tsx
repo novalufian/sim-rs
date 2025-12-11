@@ -150,6 +150,32 @@ export const useGetPermohonanMutasiDetail = (id: string, enabled: boolean = true
     })
 }
 
+/**
+ * Hook untuk export semua data Permohonan Mutasi (tanpa pagination)
+ * GET /kepegawaian/mutasi/permohonan/export
+ */
+export const useExportPermohonanMutasi = (filters: Omit<PermohonanMutasiFilters, 'page' | 'limit'> = {}, enabled: boolean = false) => {
+    return useQuery<ApiListResponse<PermohonanMutasiWithRelations>>({
+        queryKey: ['permohonanMutasi', 'export', filters],
+        queryFn: async () => {
+            const params = new URLSearchParams({
+                ...Object.entries(filters).reduce((acc: Record<string, string>, [key, value]) => {
+                    if (value !== undefined && value !== null && value !== '') {
+                        acc[key] = String(value)
+                    }
+                    return acc
+                }, {}),
+            })
+
+            const res = await api.get(`/kepegawaian/mutasi/permohonan/export?${params.toString()}`)
+            return res.data as ApiListResponse<PermohonanMutasiWithRelations>
+        },
+        enabled: enabled,
+        refetchOnWindowFocus: false,
+        staleTime: 5 * 60 * 1000, // Cache 5 minutes
+    })
+}
+
 // Tipe response untuk Mutation
 type MutationResponse = ApiItemResponse<PermohonanMutasiWithRelations>
 

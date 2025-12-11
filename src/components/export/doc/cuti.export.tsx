@@ -567,3 +567,165 @@ export const downloadCutiDocument = async (data: CutiExportData, filename?: stri
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 };
+
+/**
+ * Get label untuk status
+ */
+const getStatusLabel = (status: string): string => {
+    const statusMap: Record<string, string> = {
+        'DIAJUKAN': 'Diajukan',
+        'DISETUJUI_KA_UNIT': 'Disetujui KA Unit',
+        'DISETUJUI_KA_BIDANG': 'Disetujui KA Bidang',
+        'VALIDASI_KEPEGAWAIAN': 'Validasi Kepegawaian',
+        'DISETUJUI_AKHIR': 'Disetujui Akhir',
+        'DITOLAK': 'Ditolak',
+        'DIREVISI': 'Direvisi',
+        'DIBATALKAN': 'Dibatalkan',
+        'SELESAI': 'Selesai',
+    };
+    return statusMap[status] || status;
+};
+
+/**
+ * Export data cuti ke file DOC
+ */
+export const exportCutiToDoc = async (data: PermohonanCutiWithRelations[], filename?: string): Promise<void> => {
+    if (!data || data.length === 0) {
+        throw new Error('Tidak ada data untuk diekspor');
+    }
+
+    // Header tabel
+    const headerRow = new TableRow({
+        children: [
+            new TableCell({ children: [new Paragraph({ children: [new TextRun('No')], alignment: AlignmentType.CENTER })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun('NIP')] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun('Nama Pegawai')] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun('Jenis Cuti')] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun('Tanggal Mulai')] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun('Tanggal Selesai')] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun('Jumlah Hari')] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun('Status')] })] }),
+        ],
+    });
+
+    // Data rows
+    const dataRows = data.map((cuti, index) => 
+        new TableRow({
+            children: [
+                new TableCell({ children: [new Paragraph({ children: [new TextRun(String(index + 1))], alignment: AlignmentType.CENTER })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun(cuti.nip || '')] })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun(cuti.nama || '')] })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun(cuti.jenis_cuti_nama || '')] })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun(formatDateIndonesian(cuti.tanggal_mulai_cuti))] })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun(formatDateIndonesian(cuti.tanggal_selesai_cuti))] })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun(String(cuti.jumlah_hari || 0))] })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun(getStatusLabel(cuti.status || ''))] })] }),
+            ],
+        })
+    );
+
+    const table = new Table({
+        rows: [headerRow, ...dataRows],
+        width: {
+            size: 100,
+            type: WidthType.PERCENTAGE,
+        },
+    });
+
+    const doc = new Document({
+        sections: [{
+            children: [
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: 'Data Cuti',
+                            bold: true,
+                            size: 28,
+                        }),
+                    ],
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 400 },
+                }),
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: `Tanggal Export: ${formatDateIndonesian(new Date())}`,
+                            size: 22,
+                        }),
+                    ],
+                    spacing: { after: 400 },
+                }),
+                table,
+            ],
+        }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const defaultFilename = `Data_Cuti_${timestamp}.docx`;
+    link.download = filename || defaultFilename;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+};
+
+/**
+ * Export data cuti dengan filter tertentu
+ */
+export const exportCutiToDocWithFilters = async (
+    data: PermohonanCutiWithRelations[],
+    filters?: {
+        status?: string;
+        id_jenis_cuti?: number;
+        startDate?: string;
+        endDate?: string;
+    },
+    filename?: string
+): Promise<void> => {
+    let filteredData = [...data];
+
+    if (filters) {
+        if (filters.status) {
+            filteredData = filteredData.filter(item => item.status === filters.status);
+        }
+        if (filters.id_jenis_cuti) {
+            filteredData = filteredData.filter(item => item.id_jenis_cuti === filters.id_jenis_cuti);
+        }
+        if (filters.startDate) {
+            filteredData = filteredData.filter(item => {
+                const itemDate = new Date(item.tanggal_mulai_cuti);
+                const startDate = new Date(filters.startDate!);
+                return itemDate >= startDate;
+            });
+        }
+        if (filters.endDate) {
+            filteredData = filteredData.filter(item => {
+                const itemDate = new Date(item.tanggal_mulai_cuti);
+                const endDate = new Date(filters.endDate!);
+                endDate.setHours(23, 59, 59, 999);
+                return itemDate <= endDate;
+            });
+        }
+    }
+
+    let finalFilename = filename;
+    if (!finalFilename) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        const filterParts: string[] = [];
+        
+        if (filters?.status) filterParts.push(`Status-${getStatusLabel(filters.status)}`);
+        if (filters?.startDate) filterParts.push(`Dari-${filters.startDate}`);
+        if (filters?.endDate) filterParts.push(`Sampai-${filters.endDate}`);
+        
+        const filterStr = filterParts.length > 0 ? `_${filterParts.join('_')}` : '';
+        finalFilename = `Data_Cuti${filterStr}_${timestamp}.docx`;
+    }
+
+    await exportCutiToDoc(filteredData, finalFilename);
+};

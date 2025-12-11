@@ -181,6 +181,32 @@ export const useGetPermohonanPensiunDetail = (id: string, enabled: boolean = tru
 }
 
 /**
+ * Hook untuk export semua data Permohonan Pensiun (tanpa pagination)
+ * GET /kepegawaian/pensiun/pengajuan/export
+ */
+export const useExportPermohonanPensiun = (filters: Omit<PermohonanPensiunFilters, 'page' | 'limit'> = {}, enabled: boolean = false) => {
+    return useQuery<ApiListResponse<PermohonanPensiunWithRelations>>({
+        queryKey: ['permohonanPensiun', 'export', filters],
+        queryFn: async () => {
+            const params = new URLSearchParams({
+                ...Object.entries(filters).reduce((acc: Record<string, string>, [key, value]) => {
+                    if (value !== undefined && value !== null && value !== '') {
+                        acc[key] = String(value)
+                    }
+                    return acc
+                }, {}),
+            })
+
+            const res = await api.get(`/kepegawaian/pensiun/pengajuan/export?${params.toString()}`)
+            return res.data as ApiListResponse<PermohonanPensiunWithRelations>
+        },
+        enabled: enabled,
+        refetchOnWindowFocus: false,
+        staleTime: 5 * 60 * 1000, // Cache 5 minutes
+    })
+}
+
+/**
  * Hook untuk mengambil daftar Dokumen Persyaratan
  * GET /api/kepegawaian/pensiun/dokumen
  */

@@ -143,6 +143,34 @@ export const useGetPegawaiById = (id: string) => {
   })
 }
 
+/**
+ * Hook untuk export semua data Pegawai (tanpa pagination)
+ * GET /pegawai/export
+ */
+export const useExportPegawai = (filters: Omit<PegawaiFilters, 'page' | 'limit'> = {}, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['pegawai', 'export', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      
+      if (filters.nama) params.append('nama', filters.nama)
+      if (filters.nip) params.append('nip', filters.nip)
+      if (filters.jenis_kelamin) params.append('jenis_kelamin', filters.jenis_kelamin)
+      if (filters.agama) params.append('agama', filters.agama)
+      if (filters.status_perkawinan) params.append('status_perkawinan', filters.status_perkawinan)
+      if (filters.status_pekerjaan) params.append('status_pekerjaan', filters.status_pekerjaan)
+      if (filters.sortBy) params.append('sortBy', filters.sortBy)
+      if (filters.sortOrder) params.append('sortOrder', filters.sortOrder)
+      
+      const res = await api.get(`/pegawai/export?${params.toString()}`)
+      return res.data
+    },
+    enabled: enabled,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // Cache 5 minutes
+  })
+}
+
 export const usePegawaiDelete = () => {
   const queryClient = useQueryClient()
   

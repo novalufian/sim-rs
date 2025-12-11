@@ -80,6 +80,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/nprogress": "^0.2.3",
+    "@types/pdfmake": "^0.2.12",
     "@types/react": "^19.1.2",
     "@types/react-dates": "^21.8.6",
     "@types/react-dom": "^19.0.4",

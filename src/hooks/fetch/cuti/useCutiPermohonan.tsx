@@ -139,6 +139,31 @@ export const usePermohonanCutiList = (filters: PermohonanCutiFilters = {}) => {
 }
 
 /**
+ * Hook untuk export semua data Permohonan Cuti (tanpa pagination)
+ * GET /kepegawaian/cuti/permohonan/export
+ */
+export const useExportPermohonanCuti = (filters: Omit<PermohonanCutiFilters, 'page' | 'limit'> = {}, enabled: boolean = false) => {
+  return useQuery<ApiListResponse<PermohonanCutiWithRelations>>({
+    queryKey: ['permohonanCuti', 'export', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        ...Object.entries(filters).reduce((acc: Record<string, string>, [key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            acc[key] = String(value)
+          }
+          return acc
+        }, {}),
+      })
+
+      const res = await api.get(`/kepegawaian/cuti/permohonan/export?${params.toString()}`)
+      return res.data as ApiListResponse<PermohonanCutiWithRelations>
+    },
+    enabled: enabled,
+    refetchOnWindowFocus: false,
+  })
+}
+
+/**
  * Hook untuk mendapatkan detail Permohonan Cuti
  * GET /kepegawaian/cuti/permohonan/:id
  */

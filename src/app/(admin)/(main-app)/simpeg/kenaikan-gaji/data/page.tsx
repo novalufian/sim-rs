@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect } from "react";
 import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
@@ -7,7 +7,7 @@ import { IoAddCircleSharp } from "react-icons/io5";
 import { LuSettings2, LuFolderSearch } from "react-icons/lu";
 import { FiTrendingUp, FiTrendingDown } from "react-icons/fi";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import { 
     usePermohonanGajiList, 
@@ -173,8 +173,10 @@ const ITEMS_PER_PAGE = 10;
 
 function Page() {
     const router = useRouter();
+    const pathname = usePathname();
     const [currentPage, setCurrentPage] = useState(1);
     const [dropdownStates, setDropdownStates] = useState<Record<number, boolean>>({});
+    const [isInitialized, setIsInitialized] = useState(false);
     
     // State untuk Drawer
     const [gajiDrawer, setGajiDrawer] = useState(false);
@@ -205,6 +207,75 @@ function Page() {
         page: currentPage,
     });
 
+    // Helper function untuk convert status ke format URL (lowercase)
+    const convertStatusToUrl = (status: string | undefined): string | undefined => {
+        if (!status) return undefined;
+        return status.toLowerCase();
+    };
+
+    // Helper function untuk convert status dari URL (lowercase) ke format asli (uppercase)
+    const convertStatusFromUrl = (status: string | null): string | undefined => {
+        if (!status) return undefined;
+        // Convert ke uppercase untuk format asli
+        return status.toUpperCase();
+    };
+
+    // Helper function untuk update URL dengan query parameters
+    const updateURLParams = (newFilters: PermohonanGajiFilters, page: number = 1) => {
+        const params = new URLSearchParams();
+        
+        if (newFilters.status) {
+            params.set('status', convertStatusToUrl(newFilters.status)!);
+        }
+        if (newFilters.startDate) params.set('startDate', newFilters.startDate);
+        if (newFilters.endDate) params.set('endDate', newFilters.endDate);
+        if (page > 1) params.set('page', page.toString());
+        
+        const queryString = params.toString();
+        const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+        router.replace(newUrl, { scroll: false });
+    };
+
+    // Baca query parameter saat pertama kali load
+    useEffect(() => {
+        if (typeof window !== "undefined" && !isInitialized) {
+            const params = new URLSearchParams(window.location.search);
+            
+            const initialFilters: PermohonanGajiFilters = {
+                limit: ITEMS_PER_PAGE,
+                page: 1,
+            };
+            
+            const statusParam = params.get("status");
+            const startDateParam = params.get("startDate");
+            const endDateParam = params.get("endDate");
+            const pageParam = params.get("page");
+            
+            if (statusParam) {
+                initialFilters.status = convertStatusFromUrl(statusParam);
+            }
+            if (startDateParam) initialFilters.startDate = startDateParam;
+            if (endDateParam) initialFilters.endDate = endDateParam;
+            if (pageParam) {
+                const pageNum = parseInt(pageParam, 10);
+                if (!isNaN(pageNum) && pageNum > 0) {
+                    initialFilters.page = pageNum;
+                    setCurrentPage(pageNum);
+                }
+            }
+            
+            setFilters(initialFilters);
+            setIsInitialized(true);
+        }
+    }, [isInitialized]);
+
+    // Update URL saat filters atau page berubah
+    useEffect(() => {
+        if (isInitialized) {
+            updateURLParams(filters, currentPage);
+        }
+    }, [filters, currentPage, isInitialized, pathname, router]);
+
     // Hooks untuk fetching data dan mutasi delete
     const { data: queryResult, isLoading: isLoadingList, isError, error } = usePermohonanGajiList({
         ...filters,
@@ -228,14 +299,14 @@ function Page() {
     console.log('✅ Extracted data - count:', permohonanList.length, 'total:', totalItems, 'totalPages:', totalPages);
     
     // Menutup semua dropdown jika klik di luar
-    React.useEffect(() => {
+    useEffect(() => {
         const handleClickOutside = () => {
-        setDropdownStates({});
+            setDropdownStates({});
         };
 
         document.addEventListener("click", handleClickOutside);
         return () => {
-        document.removeEventListener("click", handleClickOutside);
+            document.removeEventListener("click", handleClickOutside);
         };
     }, []);
 
@@ -253,11 +324,13 @@ function Page() {
 
     const handleFilterChange = (newFilters: PermohonanGajiFilters) => {
         setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
-        setCurrentPage(1); 
+        setCurrentPage(1);
+        // URL akan diupdate oleh useEffect di atas
     };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
+        // URL akan diupdate oleh useEffect di atas
     };
 
     const toggleDropdown = (index: number, event: React.MouseEvent) => {
@@ -354,7 +427,7 @@ function Page() {
                 {/* Aksi dan Filter */}
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-2">
-                        <Link href="/simpeg/kenaikan-gaji/permohonan/create" passHref>
+                        <Link href="/simpeg/kenaikan-gaji/permohonan">
                             <button
                                 type="button"
                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

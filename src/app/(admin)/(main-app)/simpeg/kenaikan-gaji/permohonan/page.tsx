@@ -12,6 +12,10 @@ import PathBreadcrumb from '@/components/common/PathBreadcrumb';
 import Link from 'next/link';
 import { IoArrowBack } from 'react-icons/io5';
 import { FiDollarSign, FiCalendar, FiTrendingUp, FiClock } from 'react-icons/fi';
+import moment from 'moment';
+import 'react-dates/initialize';
+import { DateRangePicker } from 'react-dates';
+import 'react-dates/lib/css/_datepicker.css';
 
 export default function PermohonanKenaikanGajiPage() {
     const router = useRouter();
@@ -22,6 +26,7 @@ export default function PermohonanKenaikanGajiPage() {
         register,
         handleSubmit,
         watch,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<PermohonanGajiFormData>({
         resolver: zodResolver(permohonanGajiSchema),
@@ -39,11 +44,36 @@ export default function PermohonanKenaikanGajiPage() {
         },
     });
 
+    // State untuk date range picker
+    const [focusedInput, setFocusedInput] = useState<any>(null);
+    const [startDate, setStartDate] = useState<moment.Moment | null>(null);
+
     // Watch values untuk kalkulasi
     const gajiPokokLama = watch("gaji_pokok_lama");
     const gajiPokokBaru = watch("gaji_pokok_baru");
+    const tanggalPengajuan = watch("tanggal_pengajuan");
     const selisihGaji = gajiPokokBaru && gajiPokokLama ? gajiPokokBaru - gajiPokokLama : 0;
     const persentaseKenaikan = gajiPokokLama > 0 ? ((selisihGaji / gajiPokokLama) * 100).toFixed(2) : '0.00';
+
+    // Sync date range picker dengan form values
+    useEffect(() => {
+        if (tanggalPengajuan) {
+            setStartDate(moment(tanggalPengajuan));
+        } else {
+            setStartDate(null);
+        }
+    }, [tanggalPengajuan]);
+
+    // Handle date range change (hanya menggunakan startDate untuk tanggal_pengajuan)
+    const handleDateRangeChange = ({ startDate: newStartDate }: any) => {
+        setStartDate(newStartDate);
+        
+        if (newStartDate) {
+            setValue("tanggal_pengajuan", newStartDate.format('YYYY-MM-DD'));
+        } else {
+            setValue("tanggal_pengajuan", new Date().toISOString().split('T')[0]);
+        }
+    };
 
     const onSubmit: SubmitHandler<PermohonanGajiFormData> = (data) => {
         if (!user?.id_pegawai) {
@@ -177,18 +207,105 @@ export default function PermohonanKenaikanGajiPage() {
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    {/* Row 1: Tanggal Pengajuan */}
+                    {/* Row 1: Tanggal Pengajuan - Date Range Picker */}
                     <div>
                         <label className={labelClass}>
                             <FiCalendar className="inline mr-2" />
                             Tanggal Pengajuan
                         </label>
-                        <input
-                            type="date"
-                            {...register("tanggal_pengajuan")}
-                            className={inputClass}
-                        />
+                        <div className="relative z-[99] appearance-none text-gray-500 transition-colors bg-white border border-gray-200 rounded-lg hover:text-dark-900 h-11 w-full hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4 cursor-pointer">
+                            <DateRangePicker
+                                startDate={startDate}
+                                endDate={null}
+                                onDatesChange={handleDateRangeChange}
+                                startDateId="tanggal_pengajuan"
+                                endDateId="tanggal_pengajuan_end"
+                                focusedInput={focusedInput}
+                                onFocusChange={setFocusedInput}
+                                displayFormat="YYYY-MM-DD"
+                                isOutsideRange={() => false}
+                            />
+                        </div>
                         {errors.tanggal_pengajuan && <p className={errorClass}>{errors.tanggal_pengajuan.message}</p>}
+                        <style jsx global>{`
+                            .DateInput div {
+                                font-size: 16px !important;
+                            }
+                            .DateInput_input {
+                                font-size: 16px;
+                                font-weight: 400;
+                                color: inherit;
+                                padding: 9px;
+                                border: none;
+                                text-align: center;
+                                background: transparent !important;
+                            }
+                            .DateRangePickerInput {
+                                border: none;
+                                color: inherit;
+                                background: transparent;
+                            }
+                            .DateRangePicker {
+                                color: inherit;
+                            }
+                            .DateRangePicker_picker {
+                                border-radius: 20px;
+                                overflow: hidden;
+                                border: solid 1px lightgray;
+                                backdrop-filter: blur(10px);
+                                background: #ffffff80;
+                                z-index: 9999 !important;
+                            }
+                            .dark .DateRangePicker_picker {
+                                border: solid 1px rgb(55 65 81);
+                                background: rgba(17, 24, 39, 0.8);
+                            }
+                            .DateInput {
+                                background: transparent;
+                            }
+                            .CalendarDay {
+                                color: inherit;
+                            }
+                            .CalendarDay__default {
+                                color: inherit;
+                            }
+                            .CalendarDay__selected_span {
+                                background: #3b82f6;
+                                color: white;
+                            }
+                            .dark .CalendarDay__selected_span {
+                                background: #2563eb;
+                            }
+                            .CalendarDay__selected {
+                                background: #1e40af;
+                                color: white;
+                            }
+                            .dark .CalendarDay__selected {
+                                background: #1d4ed8;
+                            }
+                            .CalendarDay__hovered_span {
+                                background: #60a5fa;
+                                color: white;
+                            }
+                            .dark .CalendarDay__hovered_span {
+                                background: #3b82f6;
+                            }
+                            .DayPicker_weekHeader {
+                                color: inherit;
+                            }
+                            .DayPicker_weekHeader_li {
+                                color: inherit;
+                            }
+                            .DayPickerNavigation_button {
+                                color: inherit;
+                            }
+                            .DayPickerNavigation_button__default {
+                                color: inherit;
+                            }
+                            .DayPicker__withBorder {
+                                box-shadow: none;
+                            }
+                        `}</style>
                     </div>
 
                     {/* Row 2: Gaji Pokok Lama & Baru */}

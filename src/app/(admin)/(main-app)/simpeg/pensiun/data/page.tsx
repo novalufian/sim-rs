@@ -1,69 +1,481 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense, useEffect } from "react";
+import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
-import PensiunStateList from "./PensiunStateList";
-import PensiunStateByPegawai from "./PensiunStateByPegawai";
+import ActionDropdown from "@/components/tables/ActionDropdown";
+import { IoAddCircleSharp } from "react-icons/io5";
+import { LuSettings2 } from "react-icons/lu";
 import Link from "next/link";
-import { BsArrowLeft, BsPlusCircle } from "react-icons/bs";
+import { useRouter, usePathname } from "next/navigation";
 
-export default function DataPensiunPage() {
-    const [activeTab, setActiveTab] = useState<'list' | 'byPegawai'>('list');
+import { 
+    usePermohonanPensiunList, 
+    PermohonanPensiunFilters, 
+    PermohonanPensiunWithRelations, 
+} from "@/hooks/fetch/pensiun/usePensiunPermohonan"; 
+import PensiunStatusFilter from "./pensiunStatusFilter";
+import PensiunDateFilter from "./pensiunDateFilter";
+import LeftDrawer from "@/components/drawer/leftDrawer";
+import SelectedPensiun from "./selectedPensiun";
+
+
+// Tipe untuk kolom tabel pensiun
+interface PensiunColumn {
+    id: keyof PermohonanPensiunWithRelations | 'actions' | 'no' | 'pegawai_info';
+    label: string;
+    width: string;
+    sticky?: 'left' | 'right';
+}
+
+const PENSIUN_TABLE_COLUMNS: PensiunColumn[] = [
+    { id: 'no', label: 'No', width: 'w-[60px]', sticky: 'left' },
+    { id: 'pegawai_info', label: 'Pegawai (NIP & Nama)', width: 'w-[250px]' },
+    { id: 'jenis_pensiun', label: 'Jenis Pensiun', width: 'w-[150px]' },
+    { id: 'tanggal_pengajuan', label: 'Tgl Pengajuan', width: 'w-[120px]' },
+    { id: 'tanggal_pensiun', label: 'Tanggal Pensiun', width: 'w-[120px]' },
+    { id: 'status', label: 'Status', width: 'w-[150px]' },
+    { id: 'actions', label: 'Aksi', width: 'w-[80px]', sticky: 'right' },
+];
+
+// --- Helper Functions ---
+
+const formatDate = (date: Date | string | null | undefined): string => {
+    if (!date) return "-";
+    try {
+        const d = date instanceof Date ? date : new Date(date); 
+        return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
+    } catch {
+        return "Tgl Invalid";
+    }
+};
+
+const renderStatusBadge = (status: string) => {
+    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium inline-block";
+    let classes = baseClasses;
+    const s = status.toUpperCase();
+
+    switch (s) {
+        case "DIAJUKAN":
+        case "MENUNGGU":
+            classes += " bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"; break;
+        case "DISETUJUI":
+        case "DISETUJUI_AKHIR":
+        case "SELESAI":
+            classes += " bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"; break;
+        case "DITOLAK":
+        case "DIBATALKAN":
+            classes += " bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"; break;
+        case "DIREVISI":
+            classes += " bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"; break;
+        case "VALIDASI":
+        case "PROSES":
+            classes += " bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"; break;
+        default:
+            classes += " bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"; break;
+    }
 
     return (
-        <div className="grid grid-cols-12 gap-2">
-            <div className="col-span-12">
-                <PathBreadcrumb defaultTitle="Kelola Data Pensiun" />
-                </div>
+        <span className={classes}>
+            {status.replace(/_/g, ' ')}
+        </span>
+    );
+};
 
-            {/* Header dengan tombol kembali dan tambah */}
-            <div className="col-span-12 flex justify-between items-center mb-4">
-                <Link
-                    href="/simpeg/pensiun"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                    <BsArrowLeft className="w-5 h-5" />
-                    <span>Kembali</span>
+const getColumnValue = (pensiun: PermohonanPensiunWithRelations, columnId: string, index: number, startIndex: number) => {
+    switch (columnId) {
+        case 'no':
+            return startIndex + index + 1;
+        case 'pegawai_info':
+            return (
+                <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        {pensiun.pegawai_nama || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {pensiun.pegawai_nip || 'NIP N/A'}
+                    </span>
+                </div>
+            );
+        case 'tanggal_pengajuan':
+            return formatDate(pensiun.tanggal_pengajuan);
+        case 'tanggal_pensiun':
+            return formatDate(pensiun.tanggal_pensiun);
+        case 'status':
+            return renderStatusBadge(pensiun.status);
+        default:
+            const value = pensiun[columnId as keyof PermohonanPensiunWithRelations];
+            return typeof value === 'object' && value !== null && 'toString' in value 
+                ? value.toString() 
+                : (value ?? '-');
+    }
+};
+
+const ITEMS_PER_PAGE = 10;
+
+function Page() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [dropdownStates, setDropdownStates] = useState<Record<number, boolean>>({});
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [showDataFilter, setShowDataFilter] = useState(false);
+    
+    // State untuk Drawer
+    const [pensiunDrawer, setPensiunDrawer] = useState(false);
+    const [selectedPensiun, setSelectedPensiun] = useState<PermohonanPensiunWithRelations | null>(null); 
+    
+    // State untuk filtering dan pagination
+    const [filters, setFilters] = useState<PermohonanPensiunFilters>({
+        limit: ITEMS_PER_PAGE,
+        page: currentPage,
+    });
+
+    // Helper function untuk update URL dengan query parameters
+    const updateURLParams = (newFilters: PermohonanPensiunFilters, page: number = 1) => {
+        const params = new URLSearchParams();
+        
+        if (newFilters.status) params.set('status', newFilters.status);
+        if (newFilters.jenis_pensiun) params.set('jenis_pensiun', newFilters.jenis_pensiun);
+        if (newFilters.startDate) params.set('startDate', newFilters.startDate);
+        if (newFilters.endDate) params.set('endDate', newFilters.endDate);
+        if (page > 1) params.set('page', page.toString());
+        
+        const queryString = params.toString();
+        const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+        router.replace(newUrl, { scroll: false });
+    };
+
+    // Baca query parameter saat pertama kali load
+    useEffect(() => {
+        if (typeof window !== "undefined" && !isInitialized) {
+            const params = new URLSearchParams(window.location.search);
+            
+            const initialFilters: PermohonanPensiunFilters = {
+                limit: ITEMS_PER_PAGE,
+                page: 1,
+            };
+            
+            const statusParam = params.get("status");
+            const jenisPensiunParam = params.get("jenis_pensiun");
+            const startDateParam = params.get("startDate");
+            const endDateParam = params.get("endDate");
+            const pageParam = params.get("page");
+            
+            if (statusParam) initialFilters.status = statusParam;
+            if (jenisPensiunParam) initialFilters.jenis_pensiun = jenisPensiunParam;
+            if (startDateParam) initialFilters.startDate = startDateParam;
+            if (endDateParam) initialFilters.endDate = endDateParam;
+            if (pageParam) {
+                const pageNum = parseInt(pageParam, 10);
+                if (!isNaN(pageNum) && pageNum > 0) {
+                    initialFilters.page = pageNum;
+                    setCurrentPage(pageNum);
+                }
+            }
+            
+            setFilters(initialFilters);
+            setIsInitialized(true);
+        }
+    }, [isInitialized]);
+
+    // Hooks untuk fetching data
+    const { data: queryResult, isLoading: isLoadingList, isError, error } = usePermohonanPensiunList({
+        ...filters,
+        page: currentPage,
+        limit: filters.limit || ITEMS_PER_PAGE,
+    });
+    
+    // Ekstraksi Data Pensiun
+    const permohonanList: PermohonanPensiunWithRelations[] = queryResult?.data?.items || [];
+    const totalItems = queryResult?.data?.pagination?.total || 0;
+    const totalPages = queryResult?.data?.pagination?.totalPages || 0;
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    
+    // Menutup semua dropdown jika klik di luar
+    React.useEffect(() => {
+        const handleClickOutside = () => {
+            setDropdownStates({});
+        };
+
+        document.addEventListener("click", handleClickOutside);
+        return () => {
+            document.removeEventListener("click", handleClickOutside);
+        };
+    }, []);
+
+    const handleFilterChange = (newFilters: PermohonanPensiunFilters) => {
+        if (Object.keys(newFilters).length === 0 || (!newFilters.status && !newFilters.jenis_pensiun && !newFilters.startDate && !newFilters.endDate)) {
+            const resetFilters = {
+                limit: ITEMS_PER_PAGE,
+                page: 1,
+            };
+            setFilters(resetFilters);
+            setCurrentPage(1);
+            router.replace(pathname, { scroll: false });
+        } else {
+            setFilters(prev => {
+                const cleanedNewFilters: PermohonanPensiunFilters = {};
+                
+                if (newFilters.status && newFilters.status !== '') {
+                    cleanedNewFilters.status = newFilters.status;
+                }
+                if (newFilters.jenis_pensiun && newFilters.jenis_pensiun !== '') {
+                    cleanedNewFilters.jenis_pensiun = newFilters.jenis_pensiun;
+                }
+                if (newFilters.startDate && newFilters.startDate !== '') {
+                    cleanedNewFilters.startDate = newFilters.startDate;
+                }
+                if (newFilters.endDate && newFilters.endDate !== '') {
+                    cleanedNewFilters.endDate = newFilters.endDate;
+                }
+                
+                const mergedFilters = { ...prev, ...cleanedNewFilters, page: 1 };
+                setCurrentPage(1);
+                updateURLParams(mergedFilters, 1);
+                return mergedFilters;
+            });
+        }
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        updateURLParams(filters, page);
+    };
+
+    const toggleDropdown = (index: number, event: React.MouseEvent) => {
+        event.stopPropagation();
+        setDropdownStates((prev) => ({
+            ...Object.keys(prev).reduce(
+                (acc, key) => ({ ...acc, [key]: false }),
+                {}
+            ),
+            [index]: !prev[index],
+        }));
+    };
+
+    const handleView = (pensiun: PermohonanPensiunWithRelations) => {
+        setSelectedPensiun(pensiun);
+        setPensiunDrawer(true);
+    };
+
+    const handleCloseDrawer = () => {
+        setPensiunDrawer(false);
+        setSelectedPensiun(null);
+    };
+
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <style jsx global>{`
+                .table-wrapper { position: relative; overflow-x: auto; }
+                .min-table-width { min-width: max-content; }
+                .sticky-right { position: sticky; right: 0; z-index: 20; }
+                .sticky-right-header { position: sticky; right: 0; z-index: 30; }
+                .sticky-left { position: sticky; left: 0; z-index: 20; }
+                .bg-sticky-header { background-color: rgb(243 244 246); }
+                .dropdown-menu { min-width: 120px; transform-origin: top right; }
+                
+                /* DateRangePicker Styles */
+                .DateInput div {
+                    font-size: 16px !important;
+                }
+
+                .DateInput_input {
+                    font-size: 16px;
+                    font-weight: 400;
+                    color: inherit;
+                    padding: 9px;
+                    border: none;
+                    text-align: center;
+                    background: transparent !important;
+                }
+
+                .DateRangePickerInput {
+                    border: none;
+                    color: inherit;
+                    background: transparent;
+                }
+
+                .DateRangePicker {
+                    color: inherit;
+                }
+
+                .DateRangePicker_picker {
+                    border-radius: 20px;
+                    overflow: hidden;
+                    border: solid 1px lightgray;
+                    backdrop-filter: blur(10px);
+                    background: #ffffff80;
+                }
+
+                .DateInput {
+                    background: transparent;
+                }
+            `}</style>
+
+            <PathBreadcrumb defaultTitle="Permohonan Pensiun"/>
+            
+
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                {/* Aksi dan Filter */}
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-2">
+                        <Link href="/simpeg/pensiun/permohonan">
+                            <button
+                                type="button"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                <IoAddCircleSharp className="mr-2 h-5 w-5" />
+                                Ajukan Pensiun Baru
+                            </button>
                         </Link>
-                <Link
-                    href="/simpeg/pensiun/data/tambah"
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    <BsPlusCircle className="w-5 h-5" />
-                    <span>Tambah State Baru</span>
-                </Link>
+                        
+                        <button
+                            onClick={() => setShowDataFilter(!showDataFilter)}
+                            className="flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4"
+                        >
+                            <LuSettings2 className='h-5 w-5 mr-2'/>Data Filter
+                        </button>
                     </div>
                     
-            {/* Tab Navigation */}
-            <div className="col-span-12 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
-                <div className="flex border-b border-gray-200 dark:border-gray-700">
-                    <button
-                        onClick={() => setActiveTab('list')}
-                        className={`px-6 py-3 font-medium text-sm transition-colors ${
-                            activeTab === 'list'
-                                ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
-                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                        }`}
-                    >
-                        Daftar State
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('byPegawai')}
-                        className={`px-6 py-3 font-medium text-sm transition-colors ${
-                            activeTab === 'byPegawai'
-                                ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
-                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                        }`}
-                    >
-                        Cari Berdasarkan Pegawai
-                    </button>
-                </div>
+                    <div className="flex items-center space-x-2">
+                        <PensiunDateFilter onFilterChange={handleFilterChange} currentFilters={filters} />
                     </div>
+                </div>
 
-            {/* Content */}
-            <div className="col-span-12">
-                {activeTab === 'list' && <PensiunStateList />}
-                {activeTab === 'byPegawai' && <PensiunStateByPegawai />}
+
+                <div className="relative sm:rounded-lg bg-transparent">
+                    <div className="table-wrapper rounded-2xl">
+                        <div className="min-table-width">
+                            <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-100 dark:bg-gray-700">
+                                    <tr>
+                                        {PENSIUN_TABLE_COLUMNS.map((column) => (
+                                            <th
+                                                key={column.id}
+                                                scope="col"
+                                                className={`p-3 ${column.width} ${
+                                                    column.sticky === "left"
+                                                        ? "sticky-left bg-gray-100 dark:bg-gray-700 z-30"
+                                                        : column.sticky === "right"
+                                                        ? "sticky-right-header bg-gray-100 dark:bg-gray-700 z-30"
+                                                        : ""
+                                                }`}
+                                            >
+                                                <div className="text-xs font-medium text-gray-500 dark:text-white uppercase">
+                                                    {column.label}
+                                                </div>
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white text-gray-700 dark:bg-gray-900 dark:text-gray-200 divide-y divide-gray-200 dark:divide-gray-700">
+                                    {isLoadingList ? (
+                                        <tr>
+                                            <td colSpan={PENSIUN_TABLE_COLUMNS.length} className="p-8 text-center">
+                                                <div className="flex justify-center items-center">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                                    <span className="ml-2 text-gray-600 dark:text-gray-400">Memuat data...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : isError ? (
+                                        <tr>
+                                            <td colSpan={PENSIUN_TABLE_COLUMNS.length} className="p-8 text-center text-red-600 dark:text-red-400">
+                                                Gagal memuat data permohonan pensiun. Silakan coba lagi atau hubungi administrator.
+                                            </td>
+                                        </tr>
+                                    ) : permohonanList.length === 0 ? (
+                                        <tr>
+                                            <td
+                                                colSpan={PENSIUN_TABLE_COLUMNS.length}
+                                                className="p-8 text-center text-gray-500"
+                                            >
+                                                <div className="flex flex-col items-center justify-center">
+                                                    <p className="text-lg font-medium mb-2">
+                                                        Tidak ada data permohonan pensiun
+                                                    </p>
+                                                    <p className="text-sm text-gray-400">
+                                                        Coba ubah filter atau tambahkan permohonan pensiun baru
+                                                    </p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        permohonanList.map((pensiun, index) => (
+                                            <tr key={pensiun.id} className="group group-hover:bg-gray-50 hover:cursor-pointer">
+                                                {PENSIUN_TABLE_COLUMNS.map((column) => (
+                                                    <td
+                                                        key={column.id}
+                                                        className={`p-3 whitespace-nowrap group-hover:bg-gray-100 dark:group-hover:bg-gray-800 ${
+                                                            column.sticky === "left"
+                                                                ? "sticky-left bg-white group-hover:bg-gray-200 dark:group-hover:bg-gray-700 dark:bg-gray-900 z-20 text-center"
+                                                                : column.sticky === "right"
+                                                                ? "sticky-right bg-white group-hover:bg-gray-200 dark:group-hover:bg-gray-700 dark:bg-gray-900 z-20"
+                                                                : ""
+                                                        }`}
+                                                        onClick={() => {
+                                                            if (column.id !== 'actions') {
+                                                                handleView(pensiun);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {column.id === "actions" ? (
+                                                            <div onClick={(e) => e.stopPropagation()}>
+                                                                <ActionDropdown
+                                                                    index={index}
+                                                                    isOpen={dropdownStates[index]}
+                                                                    onToggle={(e) => toggleDropdown(index, e)}
+                                                                    onView={() => handleView(pensiun)}
+                                                                    onEdit={() => handleView(pensiun)}
+                                                                    onDelete={() => handleView(pensiun)}
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            getColumnValue(pensiun, String(column.id), index, startIndex)
+                                                        )}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="mt-6">
+                        <Pagination
+                            totalPages={totalPages}
+                            currentPage={currentPage}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                )}
             </div>
-        </div>
+
+            {/* LEFT DRAWER - Data Filter */}
+            <LeftDrawer isOpen={showDataFilter} onClose={() => setShowDataFilter(false)} title='Filter Data' width="600px">
+                <div className="flex flex-col rounded-lg space-y-4">
+                    {/* Filter Status dan Reset */}
+                    <div className="mb-4">
+                        <PensiunStatusFilter onFilterChange={handleFilterChange} currentFilters={filters} />
+                    </div>
+                </div>
+            </LeftDrawer>
+
+            {/* Left Drawer untuk Detail */}
+            <LeftDrawer 
+                isOpen={pensiunDrawer} 
+                onClose={handleCloseDrawer} 
+                title='Detail Permohonan Pensiun'
+            >
+                <SelectedPensiun pensiun={selectedPensiun} />
+            </LeftDrawer>
+        </Suspense>
     );
 }
+
+export default Page;

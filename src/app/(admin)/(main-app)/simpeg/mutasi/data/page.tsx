@@ -4,9 +4,13 @@ import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { IoAddCircleSharp } from "react-icons/io5";
-import { LuFolderSearch, LuSearch } from "react-icons/lu";
+import { LuFolderSearch, LuSearch, LuSettings2 } from "react-icons/lu";
+import { FiDownload } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import nProgress from "nprogress";
+import toast from "react-hot-toast";
+import api from "@/libs/api";
 
 import { 
     usePermohonanMutasiList, 
@@ -14,9 +18,11 @@ import {
     PermohonanMutasiWithRelations, 
     useDeletePermohonanMutasi 
 } from "@/hooks/fetch/mutasi/useMutasiPermohonan"; 
-import MutasiQueryFilter from "./mutasiQueryFilter";
+import MutasiDateFilter from "./mutasiDateFilter";
+import MutasiStatusFilter from "./mutasiStatusFilter";
 import LeftDrawer from "@/components/drawer/leftDrawer";
 import SelectedMutasi from "./selectedMutasi";
+import { exportMutasiToExcelWithFilters } from "@/components/export/xls/mutasi.export";
 
 
 // Tipe untuk kolom tabel mutasi
@@ -128,6 +134,7 @@ function Page() {
     const [currentPage, setCurrentPage] = useState(1);
     const [dropdownStates, setDropdownStates] = useState<Record<number, boolean>>({});
     const [isInitialized, setIsInitialized] = useState(false);
+    const [showDataFilter, setShowDataFilter] = useState(false);
     
     // State untuk Drawer
     const [mutasiDrawer, setMutasiDrawer] = useState(false);
@@ -218,51 +225,38 @@ function Page() {
 
 
     const handleFilterChange = (newFilters: PermohonanMutasiFilters) => {
-        // Jika newFilters kosong (reset), set ke default (hanya limit dan page)
-        // Ini akan menghapus semua filter sebelumnya
-        if (Object.keys(newFilters).length === 0 || (!newFilters.status && !newFilters.jenis_mutasi && !newFilters.startDate && !newFilters.endDate)) {
-            const resetFilters = {
+        // Merge dengan filter yang ada
+        setFilters(prev => {
+            const updated: PermohonanMutasiFilters = {
+                ...prev,
+                ...newFilters,
                 limit: ITEMS_PER_PAGE,
                 page: 1,
             };
-            setFilters(resetFilters);
-            setCurrentPage(1);
-            // Hapus semua query parameter dari URL
-            router.replace(pathname, { scroll: false });
-        } else {
-            // Merge dengan filter yang ada, tapi hapus filter yang undefined/null/empty
-            setFilters(prev => {
-                // Hapus property yang undefined/null/empty dari newFilters
-                const cleanedNewFilters: PermohonanMutasiFilters = {};
-                
-                if (newFilters.status && newFilters.status !== '') {
-                    cleanedNewFilters.status = newFilters.status;
-                }
-                if (newFilters.jenis_mutasi && newFilters.jenis_mutasi !== '') {
-                    cleanedNewFilters.jenis_mutasi = newFilters.jenis_mutasi;
-                }
-                if (newFilters.startDate && newFilters.startDate !== '') {
-                    cleanedNewFilters.startDate = newFilters.startDate;
-                }
-                if (newFilters.endDate && newFilters.endDate !== '') {
-                    cleanedNewFilters.endDate = newFilters.endDate;
-                }
-                
-                // Buat filter baru dengan hanya field yang ada di cleanedNewFilters
-                // Ini memastikan filter yang tidak ada di newFilters akan dihapus
-                const updated: PermohonanMutasiFilters = {
+            
+            // Hapus property yang undefined/null/empty
+            if (!updated.status || updated.status === '') delete updated.status;
+            if (!updated.jenis_mutasi || updated.jenis_mutasi === '') delete updated.jenis_mutasi;
+            if (!updated.startDate || updated.startDate === '') delete updated.startDate;
+            if (!updated.endDate || updated.endDate === '') delete updated.endDate;
+            
+            // Jika semua filter kosong, reset
+            if (!updated.status && !updated.jenis_mutasi && !updated.startDate && !updated.endDate) {
+                const resetFilters = {
                     limit: ITEMS_PER_PAGE,
                     page: 1,
-                    ...cleanedNewFilters,
                 };
-                
-                // Update URL dengan filter baru
-                updateURLParams(updated, 1);
-                
-                return updated;
-            });
-            setCurrentPage(1); 
-        }
+                setCurrentPage(1);
+                router.replace(pathname, { scroll: false });
+                return resetFilters;
+            }
+            
+            // Update URL dengan filter baru
+            updateURLParams(updated, 1);
+            setCurrentPage(1);
+            
+            return updated;
+        });
     };
 
     const handlePageChange = (page: number) => {
@@ -302,6 +296,36 @@ function Page() {
         const namaPegawai = mutasi.pegawai_nama || mutasi.nama || 'pegawai';
         if (window.confirm(`Anda yakin ingin menghapus permohonan mutasi dari ${namaPegawai}?`)) {
             deleteMutation.mutate(mutasi.id);
+        }
+    };
+
+    // Handler untuk export Excel
+    const handleExportExcel = async () => {
+        try {
+            nProgress.start();
+            toast.loading('Mengunduh data...', { id: 'export' });
+
+            // Fetch semua data dengan filter yang sama (tanpa pagination)
+            const params = new URLSearchParams();
+            
+            if (filters.status) params.append('status', filters.status);
+            if (filters.jenis_mutasi) params.append('jenis_mutasi', filters.jenis_mutasi);
+            if (filters.startDate) params.append('startDate', filters.startDate);
+            if (filters.endDate) params.append('endDate', filters.endDate);
+            
+            // Fetch semua data tanpa pagination
+            params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+            const res = await api.get(`/kepegawaian/mutasi/pengajuan?${params.toString()}`);
+            const allData: PermohonanMutasiWithRelations[] = res.data?.data?.items || [];
+            
+            exportMutasiToExcelWithFilters(allData, filters);
+
+            toast.success('Data berhasil diekspor!', { id: 'export' });
+        } catch (error: any) {
+            console.error('Error exporting data:', error);
+            toast.error(error?.response?.data?.message || 'Gagal mengekspor data', { id: 'export' });
+        } finally {
+            nProgress.done();
         }
     };
 
@@ -368,18 +392,34 @@ function Page() {
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                 {/* Aksi dan Filter */}
                 <div className="flex justify-between items-center mb-6">
-                    <Link href="/simpeg/mutasi/permohonan/create" passHref>
+                    <div className="flex items-center gap-2">
+                        <Link href="/simpeg/mutasi/permohonan/create">
+                            <button
+                                type="button"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                <IoAddCircleSharp className="mr-2 h-5 w-5" />
+                                Ajukan Mutasi Baru
+                            </button>
+                        </Link>
+                        
                         <button
-                            type="button"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            onClick={() => setShowDataFilter(!showDataFilter)}
+                            className="flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4"
                         >
-                            <IoAddCircleSharp className="mr-2 h-5 w-5" />
-                            Ajukan Mutasi Baru
+                            <LuSettings2 className='h-5 w-5 mr-2'/>Data Filter
                         </button>
-                    </Link>
+
+                        <button
+                            onClick={handleExportExcel}
+                            className="flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4"
+                        >
+                            <FiDownload className='h-5 w-5 mr-2'/>Export Excel
+                        </button>
+                    </div>
                     
                     <div className="flex items-center space-x-2">
-                        <MutasiQueryFilter onFilterChange={handleFilterChange} />
+                        <MutasiDateFilter onFilterChange={handleFilterChange} currentFilters={filters} />
                     </div>
 
                 </div>
@@ -512,7 +552,18 @@ function Page() {
                 )}
             </div>
         </div>
-        {/* LEFT DRAWER */}
+        
+        {/* LEFT DRAWER - Data Filter */}
+        <LeftDrawer isOpen={showDataFilter} onClose={() => setShowDataFilter(false)} title='Filter Data' width="600px">
+            <div className="flex flex-col rounded-lg space-y-4">
+                {/* Filter Status dan Reset */}
+                <div className="mb-4">
+                    <MutasiStatusFilter onFilterChange={handleFilterChange} currentFilters={filters} />
+                </div>
+            </div>
+        </LeftDrawer>
+
+        {/* LEFT DRAWER - Detail Mutasi */}
         <LeftDrawer isOpen={mutasiDrawer} onClose={handleCloseDrawer} title='Detail Permohonan Mutasi'>
             <SelectedMutasi mutasi={selectedMutasi} />
         </LeftDrawer>

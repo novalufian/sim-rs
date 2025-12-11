@@ -73,18 +73,24 @@ export default function TotalBiayaPerTahunChart() {
             {
                 label: 'Total Biaya Tahunan',
                 data: statistik.detail_per_bulan.map((item) => parseFloat(item.total_biaya_tahunan)),
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderColor: '#FFB3BA', // Pastel Pink
+                backgroundColor: 'rgba(255, 179, 186, 0.3)',
                 fill: true,
                 tension: 0.4,
+                pointBackgroundColor: '#FFB3BA',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
             },
             {
                 label: 'Total Selisih Bulanan',
                 data: statistik.detail_per_bulan.map((item) => parseFloat(item.total_selisih_bulanan)),
-                borderColor: 'rgb(16, 185, 129)',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderColor: '#BAE1FF', // Pastel Sky Blue
+                backgroundColor: 'rgba(186, 225, 255, 0.3)',
                 fill: true,
                 tension: 0.4,
+                pointBackgroundColor: '#BAE1FF',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
             },
         ],
     };

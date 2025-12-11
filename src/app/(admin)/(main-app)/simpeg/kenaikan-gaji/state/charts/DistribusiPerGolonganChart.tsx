@@ -47,13 +47,28 @@ export default function DistribusiPerGolonganChart() {
     const golonganData = Array.isArray(statistik.per_golongan) ? statistik.per_golongan : [];
     const totalKGB = golonganData.reduce((sum, item) => sum + item.jumlah_kgb, 0);
 
+    // Pastel/Warm color palette
+    const pastelColors = [
+        "#FFB3BA", // Pastel Pink
+        "#FFDFBA", // Pastel Peach
+        "#FFFFBA", // Pastel Yellow
+        "#BAFFC9", // Pastel Mint
+        "#BAE1FF", // Pastel Sky Blue
+        "#D4A5FF", // Pastel Lavender
+        "#FFCCCB", // Pastel Coral
+        "#FFE4B5", // Pastel Cream
+        "#E6E6FA", // Lavender
+        "#F0E68C", // Khaki
+    ];
+
     const chartData = {
         labels: golonganData.map((item) => `${item.kode} - ${item.nama}`),
         datasets: [
             {
                 data: golonganData.map((item) => item.jumlah_kgb),
-                backgroundColor: ["#3b82f6", "#10b981", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899"],
-                borderWidth: 1,
+                backgroundColor: pastelColors.slice(0, golonganData.length),
+                borderWidth: 2,
+                borderColor: "#ffffff",
                 borderRadius: 10,
                 spacing: 5,
             },

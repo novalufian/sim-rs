@@ -184,6 +184,59 @@ export const usePermohonanBelajarList = (filters: PermohonanBelajarFilters = {})
 }
 
 /**
+ * Hook untuk export semua data Permohonan Ijin Belajar (tanpa pagination)
+ * GET /api/kepegawaian/ijinbelajar/export
+ */
+export const useExportPermohonanBelajar = (filters: Omit<PermohonanBelajarFilters, 'page' | 'limit'> = {}, enabled: boolean = false) => {
+    return useQuery<ApiListResponse<PermohonanBelajarWithRelations>>({
+        queryKey: ['permohonanBelajar', 'export', filters],
+        queryFn: async () => {
+            const params = new URLSearchParams({
+                ...Object.entries(filters).reduce((acc: Record<string, string>, [key, value]) => {
+                    if (value !== undefined && value !== null && value !== '') {
+                        acc[key] = String(value)
+                    }
+                    return acc
+                }, {}),
+            })
+
+            const url = `/kepegawaian/ijinbelajar/export?${params.toString()}`;
+            
+            try {
+                const res = await api.get(url);
+            
+                // Response structure: { success, message, data: { items: [...], pagination: {...} } }
+                const responseData = res.data;
+
+                // Jika response sudah dalam format yang benar
+                if (responseData && responseData.data && Array.isArray(responseData.data.items)) {
+                    return responseData as ApiListResponse<PermohonanBelajarWithRelations>;
+                }
+                
+                // Fallback: return empty
+                return {
+                    success: false,
+                    message: 'Unexpected response format',
+                    data: {
+                        items: [],
+                        pagination: {
+                            page: 1,
+                            limit: 0,
+                            total: 0,
+                            totalPages: 0
+                        }
+                    }
+                };
+            } catch (error: any) {
+                throw error;
+            }
+        },
+        enabled: enabled,
+        refetchOnWindowFocus: false,
+    })
+}
+
+/**
  * Hook untuk mendapatkan detail Permohonan Ijin Belajar
  * GET /api/kepegawaian/ijinbelajar/:id
  */

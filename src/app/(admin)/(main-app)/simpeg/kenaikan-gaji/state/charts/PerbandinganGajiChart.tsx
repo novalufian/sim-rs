@@ -64,7 +64,12 @@ export default function PerbandinganGajiChart() {
                     parseFloat(statistik.gaji_baru.total),
                     parseFloat(statistik.selisih.total),
                 ],
-                backgroundColor: ['rgba(107, 114, 128, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)'],
+                backgroundColor: [
+                    'rgba(255, 223, 186, 0.8)', // Pastel Peach
+                    'rgba(186, 225, 255, 0.8)', // Pastel Sky Blue
+                    'rgba(186, 255, 201, 0.8)', // Pastel Mint
+                ],
+                borderRadius: 8,
             },
             {
                 label: 'Rata-Rata',
@@ -73,7 +78,12 @@ export default function PerbandinganGajiChart() {
                     parseFloat(statistik.gaji_baru.rata_rata),
                     parseFloat(statistik.selisih.rata_rata),
                 ],
-                backgroundColor: ['rgba(156, 163, 175, 0.8)', 'rgba(96, 165, 250, 0.8)', 'rgba(52, 211, 153, 0.8)'],
+                backgroundColor: [
+                    'rgba(255, 204, 203, 0.8)', // Pastel Coral
+                    'rgba(212, 165, 255, 0.8)', // Pastel Lavender
+                    'rgba(255, 230, 181, 0.8)', // Pastel Cream
+                ],
+                borderRadius: 8,
             },
         ],
     };
