@@ -148,3 +148,56 @@ export const exportPensiunToPdf = (data: PermohonanPensiunWithRelations[], filen
     pdfMake.createPdf(docDefinition).download(filename || defaultFilename);
 };
 
+/**
+ * Export data pensiun dengan filter tertentu
+ */
+export const exportPensiunToPdfWithFilters = (
+    data: PermohonanPensiunWithRelations[],
+    filters?: {
+        status?: string;
+        jenis_pensiun?: string;
+        startDate?: string;
+        endDate?: string;
+    },
+    filename?: string
+): void => {
+    let filteredData = [...data];
+
+    // Apply filters jika ada
+    if (filters) {
+        if (filters.status) {
+            filteredData = filteredData.filter(item => item.status === filters.status);
+        }
+        if (filters.jenis_pensiun) {
+            filteredData = filteredData.filter(item => item.jenis_pensiun === filters.jenis_pensiun);
+        }
+        if (filters.startDate) {
+            filteredData = filteredData.filter(item => {
+                const itemDate = new Date(item.tanggal_pengajuan);
+                const startDate = new Date(filters.startDate!);
+                return itemDate >= startDate;
+            });
+        }
+        if (filters.endDate) {
+            filteredData = filteredData.filter(item => {
+                const itemDate = new Date(item.tanggal_pengajuan);
+                const endDate = new Date(filters.endDate!);
+                endDate.setHours(23, 59, 59, 999);
+                return itemDate <= endDate;
+            });
+        }
+    }
+
+    // Generate filename dengan info filter
+    let finalFilename = filename;
+    if (!finalFilename) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        let filterInfo = '';
+        if (filters?.status) filterInfo += `_${filters.status}`;
+        if (filters?.jenis_pensiun) filterInfo += `_${filters.jenis_pensiun}`;
+        finalFilename = `Data_Pensiun${filterInfo}_${timestamp}.pdf`;
+    }
+
+    exportPensiunToPdf(filteredData, finalFilename);
+};
+

@@ -56,12 +56,16 @@ export default function AdminLayout({
       <Toaster
         position="top-right"
         reverseOrder={false}
+        containerStyle={{
+          zIndex: 9999,
+        }}
         toastOptions={{
           className: "bg-gray-800 text-white",
           style: {
             padding: "16px",
             borderRadius: "8px",
             fontSize: "14px",
+            zIndex: 9999,
           },
         }}
       />

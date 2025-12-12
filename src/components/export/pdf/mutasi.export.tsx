@@ -149,3 +149,56 @@ export const exportMutasiToPdf = (data: PermohonanMutasiWithRelations[], filenam
     pdfMake.createPdf(docDefinition).download(filename || defaultFilename);
 };
 
+/**
+ * Export data mutasi dengan filter tertentu
+ */
+export const exportMutasiToPdfWithFilters = (
+    data: PermohonanMutasiWithRelations[],
+    filters?: {
+        status?: string;
+        jenis_mutasi?: string;
+        startDate?: string;
+        endDate?: string;
+    },
+    filename?: string
+): void => {
+    let filteredData = [...data];
+
+    // Apply filters jika ada
+    if (filters) {
+        if (filters.status) {
+            filteredData = filteredData.filter(item => item.status === filters.status);
+        }
+        if (filters.jenis_mutasi) {
+            filteredData = filteredData.filter(item => item.jenis_mutasi === filters.jenis_mutasi);
+        }
+        if (filters.startDate) {
+            filteredData = filteredData.filter(item => {
+                const itemDate = new Date(item.tanggal_pengajuan);
+                const startDate = new Date(filters.startDate!);
+                return itemDate >= startDate;
+            });
+        }
+        if (filters.endDate) {
+            filteredData = filteredData.filter(item => {
+                const itemDate = new Date(item.tanggal_pengajuan);
+                const endDate = new Date(filters.endDate!);
+                endDate.setHours(23, 59, 59, 999);
+                return itemDate <= endDate;
+            });
+        }
+    }
+
+    // Generate filename dengan info filter
+    let finalFilename = filename;
+    if (!finalFilename) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        let filterInfo = '';
+        if (filters?.status) filterInfo += `_${filters.status}`;
+        if (filters?.jenis_mutasi) filterInfo += `_${filters.jenis_mutasi}`;
+        finalFilename = `Data_Mutasi${filterInfo}_${timestamp}.pdf`;
+    }
+
+    exportMutasiToPdf(filteredData, finalFilename);
+};
+

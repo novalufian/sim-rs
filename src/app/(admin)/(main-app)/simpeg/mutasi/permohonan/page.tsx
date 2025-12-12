@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWhoami } from '@/hooks/fetch/useWhoami';
 import { useCreatePermohonanMutasi, PermohonanMutasiInput } from '@/hooks/fetch/mutasi/useMutasiPermohonan';
 import { useRouter } from 'next/navigation';
-import { FiUser, FiMail, FiFileText, FiMapPin, FiInfo } from 'react-icons/fi';
+import { FiUser, FiMail, FiFileText, FiMapPin, FiInfo, FiCalendar } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import PathBreadcrumb from '@/components/common/PathBreadcrumb';
 import Link from 'next/link';
 import { IoArrowBack } from 'react-icons/io5';
 import moment from 'moment';
 import 'react-dates/initialize';
-import { DateRangePicker } from 'react-dates';
+import { SingleDatePicker } from 'react-dates';
 import 'react-dates/lib/css/_datepicker.css';
 
 // Schema validasi
@@ -49,28 +49,26 @@ export default function PermohonanMutasiPage() {
         },
     });
 
-    // State untuk date range picker
-    const [focusedInput, setFocusedInput] = useState<any>(null);
-    const [startDate, setStartDate] = useState<moment.Moment | null>(null);
+    // Watch tanggal pengajuan
     const tanggalPengajuan = watch("tanggal_pengajuan");
 
-    // Sync date range picker dengan form values
-    useEffect(() => {
-        if (tanggalPengajuan) {
-            setStartDate(moment(tanggalPengajuan));
-        } else {
-            setStartDate(null);
-        }
-    }, [tanggalPengajuan]);
+    // State untuk date picker
+    const [focusedPengajuan, setFocusedPengajuan] = useState<boolean>(false);
+    
+    // Gunakan useMemo untuk mengkonversi string tanggal form menjadi objek moment
+    const pengajuanDate = useMemo(() => tanggalPengajuan ? moment(tanggalPengajuan) : null, [tanggalPengajuan]);
 
-    // Handle date range change (hanya menggunakan startDate untuk tanggal_pengajuan)
-    const handleDateRangeChange = ({ startDate: newStartDate }: any) => {
-        setStartDate(newStartDate);
-        
-        if (newStartDate) {
-            setValue("tanggal_pengajuan", newStartDate.format('YYYY-MM-DD'));
+    // Helper function untuk cek apakah tanggal sebelum hari ini
+    const isBeforeToday = (day: moment.Moment) => {
+        return day.isBefore(moment(), 'day');
+    };
+
+    // Handle tanggal pengajuan change
+    const handlePengajuanDateChange = (date: moment.Moment | null) => {
+        if (date) {
+            setValue("tanggal_pengajuan", date.format('YYYY-MM-DD'), { shouldValidate: true });
         } else {
-            setValue("tanggal_pengajuan", new Date().toISOString().split('T')[0]);
+            setValue("tanggal_pengajuan", new Date().toISOString().split('T')[0], { shouldValidate: true });
         }
     };
 
@@ -231,114 +229,42 @@ export default function PermohonanMutasiPage() {
                             )}
                         </div>
 
-                        {/* Tanggal Pengajuan - Date Range Picker */}
+                        {/* Tanggal Pengajuan - Single Date Picker */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                <FiFileText className="inline mr-2" />
+                                <FiCalendar className="inline mr-2" />
                                 Tanggal Pengajuan
                             </label>
-                            <div className="relative z-[99] appearance-none text-gray-500 transition-colors bg-white border border-gray-200 rounded-lg hover:text-dark-900 h-11 w-full hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4 cursor-pointer">
-                                <DateRangePicker
-                                    startDate={startDate}
-                                    endDate={null}
-                                    onDatesChange={handleDateRangeChange}
-                                    startDateId="tanggal_pengajuan"
-                                    endDateId="tanggal_pengajuan_end"
-                                    focusedInput={focusedInput}
-                                    onFocusChange={setFocusedInput}
+                            {/* Tambahkan z-index yang lebih tinggi di sini */}
+                            <div className="relative z-50 appearance-none text-gray-500 transition-colors bg-white border border-gray-300 rounded-lg h-11 w-full dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 cursor-pointer">
+                                <SingleDatePicker
+                                    date={pengajuanDate} // Menggunakan state moment yang disinkronkan dengan watch
+                                    onDateChange={handlePengajuanDateChange} // Menggunakan handler yang update form value
+                                    focused={focusedPengajuan}
+                                    onFocusChange={({ focused }) => setFocusedPengajuan(focused || false)}
+                                    id="tanggal_pengajuan"
                                     displayFormat="YYYY-MM-DD"
-                                    isOutsideRange={() => false}
+                                    isOutsideRange={isBeforeToday}
+                                    placeholder="Pilih tanggal pengajuan"
+                                    numberOfMonths={1}
+                                    // Prop untuk menyembunyikan input asli
+                                    customInputIcon={null}
+                                    showClearDate={true}
                                 />
                             </div>
                             {errors.tanggal_pengajuan && (
                                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.tanggal_pengajuan.message}</p>
                             )}
-                            <style jsx global>{`
-                                .DateInput div {
-                                    font-size: 16px !important;
-                                }
-                                .DateInput_input {
-                                    font-size: 16px;
-                                    font-weight: 400;
-                                    color: inherit;
-                                    padding: 9px;
-                                    border: none;
-                                    text-align: center;
-                                    background: transparent !important;
-                                }
-                                .DateRangePickerInput {
-                                    border: none;
-                                    color: inherit;
-                                    background: transparent;
-                                }
-                                .DateRangePicker {
-                                    color: inherit;
-                                }
-                                .DateRangePicker_picker {
-                                    border-radius: 20px;
-                                    overflow: hidden;
-                                    border: solid 1px lightgray;
-                                    backdrop-filter: blur(10px);
-                                    background: #ffffff80;
-                                    z-index: 9999 !important;
-                                }
-                                .dark .DateRangePicker_picker {
-                                    border: solid 1px rgb(55 65 81);
-                                    background: rgba(17, 24, 39, 0.8);
-                                }
-                                .DateInput {
-                                    background: transparent;
-                                }
-                                .CalendarDay {
-                                    color: inherit;
-                                }
-                                .CalendarDay__default {
-                                    color: inherit;
-                                }
-                                .CalendarDay__selected_span {
-                                    background: #3b82f6;
-                                    color: white;
-                                }
-                                .dark .CalendarDay__selected_span {
-                                    background: #2563eb;
-                                }
-                                .CalendarDay__selected {
-                                    background: #1e40af;
-                                    color: white;
-                                }
-                                .dark .CalendarDay__selected {
-                                    background: #1d4ed8;
-                                }
-                                .CalendarDay__hovered_span {
-                                    background: #60a5fa;
-                                    color: white;
-                                }
-                                .dark .CalendarDay__hovered_span {
-                                    background: #3b82f6;
-                                }
-                                .DayPicker_weekHeader {
-                                    color: inherit;
-                                }
-                                .DayPicker_weekHeader_li {
-                                    color: inherit;
-                                }
-                                .DayPickerNavigation_button {
-                                    color: inherit;
-                                }
-                                .DayPickerNavigation_button__default {
-                                    color: inherit;
-                                }
-                                .DayPicker__withBorder {
-                                    box-shadow: none;
-                                }
-                            `}</style>
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex justify-end gap-4 pt-4">
                             <button
                                 type="button"
-                                onClick={() => reset()}
+                                onClick={() => {
+                                    setFocusedPengajuan(false);
+                                    reset();
+                                }}
                                 className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                             >
                                 Reset Form
@@ -359,6 +285,87 @@ export default function PermohonanMutasiPage() {
                             </button>
                         </div>
                     </form>
+                    {/* Gaya global untuk datepicker dipertahankan, namun perhatikan konflik z-index (z-index: 50 pada div pembungkus sudah dinaikkan) */}
+                    <style jsx global>{`
+                        /* Membatasi selector ke elemen yang spesifik jika memungkinkan */
+                        .DateInput div {
+                            font-size: 16px !important;
+                        }
+                        .DateInput_input {
+                            font-size: 16px;
+                            font-weight: 400;
+                            color: inherit;
+                            padding: 9px;
+                            border: none;
+                            text-align: center;
+                            background: transparent !important;
+                            width: 100%;
+                        }
+                        .SingleDatePickerInput {
+                            border: none;
+                            color: inherit;
+                            background: transparent;
+                            width: 100%;
+                        }
+                        .SingleDatePicker {
+                            color: inherit;
+                            width: 100%;
+                        }
+                        .SingleDatePicker_picker {
+                            /* Perlu z-index tinggi agar kalender muncul di atas elemen lain */
+                            z-index: 9999 !important;
+                            border-radius: 20px;
+                            overflow: hidden;
+                            border: solid 1px lightgray;
+                            backdrop-filter: blur(10px);
+                            background: #ffffff80;
+                        }
+                        .dark .SingleDatePicker_picker {
+                            border: solid 1px rgb(55 65 81);
+                            background: rgba(17, 24, 39, 0.8);
+                        }
+                        .DateInput {
+                            background: transparent;
+                            width: 100%;
+                        }
+                        .CalendarDay {
+                            color: inherit;
+                        }
+                        .CalendarDay__default {
+                            color: inherit;
+                        }
+                        .CalendarDay__selected {
+                            background: #1e40af;
+                            color: white;
+                        }
+                        .dark .CalendarDay__selected {
+                            background: #1d4ed8;
+                        }
+                        .CalendarDay__blocked_calendar {
+                            background: #f3f4f6;
+                            color: #9ca3af;
+                            cursor: not-allowed;
+                        }
+                        .dark .CalendarDay__blocked_calendar {
+                            background: #374151;
+                            color: #6b7280;
+                        }
+                        .DayPicker_weekHeader {
+                            color: inherit;
+                        }
+                        .DayPicker_weekHeader_li {
+                            color: inherit;
+                        }
+                        .DayPickerNavigation_button {
+                            color: inherit;
+                        }
+                        .DayPickerNavigation_button__default {
+                            color: inherit;
+                        }
+                        .DayPicker__withBorder {
+                            box-shadow: none;
+                        }
+                    `}</style>
                 </div>
             </div>
         </div>

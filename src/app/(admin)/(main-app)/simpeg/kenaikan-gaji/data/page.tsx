@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, Suspense, useEffect } from "react";
+import React, { useState, Suspense, useEffect, useRef } from "react";
 import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
@@ -13,12 +13,20 @@ import {
     usePermohonanGajiList, 
     PermohonanGajiFilters, 
     PermohonanGajiWithRelations, 
-    useDeletePermohonanGaji 
+    useDeletePermohonanGaji,
+    useExportPermohonanGaji
 } from "@/hooks/fetch/gaji/useGajiPermohonan"; 
 import GajiStatusFilter from "./gajiStatusFilter";
 import GajiDateFilter from "./gajiDateFilter";
 import LeftDrawer from "@/components/drawer/leftDrawer";
 import SelectedGaji from "./selectedGaji";
+import { exportGajiToExcelWithFilters } from "@/components/export/xls/gaji.export";
+import { exportGajiToDocWithFilters } from "@/components/export/doc/gaji.export";
+import { exportGajiToPdfWithFilters } from "@/components/export/pdf/gaji.export";
+import { TbFileExport } from "react-icons/tb";
+import toast from "react-hot-toast";
+import nProgress from "nprogress";
+import api from "@/libs/api";
 
 
 // Tipe untuk kolom tabel kenaikan gaji
@@ -171,6 +179,8 @@ const getColumnValue = (gaji: PermohonanGajiWithRelations, columnId: string, ind
 
 const ITEMS_PER_PAGE = 10;
 
+type ExportType = 'excel' | 'docx' | 'pdf';
+
 function Page() {
     const router = useRouter();
     const pathname = usePathname();
@@ -181,6 +191,8 @@ function Page() {
     // State untuk Drawer
     const [gajiDrawer, setGajiDrawer] = useState(false);
     const [selectedGaji, setSelectedGaji] = useState<PermohonanGajiWithRelations | null>(null);
+    const [showExportDropdown, setShowExportDropdown] = useState(false);
+    const exportDropdownRef = useRef<HTMLDivElement>(null);
     
     // State untuk Column Filter Visibility
     const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
@@ -288,6 +300,7 @@ function Page() {
     }
     
     const deleteMutation = useDeletePermohonanGaji();
+    const exportQuery = useExportPermohonanGaji(filters, false);
 
     // Ekstraksi Data Kenaikan Gaji
     const permohonanList: PermohonanGajiWithRelations[] = queryResult?.data?.items || [];
@@ -307,6 +320,19 @@ function Page() {
         document.addEventListener("click", handleClickOutside);
         return () => {
             document.removeEventListener("click", handleClickOutside);
+        };
+    }, []);
+
+    // Menutup export dropdown jika klik di luar
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+                setShowExportDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
 
@@ -364,6 +390,101 @@ function Page() {
         const namaPegawai = gaji.pegawai_nama || 'pegawai';
         if (window.confirm(`Anda yakin ingin menghapus permohonan kenaikan gaji dari ${namaPegawai}?`)) {
             deleteMutation.mutate(gaji.id);
+        }
+    };
+
+    // Handler untuk export dengan berbagai format
+    const handleExport = async (type: ExportType) => {
+        try {
+            nProgress.start();
+            toast.loading('Mengunduh data...', { id: 'export' });
+
+            // Fetch semua data dengan filter yang sama (tanpa pagination)
+            // Buat params untuk export (tanpa limit, karena export endpoint biasanya mengembalikan semua data)
+            const exportParams = new URLSearchParams();
+            if (filters.status) exportParams.append('status', filters.status);
+            if (filters.startDate) exportParams.append('startDate', filters.startDate);
+            if (filters.endDate) exportParams.append('endDate', filters.endDate);
+            
+            let allData: PermohonanGajiWithRelations[] = [];
+            
+            try {
+                // Coba endpoint export terlebih dahulu
+                const res = await api.get(`/kepegawaian/gajiberkala/export?${exportParams.toString()}`);
+                
+                console.log('Export API Response:', res.data);
+                
+                // Handle different response structures
+                // Response structure: { success: true, message: '...', data: { data: Array(...) } }
+                if (res.data?.data?.data && Array.isArray(res.data.data.data)) {
+                    allData = res.data.data.data;
+                } else if (res.data?.data?.items && Array.isArray(res.data.data.items)) {
+                    allData = res.data.data.items;
+                } else if (res.data?.items && Array.isArray(res.data.items)) {
+                    allData = res.data.items;
+                } else if (Array.isArray(res.data)) {
+                    allData = res.data;
+                } else if (res.data?.data && Array.isArray(res.data.data)) {
+                    allData = res.data.data;
+                }
+            } catch (exportError: any) {
+                // Jika endpoint export tidak ada atau error, gunakan endpoint list biasa dengan limit besar
+                console.warn('Export endpoint tidak tersedia atau error, menggunakan endpoint list:', exportError);
+                const params = new URLSearchParams();
+                if (filters.status) params.append('status', filters.status);
+                if (filters.startDate) params.append('startDate', filters.startDate);
+                if (filters.endDate) params.append('endDate', filters.endDate);
+                params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+                const res = await api.get(`/kepegawaian/gajiberkala?${params.toString()}`);
+                
+                console.log('List API Response:', res.data);
+                
+                if (res.data?.data?.items && Array.isArray(res.data.data.items)) {
+                    allData = res.data.data.items;
+                } else if (res.data?.items && Array.isArray(res.data.items)) {
+                    allData = res.data.items;
+                }
+            }
+            
+            console.log('Final extracted data:', allData);
+            console.log('Data length:', allData?.length);
+            
+            if (!allData || allData.length === 0) {
+                toast.error('Tidak ada data untuk diekspor dengan filter yang dipilih', { id: 'export' });
+                nProgress.done();
+                return;
+            }
+
+            // Export berdasarkan type
+            switch (type) {
+                case 'excel':
+                    exportGajiToExcelWithFilters(allData, {
+                        status: filters.status,
+                        startDate: filters.startDate,
+                        endDate: filters.endDate,
+                    });
+                    break;
+                case 'docx':
+                    await exportGajiToDocWithFilters(allData, {
+                        status: filters.status,
+                        startDate: filters.startDate,
+                        endDate: filters.endDate,
+                    });
+                    break;
+                case 'pdf':
+                    exportGajiToPdfWithFilters(allData, {
+                        status: filters.status,
+                        startDate: filters.startDate,
+                        endDate: filters.endDate,
+                    });
+                    break;
+            }
+            toast.success('Data berhasil diekspor!', { id: 'export' });
+        } catch (error: any) {
+            console.error('Error exporting data:', error);
+            toast.error(error?.response?.data?.message || 'Gagal mengekspor data', { id: 'export' });
+        } finally {
+            nProgress.done();
         }
     };
 
@@ -443,6 +564,37 @@ function Page() {
                         >
                             <LuSettings2 className='h-5 w-5 mr-2'/>Data Filter
                         </button>
+
+                        <div className="relative" ref={exportDropdownRef}>
+                            <button
+                                onClick={() => setShowExportDropdown(!showExportDropdown)}
+                                className="flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4"
+                            >
+                                <TbFileExport className='h-5 w-5 mr-2'/> Export
+                            </button>
+                            {showExportDropdown && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-50">
+                                    <button
+                                        onClick={() => { handleExport('excel'); setShowExportDropdown(false); }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                    >
+                                        Export Excel
+                                    </button>
+                                    <button
+                                        onClick={() => { handleExport('docx'); setShowExportDropdown(false); }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                    >
+                                        Export DOCX
+                                    </button>
+                                    <button
+                                        onClick={() => { handleExport('pdf'); setShowExportDropdown(false); }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                    >
+                                        Export PDF
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     
                     <div className="flex items-center space-x-2">

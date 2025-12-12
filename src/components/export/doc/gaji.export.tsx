@@ -136,3 +136,51 @@ export const exportGajiToDoc = async (data: PermohonanGajiWithRelations[], filen
     window.URL.revokeObjectURL(url);
 };
 
+/**
+ * Export data gaji dengan filter tertentu
+ */
+export const exportGajiToDocWithFilters = async (
+    data: PermohonanGajiWithRelations[],
+    filters?: {
+        status?: string;
+        startDate?: string;
+        endDate?: string;
+    },
+    filename?: string
+): Promise<void> => {
+    let filteredData = [...data];
+
+    // Apply filters jika ada
+    if (filters) {
+        if (filters.status) {
+            filteredData = filteredData.filter(item => item.status === filters.status);
+        }
+        if (filters.startDate) {
+            filteredData = filteredData.filter(item => {
+                const itemDate = new Date(item.tanggal_pengajuan);
+                const startDate = new Date(filters.startDate!);
+                return itemDate >= startDate;
+            });
+        }
+        if (filters.endDate) {
+            filteredData = filteredData.filter(item => {
+                const itemDate = new Date(item.tanggal_pengajuan);
+                const endDate = new Date(filters.endDate!);
+                endDate.setHours(23, 59, 59, 999);
+                return itemDate <= endDate;
+            });
+        }
+    }
+
+    // Generate filename dengan info filter
+    let finalFilename = filename;
+    if (!finalFilename) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        let filterInfo = '';
+        if (filters?.status) filterInfo += `_${filters.status}`;
+        finalFilename = `Data_Kenaikan_Gaji${filterInfo}_${timestamp}.docx`;
+    }
+
+    await exportGajiToDoc(filteredData, finalFilename);
+};
+

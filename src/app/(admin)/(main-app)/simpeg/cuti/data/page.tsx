@@ -241,12 +241,58 @@ function Page() {
             if (filters.startDate) params.append('startDate', filters.startDate);
             if (filters.endDate) params.append('endDate', filters.endDate);
             
-            // Fetch semua data tanpa pagination menggunakan export endpoint
-            params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
-            const res = await api.get(`/kepegawaian/cuti/permohonan/export?${params.toString()}`);
+            // Fetch semua data tanpa pagination
+            // Buat params untuk export (tanpa limit, karena export endpoint biasanya mengembalikan semua data)
+            const exportParams = new URLSearchParams();
+            if (filters.status) exportParams.append('status', filters.status);
+            if (filters.id_jenis_cuti) exportParams.append('id_jenis_cuti', filters.id_jenis_cuti.toString());
+            if (filters.startDate) exportParams.append('startDate', filters.startDate);
+            if (filters.endDate) exportParams.append('endDate', filters.endDate);
             
-            // Handle different response structures
-            const allData: PermohonanCutiWithRelations[] = res.data?.data?.items || res.data?.items || [];
+            let allData: PermohonanCutiWithRelations[] = [];
+            
+            try {
+                // Coba endpoint export terlebih dahulu
+                const res = await api.get(`/kepegawaian/cuti/permohonan/export?${exportParams.toString()}`);
+                
+                console.log('Export API Response:', res.data);
+                
+                // Handle different response structures
+                // Response structure: { success: true, message: '...', data: { data: Array(...) } }
+                if (res.data?.data?.data && Array.isArray(res.data.data.data)) {
+                    allData = res.data.data.data;
+                } else if (res.data?.data?.items && Array.isArray(res.data.data.items)) {
+                    allData = res.data.data.items;
+                } else if (res.data?.items && Array.isArray(res.data.items)) {
+                    allData = res.data.items;
+                } else if (Array.isArray(res.data)) {
+                    allData = res.data;
+                } else if (res.data?.data && Array.isArray(res.data.data)) {
+                    allData = res.data.data;
+                }
+            } catch (exportError: any) {
+                // Jika endpoint export tidak ada atau error, gunakan endpoint list biasa dengan limit besar
+                console.warn('Export endpoint tidak tersedia atau error, menggunakan endpoint list:', exportError);
+                params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+                const res = await api.get(`/kepegawaian/cuti/permohonan?${params.toString()}`);
+                
+                console.log('List API Response:', res.data);
+                
+                if (res.data?.data?.items && Array.isArray(res.data.data.items)) {
+                    allData = res.data.data.items;
+                } else if (res.data?.items && Array.isArray(res.data.items)) {
+                    allData = res.data.items;
+                }
+            }
+            
+            console.log('Final extracted data:', allData);
+            console.log('Data length:', allData?.length);
+            
+            if (!allData || allData.length === 0) {
+                toast.error('Tidak ada data untuk diekspor dengan filter yang dipilih', { id: 'export' });
+                nProgress.done();
+                return;
+            }
 
             // Export berdasarkan type
             switch (type) {

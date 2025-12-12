@@ -1,11 +1,10 @@
 "use client";
-import React, { useState, Suspense, useEffect } from "react";
+import React, { useState, Suspense, useEffect, useRef } from "react";
 import Pagination from "@/components/tables/Pagination";
 import PathBreadcrumb from "@/components/common/PathBreadcrumb";
 import ActionDropdown from "@/components/tables/ActionDropdown";
 import { IoAddCircleSharp } from "react-icons/io5";
 import { LuFolderSearch, LuSearch, LuSettings2 } from "react-icons/lu";
-import { FiDownload } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import nProgress from "nprogress";
@@ -16,13 +15,17 @@ import {
     usePermohonanMutasiList, 
     PermohonanMutasiFilters, 
     PermohonanMutasiWithRelations, 
-    useDeletePermohonanMutasi 
+    useDeletePermohonanMutasi,
+    useExportPermohonanMutasi
 } from "@/hooks/fetch/mutasi/useMutasiPermohonan"; 
 import MutasiDateFilter from "./mutasiDateFilter";
 import MutasiStatusFilter from "./mutasiStatusFilter";
 import LeftDrawer from "@/components/drawer/leftDrawer";
 import SelectedMutasi from "./selectedMutasi";
 import { exportMutasiToExcelWithFilters } from "@/components/export/xls/mutasi.export";
+import { exportMutasiToDocWithFilters } from "@/components/export/doc/mutasi.export";
+import { exportMutasiToPdfWithFilters } from "@/components/export/pdf/mutasi.export";
+import { TbFileExport } from "react-icons/tb";
 
 
 // Tipe untuk kolom tabel mutasi
@@ -128,6 +131,8 @@ const getColumnValue = (mutasi: PermohonanMutasiWithRelations, columnId: string,
 
 const ITEMS_PER_PAGE = 10;
 
+type ExportType = 'excel' | 'docx' | 'pdf';
+
 function Page() {
     const router = useRouter();
     const pathname = usePathname();
@@ -138,7 +143,9 @@ function Page() {
     
     // State untuk Drawer
     const [mutasiDrawer, setMutasiDrawer] = useState(false);
-    const [selectedMutasi, setSelectedMutasi] = useState<PermohonanMutasiWithRelations | null>(null); 
+    const [selectedMutasi, setSelectedMutasi] = useState<PermohonanMutasiWithRelations | null>(null);
+    const [showExportDropdown, setShowExportDropdown] = useState(false);
+    const exportDropdownRef = useRef<HTMLDivElement>(null); 
     // State untuk filtering dan pagination
     // Jangan set filter default, biarkan kosong agar semua data muncul
     const [filters, setFilters] = useState<PermohonanMutasiFilters>({
@@ -203,6 +210,7 @@ function Page() {
     });
     
     const deleteMutation = useDeletePermohonanMutasi();
+    const exportQuery = useExportPermohonanMutasi(filters, false);
 
     // Ekstraksi Data Mutasi
     // Struktur response: { success, message, data: { items: [...], pagination: {...} } }
@@ -220,6 +228,19 @@ function Page() {
         document.addEventListener("click", handleClickOutside);
         return () => {
         document.removeEventListener("click", handleClickOutside);
+        };
+    }, []);
+
+    // Menutup export dropdown jika klik di luar
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+                setShowExportDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
 
@@ -299,27 +320,97 @@ function Page() {
         }
     };
 
-    // Handler untuk export Excel
-    const handleExportExcel = async () => {
+    // Handler untuk export dengan berbagai format
+    const handleExport = async (type: ExportType) => {
         try {
             nProgress.start();
             toast.loading('Mengunduh data...', { id: 'export' });
 
             // Fetch semua data dengan filter yang sama (tanpa pagination)
-            const params = new URLSearchParams();
+            // Buat params untuk export (tanpa limit, karena export endpoint biasanya mengembalikan semua data)
+            const exportParams = new URLSearchParams();
+            if (filters.status) exportParams.append('status', filters.status);
+            if (filters.jenis_mutasi) exportParams.append('jenis_mutasi', filters.jenis_mutasi);
+            if (filters.startDate) exportParams.append('startDate', filters.startDate);
+            if (filters.endDate) exportParams.append('endDate', filters.endDate);
             
-            if (filters.status) params.append('status', filters.status);
-            if (filters.jenis_mutasi) params.append('jenis_mutasi', filters.jenis_mutasi);
-            if (filters.startDate) params.append('startDate', filters.startDate);
-            if (filters.endDate) params.append('endDate', filters.endDate);
+            let allData: PermohonanMutasiWithRelations[] = [];
             
-            // Fetch semua data tanpa pagination
-            params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
-            const res = await api.get(`/kepegawaian/mutasi/pengajuan?${params.toString()}`);
-            const allData: PermohonanMutasiWithRelations[] = res.data?.data?.items || [];
+            try {
+                // Coba endpoint export terlebih dahulu
+                const res = await api.get(`/kepegawaian/mutasi/permohonan/export?${exportParams.toString()}`);
+                
+                console.log('Export API Response:', res.data);
+                
+                // Handle different response structures
+                // Response structure: { success: true, message: '...', data: { data: Array(...) } }
+                if (res.data?.data?.data && Array.isArray(res.data.data.data)) {
+                    allData = res.data.data.data;
+                } else if (res.data?.data?.items && Array.isArray(res.data.data.items)) {
+                    allData = res.data.data.items;
+                } else if (res.data?.items && Array.isArray(res.data.items)) {
+                    allData = res.data.items;
+                } else if (Array.isArray(res.data)) {
+                    allData = res.data;
+                } else if (res.data?.data && Array.isArray(res.data.data)) {
+                    allData = res.data.data;
+                }
+            } catch (exportError: any) {
+                // Jika endpoint export tidak ada atau error, gunakan endpoint list biasa dengan limit besar
+                console.warn('Export endpoint tidak tersedia atau error, menggunakan endpoint list:', exportError);
+                const params = new URLSearchParams();
+                if (filters.status) params.append('status', filters.status);
+                if (filters.jenis_mutasi) params.append('jenis_mutasi', filters.jenis_mutasi);
+                if (filters.startDate) params.append('startDate', filters.startDate);
+                if (filters.endDate) params.append('endDate', filters.endDate);
+                params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+                const res = await api.get(`/kepegawaian/mutasi/permohonan?${params.toString()}`);
+                
+                console.log('List API Response:', res.data);
+                
+                if (res.data?.data?.items && Array.isArray(res.data.data.items)) {
+                    allData = res.data.data.items;
+                } else if (res.data?.items && Array.isArray(res.data.items)) {
+                    allData = res.data.items;
+                }
+            }
             
-            exportMutasiToExcelWithFilters(allData, filters);
+            console.log('Final extracted data:', allData);
+            console.log('Data length:', allData?.length);
+            
+            if (!allData || allData.length === 0) {
+                toast.error('Tidak ada data untuk diekspor dengan filter yang dipilih', { id: 'export' });
+                nProgress.done();
+                return;
+            }
 
+            // Export berdasarkan type
+            switch (type) {
+                case 'excel':
+                    exportMutasiToExcelWithFilters(allData, {
+                        status: filters.status,
+                        jenis_mutasi: filters.jenis_mutasi,
+                        startDate: filters.startDate,
+                        endDate: filters.endDate,
+                    });
+                    break;
+                case 'docx':
+                    await exportMutasiToDocWithFilters(allData, {
+                        status: filters.status,
+                        jenis_mutasi: filters.jenis_mutasi,
+                        startDate: filters.startDate,
+                        endDate: filters.endDate,
+                    });
+                    break;
+                case 'pdf':
+                    exportMutasiToPdfWithFilters(allData, {
+                        status: filters.status,
+                        jenis_mutasi: filters.jenis_mutasi,
+                        startDate: filters.startDate,
+                        endDate: filters.endDate,
+                    });
+                    break;
+            }
             toast.success('Data berhasil diekspor!', { id: 'export' });
         } catch (error: any) {
             console.error('Error exporting data:', error);
@@ -410,12 +501,36 @@ function Page() {
                             <LuSettings2 className='h-5 w-5 mr-2'/>Data Filter
                         </button>
 
-                        <button
-                            onClick={handleExportExcel}
-                            className="flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4"
-                        >
-                            <FiDownload className='h-5 w-5 mr-2'/>Export Excel
-                        </button>
+                        <div className="relative" ref={exportDropdownRef}>
+                            <button
+                                onClick={() => setShowExportDropdown(!showExportDropdown)}
+                                className="flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-auto hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white px-4"
+                            >
+                                <TbFileExport className='h-5 w-5 mr-2'/> Export
+                            </button>
+                            {showExportDropdown && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-50">
+                                    <button
+                                        onClick={() => { handleExport('excel'); setShowExportDropdown(false); }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                    >
+                                        Export Excel
+                                    </button>
+                                    <button
+                                        onClick={() => { handleExport('docx'); setShowExportDropdown(false); }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                    >
+                                        Export DOCX
+                                    </button>
+                                    <button
+                                        onClick={() => { handleExport('pdf'); setShowExportDropdown(false); }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                    >
+                                        Export PDF
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     
                     <div className="flex items-center space-x-2">

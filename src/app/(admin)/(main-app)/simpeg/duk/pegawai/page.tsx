@@ -191,45 +191,109 @@ function Page() {
         allData = res.data?.data?.pegawai || res.data?.pegawai || [];
       } else {
         // Fetch semua data tanpa pagination menggunakan export endpoint
-        params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
-        const res = await api.get(`/pegawai/export?${params.toString()}`);
-        // Handle different response structures
-        allData = res.data?.data?.pegawai || res.data?.pegawai || res.data?.data || [];
+        // Buat params untuk export (tanpa limit, karena export endpoint biasanya mengembalikan semua data)
+        const exportParams = new URLSearchParams();
+        if (filters.nama) exportParams.append('nama', filters.nama);
+        if (filters.nip) exportParams.append('nip', filters.nip);
+        if (filters.jenis_kelamin) exportParams.append('jenis_kelamin', filters.jenis_kelamin);
+        if (filters.agama) exportParams.append('agama', filters.agama);
+        if (filters.status_perkawinan) exportParams.append('status_perkawinan', filters.status_perkawinan);
+        if (filters.status_pekerjaan) exportParams.append('status_pekerjaan', filters.status_pekerjaan);
+        
+        try {
+          // Coba endpoint export terlebih dahulu
+          const res = await api.get(`/pegawai/export?${exportParams.toString()}`);
+          
+          console.log('Export API Response:', res.data);
+          
+          // Handle different response structures
+          // Response structure: { success: true, message: '...', data: { data: Array(...) } } atau { success: true, message: '...', data: { pegawai: Array(...) } }
+          if (res.data?.data?.data && Array.isArray(res.data.data.data)) {
+            allData = res.data.data.data;
+          } else if (res.data?.data?.pegawai && Array.isArray(res.data.data.pegawai)) {
+            allData = res.data.data.pegawai;
+          } else if (res.data?.data?.items && Array.isArray(res.data.data.items)) {
+            allData = res.data.data.items;
+          } else if (res.data?.pegawai && Array.isArray(res.data.pegawai)) {
+            allData = res.data.pegawai;
+          } else if (res.data?.items && Array.isArray(res.data.items)) {
+            allData = res.data.items;
+          } else if (Array.isArray(res.data)) {
+            allData = res.data;
+          } else if (res.data?.data && Array.isArray(res.data.data)) {
+            allData = res.data.data;
+          }
+        } catch (exportError: any) {
+          // Jika endpoint export tidak ada atau error, gunakan endpoint list biasa dengan limit besar
+          console.warn('Export endpoint tidak tersedia atau error, menggunakan endpoint list:', exportError);
+          params.append('limit', '10000'); // Limit besar untuk mendapatkan semua data
+          const res = await api.get(`/pegawai?${params.toString()}`);
+          
+          console.log('List API Response:', res.data);
+          
+          if (res.data?.data?.pegawai && Array.isArray(res.data.data.pegawai)) {
+            allData = res.data.data.pegawai;
+          } else if (res.data?.pegawai && Array.isArray(res.data.pegawai)) {
+            allData = res.data.pegawai;
+          } else if (res.data?.items && Array.isArray(res.data.items)) {
+            allData = res.data.items;
+          }
+        }
+      }
+      
+      console.log('Final extracted data:', allData);
+      console.log('Data length:', allData?.length);
+      
+      if (!allData || allData.length === 0) {
+        toast.error('Tidak ada data untuk diekspor dengan filter yang dipilih', { id: 'export' });
+        nProgress.done();
+        return;
       }
 
       // Convert to Employee format if needed
-      const employeeData: Employee[] = allData.map((item: any) => ({
-        id: item.id_pegawai || item.id,
-        id_pegawai: item.id_pegawai || item.id,
-        nama: item.nama || '',
-        nip: item.nip || '',
-        email: item.email || null,
-        tempat_lahir: item.tempat_lahir || null,
-        tanggal_lahir: item.tanggal_lahir || null,
-        umur: item.umur || null,
-        jenis_kelamin: item.jenis_kelamin || null,
-        agama: item.agama || null,
-        status_perkawinan: item.status_perkawinan || null,
-        status_pekerjaan: item.status_pekerjaan || '',
-        alamat_ktp: item.alamat_ktp || null,
-        alamat_domisili: item.alamat_domisili || null,
-        avatar_url: item.avatar_url || null,
-        no_kk: item.no_kk ? (typeof item.no_kk === 'object' ? item.no_kk : { masked: item.no_kk, unmasked: item.no_kk }) : null,
-        no_rekening: item.no_rekening ? (typeof item.no_rekening === 'object' ? item.no_rekening : { masked: item.no_rekening, unmasked: item.no_rekening }) : null,
-        no_hp: item.no_hp ? (typeof item.no_hp === 'object' ? item.no_hp : { masked: item.no_hp, unmasked: item.no_hp }) : null,
-        pengangkatan_tmt: item.pengangkatan_tmt || null,
-        pengangkatan_nomor_sk: item.pengangkatan_nomor_sk || null,
-        pengangkatan_masakerja: item.pengangkatan_masakerja || null,
-        pangkat_tmt: item.pangkat_tmt || null,
-        jabatan: item.jabatan || null,
-        jabatan_tmt: item.jabatan_tmt || null,
-        pendidikan_jenjang: item.pendidikan_jenjang || null,
-        pendidikan_jurusan: item.pendidikan_jurusan || null,
-        pendidikan_institusi: item.pendidikan_institusi || null,
-        pendidikan_tahun_selesai: item.pendidikan_tahun_selesai || null,
-        pendidikan_gelar: item.pendidikan_gelar || null,
-        is_deleted: item.is_deleted || false,
-      }));
+      const employeeData: Employee[] = allData.map((item: any): Employee => {
+        // Helper function untuk handle no_kk, no_rekening, no_hp
+        const handleMaskedField = (value: any) => {
+          if (!value) return null;
+          if (typeof value === 'object' && value !== null) {
+            return value;
+          }
+          return { masked: String(value), unmasked: String(value) };
+        };
+
+        return {
+          id: item.id_pegawai || item.id || '',
+          id_pegawai: item.id_pegawai || item.id || '',
+          nama: item.nama || '',
+          nip: item.nip || '',
+          email: item.email || null,
+          tempat_lahir: item.tempat_lahir || null,
+          tanggal_lahir: item.tanggal_lahir || null,
+          umur: item.umur ? String(item.umur) : null,
+          jenis_kelamin: item.jenis_kelamin || null,
+          agama: item.agama || null,
+          status_perkawinan: item.status_perkawinan || null,
+          status_pekerjaan: item.status_pekerjaan || '',
+          alamat_ktp: item.alamat_ktp || null,
+          alamat_domisili: item.alamat_domisili || null,
+          avatar_url: item.avatar_url || null,
+          no_kk: handleMaskedField(item.no_kk),
+          no_rekening: handleMaskedField(item.no_rekening),
+          no_hp: handleMaskedField(item.no_hp),
+          pengangkatan_tmt: item.pengangkatan_tmt || null,
+          pengangkatan_nomor_sk: item.pengangkatan_nomor_sk || null,
+          pengangkatan_masakerja: item.pengangkatan_masakerja || null,
+          pangkat_tmt: item.pangkat_tmt || null,
+          jabatan: item.jabatan || null,
+          jabatan_tmt: item.jabatan_tmt || null,
+          pendidikan_jenjang: item.pendidikan_jenjang || null,
+          pendidikan_jurusan: item.pendidikan_jurusan || null,
+          pendidikan_institusi: item.pendidikan_institusi || null,
+          pendidikan_tahun_selesai: item.pendidikan_tahun_selesai || null,
+          pendidikan_gelar: item.pendidikan_gelar || null,
+          is_deleted: item.is_deleted || false,
+        };
+      });
 
       // Export berdasarkan type
       switch (type) {
