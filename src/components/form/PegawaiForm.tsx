@@ -152,7 +152,7 @@ import { env } from 'process';
         }
     };
 
-    const inputClass = "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed outline-none focus:ring-0 focus:border-gray-300";
+    const inputClass = "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed outline-none focus:ring-0 focus:border-gray-300";
 
     useEffect(() => {
         if(errorOnSubmit){
@@ -284,7 +284,7 @@ import { env } from 'process';
             {/* Right Panel: Upload */}
             <div className='bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 col-span-4 sticky top-0 z-5'>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-5">Upload Photo</h2>
-            <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer ${isDragActive ? 'border-blue-400 bg-blue-50/40 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'} ${isFormLoading ? 'pointer-events-none opacity-50' : ''}`}>
+            <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer ${isDragActive ? 'border-green-400 bg-green-50/40 dark:bg-green-900/20' : 'border-gray-300 dark:border-gray-600'} ${isFormLoading ? 'pointer-events-none opacity-50' : ''}`}>
                 <input {...getInputProps()} />
                 <div className="flex flex-col items-center gap-3">
                 {previewUrl ? <img src={previewUrl} alt="Preview" className="w-2/3 min-h-24 rounded-lg object-cover" /> : <p className="text-gray-600 dark:text-gray-400">Drag & drop image here or browse</p>}
@@ -297,7 +297,7 @@ import { env } from 'process';
             <div className="flex flex-col justify-end space-y-2 pt-6">
                 <button type="button" onClick={onCancel} className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" disabled={isLoading}>Cancel</button>
                 <button type="button" className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" disabled={isLoading}>Reset Data</button>
-                <button type="submit" className={`px-6 py-3 rounded-lg transition-colors ${isLoading ? 'bg-gray-400 cursor-not-allowed text-gray-200' : 'bg-blue-600 text-white hover:bg-blue-700'}`} disabled={isLoading}>
+                <button type="submit" className={`px-6 py-3 rounded-lg transition-colors ${isLoading ? 'bg-gray-400 cursor-not-allowed text-gray-200' : 'bg-green-600 text-white hover:bg-green-700'}`} disabled={isLoading}>
                 {isLoading ? 'Saving...' : 'Save Changes'}
                 </button>
             </div>

@@ -10,7 +10,7 @@ type TabType = 'permohonan' | 'persetujuan';
 function UserPage() {
     const [activeTab, setActiveTab] = useState<TabType>('persetujuan');
 
-    const activeLinkClass = "text-base font-medium text-white dark:text-gray-300 dark:bg-blue-900 bg-blue-600 w-full p-3 px-4 rounded-md transition-colors duration-300 flex items-center gap-3";
+    const activeLinkClass = "text-base font-medium text-white dark:text-gray-300 dark:bg-green-900 bg-green-600 w-full p-3 px-4 rounded-md transition-colors duration-300 flex items-center gap-3";
     const inactiveLinkClass = "text-base font-medium text-gray-700 dark:text-gray-300 w-full p-3 px-4 rounded-md dark:hover:bg-gray-800 hover:bg-gray-200 transition-colors duration-300 flex items-center gap-3";
 
     return (

@@ -8,11 +8,15 @@ import { FiEye, FiTrash2 } from "react-icons/fi"; // Digunakan untuk ikon
 import { CiExport } from "react-icons/ci";
 import { FiFile, FiFileText } from "react-icons/fi";
 import { TbFileExport } from "react-icons/tb";
+import { LuShieldX } from "react-icons/lu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import nProgress from "nprogress";
 import toast from "react-hot-toast";
 import api from "@/libs/api";
+import { useAppSelector } from "@/hooks/useAppDispatch";
+import type { RootState } from '@/libs/store';
+import GeneratingPage from "@/components/loading/GeneratingPage";
 
 import { 
     usePermohonanCutiList, 
@@ -118,6 +122,8 @@ const ITEMS_PER_PAGE = 10;
 
 function Page() {
     const router = useRouter();
+    const user = useAppSelector((state: RootState) => state.auth.user);
+    const userRole = user?.role;
     const [currentPage, setCurrentPage] = useState(1);
     const [dropdownStates, setDropdownStates] = useState<Record<number, boolean>>({}); // State untuk dropdown
     
@@ -325,6 +331,58 @@ function Page() {
             nProgress.done();
         }
     };
+
+    // Guard: Cek apakah user memiliki akses (jika role adalah user, tampilkan forbidden)
+    if (userRole === "user") {
+        return (
+            <div className="flex items-center justify-center min-h-[80vh] p-6">
+                <div className="max-w-2xl w-full text-center">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 md:p-12">
+                        {/* Icon */}
+                        <div className="flex justify-center mb-6">
+                            <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full">
+                                <LuShieldX className="w-16 h-16 text-red-600 dark:text-red-400" />
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+                            Akses Ditolak
+                        </h1>
+
+                        {/* Description */}
+                        <div className="space-y-3 mb-8">
+                            <p className="text-lg text-gray-600 dark:text-gray-300">
+                                Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.
+                            </p>
+                            <p className="text-base text-gray-500 dark:text-gray-400">
+                                Halaman <span className="font-semibold text-gray-700 dark:text-gray-300">Kelola Data Permohonan Cuti</span> tidak dapat diakses oleh <span className="font-semibold text-red-600 dark:text-red-400">User</span>.
+                            </p>
+                            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <p className="text-sm text-blue-800 dark:text-blue-300">
+                                    Jika Anda memerlukan akses ke halaman ini, silakan hubungi administrator sistem.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="flex justify-center gap-4">
+                            <Link href="/simpeg/cuti">
+                                <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                                    Kembali ke Halaman Cuti
+                                </button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Preloading untuk super_admin dan admin saat data sedang dimuat
+    if (isLoadingList && (userRole === "super_admin" || userRole === "admin")) {
+        return <GeneratingPage title="Memuat Data Permohonan Cuti" />;
+    }
 
     if (isError) {
         return <div>Error loading data: Gagal memuat data permohonan cuti.</div>;

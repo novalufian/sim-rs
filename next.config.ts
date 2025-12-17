@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'https://8de6abf68b0a.ngrok-free.app',
+        hostname: 'https://ancient-deaf-passes-headline.trycloudflare.com',
         pathname: '/**',
       },
       // Support dynamic API URL from env

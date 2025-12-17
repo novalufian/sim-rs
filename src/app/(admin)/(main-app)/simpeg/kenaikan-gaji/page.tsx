@@ -7,6 +7,7 @@ import type { RootState } from '@/libs/store';
 import { BsArrowUpRightCircle } from "react-icons/bs";
 import Link from "next/link";
 import SuperAdminPage from './superadmin-page';
+import UserPage from './user-page';
 
 export default function Page() {
     const user = useAppSelector((state: RootState) => state.auth.user);
@@ -34,6 +35,7 @@ export default function Page() {
             </div>
 
             {userRole && userRole === "super_admin" && <SuperAdminPage />}
+            {userRole && userRole === "user" && <UserPage />}
         </div>
     );
 }
