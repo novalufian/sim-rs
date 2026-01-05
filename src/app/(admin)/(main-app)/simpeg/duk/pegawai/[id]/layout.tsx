@@ -47,6 +47,11 @@ export default function Layout({
                         className={pathname === `/simpeg/duk/pegawai/${id}/identitas` ? activeLinkClass : inactiveLinkClass}>
                         Indentitas
                     </Link>
+                    <Link 
+                        href={`/simpeg/duk/pegawai/${id}/kepegawaian`}
+                        className={pathname === `/simpeg/duk/pegawai/${id}/kepegawaian` ? activeLinkClass : inactiveLinkClass}>
+                        Kepegawaian
+                    </Link>
 
                     <Link 
                         href={`/simpeg/duk/pegawai/${id}/pendidikan`}
