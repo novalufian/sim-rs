@@ -14,6 +14,7 @@ import { FaRegCalendarCheck } from "react-icons/fa";
 import { GrPowerReset } from "react-icons/gr";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { BsArrowUpRightCircle } from "react-icons/bs";
+import { HiOutlineClipboardDocumentList } from "react-icons/hi2";
 import Link from "next/link";
 import SuperAdminPage from './superadmin-page';
 import UserPage from './user-page';
@@ -151,14 +152,16 @@ export default function Page() {
                 </div>
             )}
 
-            <div className="col-span-3">
-                <Link href="/simpeg/cuti/permohonan" className='group'>
-                    <div className="group-hover:dark:bg-amber-300 text-red-600 rounded-4xl bg-red-100/50 hover:bg-red-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center">
-                        <h1 className='text-2xl leading-tight font-semibold tracking-tight'>Ajukan <br /> Cuti Baru</h1>
-                        <IoIosAddCircleOutline className='w-18 h-18 group-hover:scale-140 transition-all group-hover:rotate-90'/>
-                    </div>
-                </Link>
-            </div>
+            <div className="col-span-6 grid grid-cols-6 gap-2">
+
+                <div className="col-span-3">
+                    <Link href="/simpeg/cuti/permohonan" className='group'>
+                        <div className="group-hover:dark:bg-amber-300 text-red-600 rounded-4xl bg-red-100/50 hover:bg-red-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-amber-300 group-hover:dark:text-gray-800 flex justify-between items-center">
+                            <h1 className='text-2xl leading-tight font-semibold tracking-tight'>Ajukan <br /> Cuti Baru</h1>
+                            <IoIosAddCircleOutline className='w-18 h-18 group-hover:scale-140 transition-all group-hover:rotate-90'/>
+                        </div>
+                    </Link>
+                </div>
 
             
                 {userRole && userRole === "super_admin" && (
@@ -171,7 +174,18 @@ export default function Page() {
                     </Link>
                     </div>
                 )}
-
+                {userRole && userRole === "super_admin" && (
+                    <div className="col-span-3">
+                    <Link href="/simpeg/cuti/jatah" className='group'>
+                        <div className="group-hover:dark:bg-amber-300 text-blue-600 rounded-4xl bg-blue-100/50 hover:bg-blue-600 hover:text-white p-5 transition-all dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 min-h-40 dark:text-blue-300 group-hover:dark:text-gray-800 flex justify-between items-center">
+                            <h1 className='text-2xl leading-tight font-semibold tracking-tight'>Kelola <br /> Jatah Cuti</h1>
+                            <HiOutlineClipboardDocumentList className='w-18 h-18 group-hover:scale-140 transition-all'/>
+                        </div>
+                    </Link>
+                    </div>
+                )}
+            </div>
+            
             <div className="col-span-12 h-20 flex justify-center items-center">
                 <hr className='w-6/8 border-t border-white/[0.03]'/>
             </div>

@@ -28,6 +28,17 @@ export interface CutiJatahItem {
     updated_at?: string
     pegawai_nama?: string
     pegawai_nip?: string
+    pegawai_email?: string
+    pegawai_no_hp?: string
+    pegawai_jenis_kelamin?: string
+    pegawai_tempat_lahir?: string
+    pegawai_tanggal_lahir?: string
+    pegawai_agama?: string
+    pegawai_status_pekerjaan?: string
+    pegawai_jenis_pegawai?: string | null
+    pegawai_gelar_depan?: string | null
+    pegawai_gelar_belakang?: string | null
+    pegawai_id_unit_kerja?: string | null
     is_deleted?: boolean
     // ...field lain
 }
@@ -267,6 +278,55 @@ export const useDeleteCutiJatah = () => {
         onError: (error: any) => {
             const message = error.response?.data?.message || 'Gagal menghapus jatah cuti!';
             toast.error(message, { position: 'bottom-right' });
+        },
+    });
+}
+
+/**
+ * Hook untuk auto-generate jatah cuti
+ * POST /kepegawaian/cuti/jatah/auto-generate
+ */
+export interface AutoGenerateJatahCutiInput {
+    tahun: number;
+    jumlah_jatah?: number;
+    id_pegawai?: string;
+    // Tambahkan field lain sesuai kebutuhan API
+}
+
+export const useAutoGenerateJatahCuti = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (formData: AutoGenerateJatahCutiInput) => {
+            const res = await api.post(`${BASE_PATH}/auto-generate`, formData);
+            return res.data;
+        },
+        onSuccess: (data) => {
+            toast.success('🔄 Jatah cuti berhasil di-generate otomatis!', { position: 'bottom-right' });
+            queryClient.invalidateQueries({ queryKey: ['cutiJatah'] });
+            // Invalidate berdasarkan tahun jika ada
+            if (data?.data?.tahun) {
+                queryClient.invalidateQueries({ queryKey: ['jatahCutiByPegawaiTahun'] });
+            }
+        },
+        onError: (error: any) => {
+            const message = error.response?.data?.message || 'Gagal auto-generate jatah cuti!';
+            const validationErrors = error.response?.data?.errors;
+            
+            if (validationErrors) {
+                Object.entries(validationErrors).forEach(([field, messages]: [string, any]) => {
+                    if (Array.isArray(messages)) {
+                        messages.forEach((msg) => {
+                            toast(`${field}: ${msg}`, {
+                                icon: '❌',
+                                position: 'bottom-right',
+                                style: { background: '#333', color: '#fff' },
+                            });
+                        });
+                    }
+                });
+            } else {
+                toast.error(message, { position: 'bottom-right' });
+            }
         },
     });
 }
