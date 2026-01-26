@@ -23,7 +23,7 @@ export default function AdminLayout({
     : "lg:ml-[90px]";
 
   return (
-    <div className="min-h-screen xl:flex flex-col text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen xl:flex flex-col text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <AppHeader />
       {/* Sidebar and Backdrop */}

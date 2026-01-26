@@ -8,12 +8,51 @@ interface JabatanFilters {
     limit?: number
 }
 
-export const useJabatan = () => {
-    return useQuery({
-        queryKey: ['jabatan'], // caching per filter
+export interface JabatanItem {
+    id: string
+    nama_jabatan: string
+    tipe_jabatan: string
+    tingkat_jabatan?: string | null
+    parent_id?: string | null
+    created_at?: string
+    updated_at?: string
+    is_deleted?: boolean
+    parent?: {
+        id: string
+        nama_jabatan: string
+        tipe_jabatan: string
+    } | null
+    children?: JabatanItem[]
+}
+
+export interface ApiListResponse<T> {
+    success: boolean
+    message: string
+    data: {
+        page: number
+        limit: number
+        total: number
+        items: T[]
+    }
+}
+
+export interface ApiItemResponse<T> {
+    success: boolean
+    message: string
+    data: T
+}
+
+export const useJabatan = (filters: JabatanFilters = {}) => {
+    const { status, page = 1, limit = 10 } = filters
+    return useQuery<ApiListResponse<JabatanItem>>({
+        queryKey: ['jabatan', filters], // caching per filter
         queryFn: async () => {
-            const res = await api.get(`/public/jenis_jabatan`)
-            return res.data
+            const params = new URLSearchParams()
+            if (status) params.append('status', status)
+            params.append('page', String(page))
+            params.append('limit', String(limit))
+            const res = await api.get(`/master/jenis_jabatan?${params.toString()}`)
+            return res.data as ApiListResponse<JabatanItem>
         },
         // staleTime: 1000 * 60 * 5, // cache for 5 mins
         refetchOnWindowFocus: false,
@@ -22,15 +61,16 @@ export const useJabatan = () => {
 }
 
 export const useJabatanId = (id: string) => {
-    return useQuery({
+    return useQuery<ApiItemResponse<JabatanItem>>({
         queryKey: ['jabatan', id],
         queryFn: async () => {
-            const res = await api.get(`/master/jenis_jabatan/id/${id}`)
-            return res.data
+            const res = await api.get(`/master/jenis_jabatan/${id}`)
+            return res.data as ApiItemResponse<JabatanItem>
         },
         staleTime: 1000 * 60 * 20, // cache for 20 mins
         refetchOnWindowFocus: false,
         refetchInterval: false,
+        enabled: !!id,
     })
 }
 
@@ -57,7 +97,7 @@ export const useJabatanDelete = () => {
 export const usePostJabatan = () => {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: async (formData: any) => {
+        mutationFn: async (formData: Partial<JabatanItem>) => {
             const res = await api.post('/master/jenis_jabatan', formData)
             return res.data
         },
@@ -97,7 +137,7 @@ export const usePostJabatan = () => {
 export const useUpdateJabatan =()=>{    
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: async (data: { id: string; formData: any }) => {
+        mutationFn: async (data: { id: string; formData: Partial<JabatanItem> }) => {
             const res = await api.put(`/master/jenis_jabatan/${data.id}`, data.formData)
             return res.data
         },
