@@ -289,8 +289,15 @@ export default function KepegawaianPage() {
       jabatan_fungsional_tmt_selesai: formatDate(d?.jabatan_fungsional_tmt_selesai ?? null),
 
       // Jabatan Pelaksana
-      jabatan_pelaksana_nama: d?.jabatan ?? '-',
-      jabatan_pelaksana_tmt: formatDate(d?.jabatan_tmt ?? null),
+      jabatan_pelaksana_nama:
+        d?.jabatan_pelaksana_nama ??
+        (d?.jabatan_struktural_id || d?.jabatan_fungsional_id ? '-' : d?.jabatan ?? '-'),
+      jabatan_pelaksana_tingkat: d?.jabatan_pelaksana_tingkat ?? '-',
+      jabatan_pelaksana_tmt_mulai: formatDate(d?.jabatan_pelaksana_tmt_mulai ?? null),
+      jabatan_pelaksana_tmt_selesai: formatDate(d?.jabatan_pelaksana_tmt_selesai ?? null),
+      jabatan_pelaksana_tmt:
+        d?.jabatan_pelaksana_tmt_mulai ??
+        (d?.jabatan_struktural_id || d?.jabatan_fungsional_id ? '-' : formatDate(d?.jabatan_tmt ?? null)),
       no_sk_pns: d?.no_sk_pns ?? '-',
     };
   }, [data]);
@@ -598,9 +605,19 @@ export default function KepegawaianPage() {
                       <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Nama</p>
                       <p className="text-sm text-gray-900 dark:text-white">{kepegawaianData.jabatan_pelaksana_nama}</p>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span>TMT</span>
-                      <span className="text-gray-900 dark:text-gray-200">{kepegawaianData.jabatan_pelaksana_tmt}</span>
+                    <div className="grid grid-cols-1 gap-2">
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>Tingkat</span>
+                        <span className="text-gray-900 dark:text-gray-200">{kepegawaianData.jabatan_pelaksana_tingkat}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>TMT Mulai</span>
+                        <span className="text-gray-900 dark:text-gray-200">{kepegawaianData.jabatan_pelaksana_tmt_mulai}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>TMT Selesai</span>
+                        <span className="text-gray-900 dark:text-gray-200">{kepegawaianData.jabatan_pelaksana_tmt_selesai}</span>
+                      </div>
                     </div>
                   </div>
                 ) : (
