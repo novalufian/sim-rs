@@ -32,6 +32,12 @@ function layout({
                     >
                         Master Kepegawaian
                     </Link>
+                    <Link
+                        href="/master/kepegawaian/pangkat-golongan"
+                        className={pathname === "/master/kepegawaian/pangkat-golongan" ? activeLinkClass : inactiveLinkClass}
+                    >
+                        Pangkat &amp; Golongan
+                    </Link>
                     <a
                         href="#bidang"
                         className={inactiveLinkClass}

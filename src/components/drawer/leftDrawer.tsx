@@ -36,7 +36,11 @@
             className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out z-99999 overflow-y-auto ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
-            style={width.includes('px') ? { width: width } : { minWidth: width }}
+            style={{
+                width: width.includes('px') || width.includes('vw') || width.includes('vh') ? width : undefined,
+                minWidth: '50vw',
+                maxWidth: '700px',
+            }}
         >
             {/* Drawer Header */}
             <div className=" dark:text-white p-10 flex justify-between items-center sticky top-0  dark:bg-gray-900">
