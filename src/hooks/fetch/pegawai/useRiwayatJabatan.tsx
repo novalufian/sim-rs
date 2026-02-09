@@ -81,9 +81,19 @@ export const useRiwayatJabatan = (params: RiwayatJabatanParams = {}) => {
   })
 
   const createMutation = useMutation({
-    mutationFn: async (payload: CreateRiwayatJabatanPayload) => {
+    mutationFn: async (payload: CreateRiwayatJabatanPayload | FormData) => {
+      if (payload instanceof FormData) {
+        const res = await api.post(BASE_URL, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        return res.data
+      }
       const body = payload.file_sk ? toFormData(payload) : payload
-      const res = await api.post(BASE_URL, body)
+      const res = await api.post(
+        BASE_URL,
+        body,
+        payload.file_sk ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined,
+      )
       return res.data
     },
     onSuccess: () => {
@@ -97,10 +107,22 @@ export const useRiwayatJabatan = (params: RiwayatJabatanParams = {}) => {
   })
 
   const updateMutation = useMutation({
-    mutationFn: async (data: { id: string; payload: Partial<CreateRiwayatJabatanPayload> }) => {
+    mutationFn: async (data: { id: string; payload: Partial<CreateRiwayatJabatanPayload> | FormData }) => {
+      if (data.payload instanceof FormData) {
+        const res = await api.put(`${BASE_URL}/${data.id}`, data.payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        return res.data
+      }
       const body =
-        data.payload && (data.payload as any).file_sk ? toFormData(data.payload as CreateRiwayatJabatanPayload) : data.payload
-      const res = await api.put(`${BASE_URL}/${data.id}`, body)
+        data.payload && (data.payload as any).file_sk
+          ? toFormData(data.payload as CreateRiwayatJabatanPayload)
+          : data.payload
+      const res = await api.put(
+        `${BASE_URL}/${data.id}`,
+        body,
+        (data.payload as any)?.file_sk ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined,
+      )
       return res.data
     },
     onSuccess: () => {

@@ -173,6 +173,13 @@ export default function KepegawaianPage() {
     item?.jabatan_fungsional_nama ??
     '-';
 
+  const serverBase = ( process.env.NEXT_PUBLIC_IP_URL || '').replace(/\/$/, '');
+  const resolveFileUrl = (path?: string | null) => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return serverBase ? `${serverBase}${path.startsWith('/') ? '' : '/'}${path}` : path;
+  };
+
   const pangkatGolonganItems: PangkatGolonganItem[] = useMemo(() => {
     const raw = pangkatGolonganForm as any;
     const data = raw?.data ?? raw;
@@ -382,11 +389,6 @@ export default function KepegawaianPage() {
     // keep for other side effects only (riwayat jabatan now from hook)
   }, [data]);
 
-  useEffect(() => {
-    if (data?.data) {
-      console.log('[Kepegawaian] data:', data.data);
-    }
-  }, [data]);
 
   const inputClassReadOnly = "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white cursor-not-allowed opacity-75";
   const inputClassEditable = "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed";
@@ -699,106 +701,97 @@ export default function KepegawaianPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Golongan</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">TMT Pangkat</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">No. SK</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                   {riwayatKepangkatanDisplay.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                      <td colSpan={6} className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
                         {isLoadingRiwayat ? 'Memuat riwayat kepangkatan...' : 'Belum ada riwayat kepangkatan'}
                       </td>
                     </tr>
                   ) : (
                     riwayatKepangkatanDisplay.map((item: any, idx: number) => (
-                      <React.Fragment key={idx}>
-                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                            {item?.is_aktif ? (
-                              <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                Aktif
-                              </span>
-                            ) : (
-                              <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                                Historis
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{getPangkatName(item)}</td>
-                          <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{getGolongan(item)}</td>
-                          <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{getTmtPangkat(item)}</td>
-                          <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{getNoSkPangkat(item)}</td>
-                        </tr>
-                        <tr className="bg-gray-50/50 dark:bg-gray-800/50">
-                          <td colSpan={5} className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                            <details className="group">
-                              <summary className="cursor-pointer list-none font-medium text-blue-600 dark:text-blue-300">
-                                Lihat data lengkap
-                              </summary>
-                              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-700 dark:text-gray-300">
-                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
-                                  <p className="text-[11px] uppercase tracking-wide text-gray-400">Pegawai</p>
-                                  <p className="text-sm text-gray-900 dark:text-white">{item?.pegawai?.nama ?? '-'}</p>
-                                  <p className="text-[11px] text-gray-500 dark:text-gray-400">{item?.pegawai?.nip ?? '-'}</p>
+                      <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800 align-top">
+                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                          {item?.is_aktif ? (
+                            <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              Aktif
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                              Historis
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{getPangkatName(item)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{getGolongan(item)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{getTmtPangkat(item)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{getNoSkPangkat(item)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-right">
+                          <details className="group">
+                            <summary className="cursor-pointer list-none font-medium text-blue-600 dark:text-blue-300">
+                              Lihat data lengkap
+                            </summary>
+                            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-700 dark:text-gray-300">
+                              <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                <p className="text-[11px] uppercase tracking-wide text-gray-400">Pegawai</p>
+                                <p className="text-sm text-gray-900 dark:text-white">{item?.pegawai?.nama ?? '-'}</p>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400">{item?.pegawai?.nip ?? '-'}</p>
+                              </div>
+                              <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                <p className="text-[11px] uppercase tracking-wide text-gray-400">Pangkat &amp; Golongan</p>
+                                <p className="text-sm text-gray-900 dark:text-white">{item?.pangkat_golongan?.nama_pangkat ?? getPangkatName(item)}</p>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                                  {(item?.pangkat_golongan?.golongan ?? getGolongan(item)) || '-'}
+                                  {item?.pangkat_golongan?.ruang ? `/${item.pangkat_golongan.ruang}` : ''}
+                                </p>
+                              </div>
+                              <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                <p className="text-[11px] uppercase tracking-wide text-gray-400">Tanggal</p>
+                                <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                  <span>TMT Mulai</span>
+                                  <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.tmt_mulai ?? item?.tmt ?? item?.tmt_pangkat ?? null)}</span>
                                 </div>
-                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
-                                  <p className="text-[11px] uppercase tracking-wide text-gray-400">Pangkat &amp; Golongan</p>
-                                  <p className="text-sm text-gray-900 dark:text-white">{item?.pangkat_golongan?.nama_pangkat ?? getPangkatName(item)}</p>
-                                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                                    {(item?.pangkat_golongan?.golongan ?? getGolongan(item)) || '-'}
-                                    {item?.pangkat_golongan?.ruang ? `/${item.pangkat_golongan.ruang}` : ''}
-                                  </p>
+                                <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                  <span>TMT Selesai</span>
+                                  <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.tmt_selesai ?? null)}</span>
                                 </div>
-                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
-                                  <p className="text-[11px] uppercase tracking-wide text-gray-400">Tanggal</p>
-                                  <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                                    <span>TMT Mulai</span>
-                                    <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.tmt_mulai ?? item?.tmt ?? item?.tmt_pangkat ?? null)}</span>
-                                  </div>
-                                  <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                                    <span>TMT Selesai</span>
-                                    <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.tmt_selesai ?? null)}</span>
-                                  </div>
-                                  <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                                    <span>Tanggal SK</span>
-                                    <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.tanggal_sk ?? item?.sk_tanggal ?? null)}</span>
-                                  </div>
-                                </div>
-                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
-                                  <p className="text-[11px] uppercase tracking-wide text-gray-400">SK &amp; Dokumen</p>
-                                  <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                                    <span>Nomor SK</span>
-                                    <span className="text-gray-900 dark:text-gray-200">{getNoSkPangkat(item) || item?.sk_nomor || '-'}</span>
-                                  </div>
-                                  <div className="mt-2 flex items-center justify-between">
-                                    {item?.file_sk ? (
-                                      <a
-                                        href={item.file_sk}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-300 hover:underline text-[11px]"
-                                      >
-                                        <FiFileText size={14} />
-                                        Lihat File SK (PDF)
-                                      </a>
-                                    ) : (
-                                      <span className="inline-flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
-                                        <FiFileText size={14} />
-                                        File SK belum diunggah
-                                      </span>
-                                    )}
-                                    <button
-                                      type="button"
-                                      className="px-2 py-1 text-[11px] font-medium text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-600 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
-                                    >
-                                      Edit
-                                    </button>
-                                  </div>
+                                <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                  <span>Tanggal SK</span>
+                                  <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.tanggal_sk ?? item?.sk_tanggal ?? null)}</span>
                                 </div>
                               </div>
-                            </details>
-                          </td>
-                        </tr>
-                      </React.Fragment>
+                              <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                <p className="text-[11px] uppercase tracking-wide text-gray-400">SK &amp; Dokumen</p>
+                                <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                  <span>Nomor SK</span>
+                                  <span className="text-gray-900 dark:text-gray-200">{getNoSkPangkat(item) || item?.sk_nomor || '-'}</span>
+                                </div>
+                                <div className="mt-2 flex items-center justify-between">
+                                  {item?.file_sk ? (
+                                    <a
+                                      href={resolveFileUrl(item.file_sk)}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-300 hover:underline text-[11px]"
+                                    >
+                                      <FiFileText size={14} />
+                                      Lihat File SK (PDF)
+                                    </a>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
+                                      <FiFileText size={14} />
+                                      File SK belum diunggah
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </details>
+                        </td>
+                      </tr>
                     ))
                   )}
                 </tbody>
@@ -831,7 +824,6 @@ export default function KepegawaianPage() {
                   nomor_sk: newPangkat.no_sk_pangkat,
                   is_aktif: true,
                 };
-                console.log('[RiwayatKepangkatan] payload:', payload);
                 await createRiwayatKepangkatan(payload);
               } catch (error: any) {
                 const message = error?.response?.data?.message || 'Gagal menyimpan riwayat pangkat.';
@@ -1010,29 +1002,101 @@ export default function KepegawaianPage() {
                     </tr>
                   ) : (
                     filteredRiwayatJabatanDisplay.map((item: any, idx: number) => (
-                      <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                          {item?.is_aktif ? (
-                            <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                              Aktif
-                            </span>
-                          ) : (
-                            <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                              Historis
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                          {getJabatanName(item)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item?.tipe_jabatan ?? item?.jenis_jabatan ?? '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                          {formatDate(item?.tmt_mulai ?? item?.tmt_jabatan ?? null)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                          {item?.eselon ?? item?.jenjang ?? '-'}
-                        </td>
-                      </tr>
+                      <React.Fragment key={idx}>
+                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                            {item?.is_aktif ? (
+                              <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                Aktif
+                              </span>
+                            ) : (
+                              <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                                Historis
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                            {getJabatanName(item)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item?.tipe_jabatan ?? item?.jenis_jabatan ?? '-'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                            {formatDate(item?.tmt_mulai ?? item?.tmt_jabatan ?? null)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                            {jabatanModalType === 'fungsional'
+                              ? item?.jenjang ?? '-'
+                              : jabatanModalType === 'pelaksana'
+                                ? item?.keterangan ?? '-'
+                                : item?.eselon ?? '-'}
+                          </td>
+                        </tr>
+                        <tr className="bg-gray-50/50 dark:bg-gray-800/50">
+                          <td colSpan={5} className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                            <details className="group">
+                              <summary className="cursor-pointer list-none font-medium text-blue-600 dark:text-blue-300 text-right">
+                                Lihat data lengkap
+                              </summary>
+                              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-700 dark:text-gray-300">
+                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                  <p className="text-[11px] uppercase tracking-wide text-gray-400">Pegawai</p>
+                                  <p className="text-sm text-gray-900 dark:text-white">{item?.pegawai?.nama ?? '-'}</p>
+                                  <p className="text-[11px] text-gray-500 dark:text-gray-400">{item?.pegawai?.nip ?? '-'}</p>
+                                </div>
+                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                  <p className="text-[11px] uppercase tracking-wide text-gray-400">Jabatan</p>
+                                  <p className="text-sm text-gray-900 dark:text-white">{getJabatanName(item)}</p>
+                                  <p className="text-[11px] text-gray-500 dark:text-gray-400">{item?.tipe_jabatan ?? item?.jenis_jabatan ?? '-'}</p>
+                                </div>
+                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                  <p className="text-[11px] uppercase tracking-wide text-gray-400">Tanggal</p>
+                                  <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                    <span>TMT Mulai</span>
+                                    <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.tmt_mulai ?? null)}</span>
+                                  </div>
+                                  <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                    <span>TMT Selesai</span>
+                                    <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.tmt_selesai ?? null)}</span>
+                                  </div>
+                                  <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                    <span>Tanggal SK</span>
+                                    <span className="text-gray-900 dark:text-gray-200">{formatDate(item?.sk_tanggal ?? null)}</span>
+                                  </div>
+                                </div>
+                                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                  <p className="text-[11px] uppercase tracking-wide text-gray-400">SK & Dokumen</p>
+                                  <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                    <span>Nomor SK</span>
+                                    <span className="text-gray-900 dark:text-gray-200">{item?.sk_nomor ?? '-'}</span>
+                                  </div>
+                                  <div className="mt-2 flex items-center justify-between">
+                                    {item?.file_sk ? (
+                                      <a
+                                        href={resolveFileUrl(item.file_sk)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-300 hover:underline text-[11px]"
+                                      >
+                                        <FiFileText size={14} />
+                                        Lihat File SK (PDF)
+                                      </a>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
+                                        <FiFileText size={14} />
+                                        File SK belum diunggah
+                                      </span>
+                                    )}
+                                  </div>
+                                  {item?.keterangan && (
+                                    <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                                      {item.keterangan}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </details>
+                          </td>
+                        </tr>
+                      </React.Fragment>
                     ))
                   )}
                 </tbody>
@@ -1080,9 +1144,21 @@ export default function KepegawaianPage() {
                 file_sk: newJabatan.file_sk,
                 keterangan: newJabatan.keterangan,
               };
-              console.log('[RiwayatJabatan] payload:', payload);
+              const form = new FormData();
+              form.append('pegawai_id', payload.pegawai_id);
+              form.append('jabatan_id', payload.jabatan_id);
+              form.append('tipe_jabatan', payload.tipe_jabatan);
+              form.append('tmt_mulai', payload.tmt_mulai);
+              form.append('tmt_selesai', payload.tmt_selesai ?? '');
+              form.append('sk_nomor', payload.sk_nomor ?? '');
+              form.append('sk_tanggal', payload.sk_tanggal ?? '');
+              form.append('is_aktif', String(payload.is_aktif));
+              form.append('keterangan', payload.keterangan ?? '');
+              if (payload.file_sk) {
+                form.append('file_sk', payload.file_sk);
+              }
               try {
-                await createRiwayatJabatan(payload);
+                await createRiwayatJabatan(form);
               } catch (error: any) {
                 const message = error?.response?.data?.message || 'Gagal menyimpan riwayat jabatan.';
                 setRiwayatJabatanError(message);
@@ -1099,7 +1175,8 @@ export default function KepegawaianPage() {
                 file_sk: null,
                 keterangan: '',
               });
-                setJabatanSearch('');
+              setJabatanSearch('');
+              return;
             }}
             className="space-y-5"
           >
@@ -1305,9 +1382,23 @@ export default function KepegawaianPage() {
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">PDF (maks. 5MB)</p>
                   {newJabatan.file_sk && (
-                    <p className="mt-2 text-xs text-blue-600 dark:text-blue-300">
-                      File dipilih: {newJabatan.file_sk.name}
-                    </p>
+                    <div className="mt-2 flex items-center justify-center gap-3">
+                      <p className="text-xs text-blue-600 dark:text-blue-300">
+                        File dipilih: {newJabatan.file_sk.name}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newJabatan.file_sk) return;
+                          const url = URL.createObjectURL(newJabatan.file_sk);
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                          setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        }}
+                        className="text-xs text-blue-700 dark:text-blue-300 underline"
+                      >
+                        Preview PDF
+                      </button>
+                    </div>
                   )}
                 </div>
                 <input

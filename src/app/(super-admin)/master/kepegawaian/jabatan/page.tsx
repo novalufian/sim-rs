@@ -1,6 +1,7 @@
 "use client";
 
- import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+import JabatanOrgChart from "./JabatanOrgChart";
  import { z } from "zod";
  import { useForm } from "react-hook-form";
  import { zodResolver } from "@hookform/resolvers/zod";
@@ -147,8 +148,9 @@
      return <div className="p-6 text-red-600">Gagal memuat data jabatan.</div>;
    }
 
-   return (
-     <div className="p-6 space-y-6">
+  return (
+    <div className="p-6 space-y-6">
+      <JabatanOrgChart />
        <div className="flex items-center justify-between">
          <div>
            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Master Jabatan</h1>

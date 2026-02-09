@@ -33,13 +33,13 @@
 
         {/* Drawer */}
         <div 
-            className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out z-99999 overflow-y-auto ${
+            className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out z-99999 overflow-y-auto min-w-[800px] ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
             style={{
                 width: width.includes('px') || width.includes('vw') || width.includes('vh') ? width : undefined,
                 minWidth: '50vw',
-                maxWidth: '700px',
+                maxWidth: '800px',
             }}
         >
             {/* Drawer Header */}
